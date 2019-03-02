@@ -19,13 +19,13 @@ int main() {
     
     // TestAlgorithm::testMasking(3);
     
-    TestAlgorithm::testPlainSort(5);
+    // TestAlgorithm::testPlainSort(5);
     
     // TestAlgorithm::testSqrt(bootstrapping_test_param4);
 
     // TestAlgorithm::testMaxMin(bootstrapping_test_param4);
     
-    // TestAlgorithm::testEncCompAndSwap(bootstrapping_test_param4);
+    TestAlgorithm::testEncCompAndSwap(bootstrapping_test_param4);
 
     // TestAlgorithm::testEncSorting(bootstrapping_test_param4);
 

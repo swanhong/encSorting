@@ -35,8 +35,6 @@ public:
     static void testMaxMin(Parameter parameter);
 
     static void testEncCompAndSwap(Parameter parameter);
-
-    static void testEncSorting(Parameter parameter);
 };
 
 void fcnDecryptAndPrint(string str, Ciphertext cipher, Scheme scheme, SecretKey secretKey);
