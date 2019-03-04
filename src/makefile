@@ -2,24 +2,26 @@ RM = rm -rf
 CC = g++
 CFLAGS = -std=c++11 -O3
 HEAANDIR = ../HEAAN
-OBJS = CyclicArray.o SortingAlgorithm.o TestAlgorithm.o
+OBJS = CyclicArray.o SortingAlgorithm.o
 LOCALLIBS = -lntl -lgmp -lm -lpthread
-BOOTLIBS = -I../eigen
-LIBS = -L/usr/local/lib $(HEAANDIR)/lib/libHEAAN.a -I$(HEAANDIR)/src  $(LOCALLIBS)
+BOOTLIBS = ../eigen
+LIBS = -L/usr/local/lib -I $(BOOTLIBS) $(HEAANDIR)/lib/libHEAAN.a $(LOCALLIBS)
 
 # All Target
 all: main run
 
+
+# g++ main.cpp -o output -L/usr/local/lib -I ../eigen ../HEAAN/lib/libHEAAN.a -lntl -lgmp -lm -std=c++11 -O3 -I/../../src -pthread
 # Tool invocations
 main: $(OBJS)
 	@echo 'Building target: $@'
-	$(CC) main.cpp -o output $(OBJS) $(LIBS) $(CFLAGS) $(BOOTLIBS)
+	$(CC) main.cpp -o output $(OBJS) $(LIBS) $(CFLAGS)	
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 .cpp.o:
 	@echo 'Building file: $<'
-	$(CC) -c $< -o $@ $(LIBS) $(CFLAGS) $(BOOTLIBS)
+	$(CC) -c $< -o $@ $(LIBS) $(CFLAGS)
 	@echo 'Finished building: $<'
 	@echo ' '
 
