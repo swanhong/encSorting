@@ -142,20 +142,20 @@ void TestAlgorithm::testSqrt(Parameter parameter) {
     
 	Ciphertext cipher = scheme.encrypt(mvec, n, logp, logQ);
 
-	Ciphertext cipher2;
-
+	
+    Ciphertext sqrtCipher;
     timeutils.start("Sqrt");
-    fcnEncComputeSqrt(cipher2, cipher, logp, 5, scheme);
+    fcnEncComputeSqrt(sqrtCipher, cipher, logp, 5, scheme);
        
     timeutils.stop("Sqrt");
 
-	complex<double>* dmult = scheme.decrypt(secretKey, cipher2);
-    // StringUtils::compare(mvec, dmult, n, "mult");
+    // Print Result and Difference //	
+	complex<double>* dvec = scheme.decrypt(secretKey, sqrtCipher);
     for(int i = 0; i < n; i++) {
-        cout << i << " : " << mvec[i] << ", " << dmult[i].real() << endl;
+		double ans = dvec[i].real();
+        cout << i << " : " << mvec[i] << " ~simeq~ "
+			<< ans * ans << " = " << ans << " ^2" << endl;
     }
-    
-
 }
 
 void TestAlgorithm::testMaxMin(Parameter parameter) {

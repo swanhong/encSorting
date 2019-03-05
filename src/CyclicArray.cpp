@@ -31,8 +31,11 @@ CyclicArray::CyclicArray(double** array, long rowNum_, long colNum_) {
 }
 
 CyclicArray::CyclicArray(double* array, long length_) {
-	data = array;
 	length = length_;
+	data = new double[length];
+	for(int i = 0; i < length; i++) {
+		data[i] = array[i];
+	}
 	start = 0;
 	rowNum = 0;
 	colNum = 0;

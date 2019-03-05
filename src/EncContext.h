@@ -14,8 +14,6 @@ double* fcnGenEncMaskingComp(long length, long jump);
 
 double* fcnGenEncMaskingMerge(long length, long num, long jump);
 
-void fcnEncSort(Ciphertext& sortedCipher, const Ciphertext& inCipher, long logp, long iter, Scheme scheme);
-
 void fcnEncCompAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double* mask, long dist, long logp, long iter, Scheme scheme);
 
 
@@ -31,29 +29,33 @@ void fcnEncComputeSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, long l
     for(int i = 0; i < d; i++) {
         std::cout << i << "/" << d - 1 << "th iteration" << '\n';
         // make dummy = 1 - b / 2
-        dummy = scheme.multByConst(b, -0.5, logp);
-        scheme.reScaleByAndEqual(dummy, logp); 
+        dummy = scheme.divByPo2(b, 1); // b - 1
+        scheme.negateAndEqual(dummy); 
+        // scheme.reScaleByAndEqual(dummy, logp); 
         scheme.addConstAndEqual(dummy, 1.0, logp);
-        // dummy - logp
+        // dummy - 1
 
         // Update a
         // a <- a * (1 - b / 2)
-        scheme.modDownByAndEqual(a, logp); // a - logp
+        scheme.modDownToAndEqual(a, dummy.logq); // a - 1
         scheme.multAndEqual(a, dummy); 
-        scheme.reScaleByAndEqual(a, logp); // a - 2logp
+        scheme.reScaleByAndEqual(a, logp); // a - logp + 1
 
         // make dummy = (b - 3) / 4
         dummy = scheme.addConst(b, -3.0, logp);
-        scheme.multByConstAndEqual(dummy, 0.25, logp);
-        scheme.reScaleByAndEqual(dummy, logp); // dummy - logp
+        // scheme.multByConstAndEqual(dummy, 0.25, logp);
+        scheme.divByPo2AndEqual(dummy, 2); // dummy - 3
+        // scheme.reScaleByAndEqual(dummy, logp); // dummy - logp
 
         //update b
         // b<- b * b * (b - 3) / 4
         // scheme.modDownByAndEqual(b, logp); // b - logp
         scheme.squareAndEqual(b);
         scheme.reScaleByAndEqual(b, logp); // b - logp
+        scheme.modDownToAndEqual(dummy, b.logq);
         scheme.multAndEqual(b, dummy);
         scheme.reScaleByAndEqual(b, logp); // b - 2logp
+        scheme.modDownToAndEqual(a, b.logq);
 
         cout << "a.logq = " << a.logq << endl;
         cout << "b.logq = " << b.logq << endl;
