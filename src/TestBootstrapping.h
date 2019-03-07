@@ -20,7 +20,9 @@ public:
 
 	static void testEncSortWithDecrypt(Parameter parameter, long iter);
 
-	// static void testMaxMinWithBootAndDecrypt(Parameter parameter, long iter)
+	static void testMaxMinWithBootAndDecrypt(Parameter parameter, long iter);
+
+	static void testSqrtWithBootAndDecrypt(Parameter parameter, long iter);
 };
 
 void TestBootstrapping::bootstrapping_test(Parameter parameter) {
@@ -306,75 +308,72 @@ void TestBootstrapping::testMaxMinWithBoot(Parameter parameter, long iter) {
 	return;
 }
 
-// void TestBootstrapping::testMaxMinWithBootAndDecrypt(Parameter parameter, long iter) {
-// 	// HE parameter //
-// 	long logN = parameter.logN;
-// 	long logQ = parameter.logQ;
-// 	long logp = parameter.logp;
-// 	long logc = parameter.logc;
+void TestBootstrapping::testMaxMinWithBootAndDecrypt(Parameter parameter, long iter) {
+	// HE parameter //
+	long logN = parameter.logN;
+	long logQ = parameter.logQ;
+	long logp = parameter.logp;
+	long logc = parameter.logc;
 
-// 	// Decomposition related parameter //
-// 	long log2n = parameter.log2n;
-// 	long radix = parameter.radix;
+	// Decomposition related parameter //
+	long log2n = parameter.log2n;
+	long radix = parameter.radix;
 
-// 	// Bootstrapping parameter //
-// 	long logq = parameter.logq;
-// 	long logT = parameter.logT;
+	// Bootstrapping parameter //
+	long logq = parameter.logq;
+	long logT = parameter.logT;
 
-// 	long n = 1 << log2n;
+	long n = 1 << log2n;
 
-// 	cout << "\n***************************" << endl;
-// 	cout << "Test for MaxMin with Boot" << endl;
-// 	cout << "logN = " << logN << ", logQ = " << logQ << ", logp = " << logp << ", logc = " << logc << endl;
-// 	cout << "slots = " << n << ", radix = " << radix << ", logq = " << logq << ", logT = " << logT << endl;
-// 	cout << "***************************" << endl;
-// 	cout << endl;
+	cout << "\n***************************" << endl;
+	cout << "Test for MaxMin with Boot" << endl;
+	cout << "logN = " << logN << ", logQ = " << logQ << ", logp = " << logp << ", logc = " << logc << endl;
+	cout << "slots = " << n << ", radix = " << radix << ", logq = " << logq << ", logT = " << logT << endl;
+	cout << "***************************" << endl;
+	cout << endl;
 
-// 	TimeUtils timeutils;
-// 	timeutils.start("KeyGen");
-// 	Ring ring(logN, logQ);
-// 	SecretKey secretKey(ring);
-// 	Scheme scheme(secretKey, ring);
-// 	scheme.addConjKey(secretKey);
-// 	scheme.addLeftRotKeys(secretKey);
-// 	timeutils.stop("KeyGen");
+	TimeUtils timeutils;
+	timeutils.start("KeyGen");
+	Ring ring(logN, logQ);
+	SecretKey secretKey(ring);
+	Scheme scheme(secretKey, ring);
+	scheme.addConjKey(secretKey);
+	scheme.addLeftRotKeys(secretKey);
+	timeutils.stop("KeyGen");
 
-// 	timeutils.start("Bootstrapping Helper construct");
-// 	BootHelper boothelper(log2n, radix, logc, scheme, ring, secretKey);
-// 	timeutils.stop("Bootstrapping Helper construct");
+	timeutils.start("Bootstrapping Helper construct");
+	BootHelper boothelper(log2n, radix, logc, scheme, ring, secretKey);
+	timeutils.stop("Bootstrapping Helper construct");
 
-// 	double* mvec1 = new double[n];
-//     for(int i = 0; i < n; i++) {
-//         mvec1[i] = 0.00001 + (double) i / n;
-//     }
-
-//     double* mvec2 = new double[n];
-//     for(int i = 0; i < n; i++) {
-//         mvec2[i] = 1.0 - (double) i / n;
-//     }
+	double* mvec1 = new double[n];
+	double* mvec2 = new double[n];
+    for(int i = 0; i < n; i++) {
+        mvec1[i] = (double) rand() / RAND_MAX;
+		mvec2[i] = (double) rand() / RAND_MAX;
+    }
     
-// 	Ciphertext cipher1 = scheme.encrypt(mvec1, n, parameter.logp, parameter.logQ);
-//     Ciphertext cipher2 = scheme.encrypt(mvec2, n, parameter.logp, parameter.logQ);
+	Ciphertext cipher1 = scheme.encrypt(mvec1, n, parameter.logp, parameter.logQ);
+    Ciphertext cipher2 = scheme.encrypt(mvec2, n, parameter.logp, parameter.logQ);
     
-//     Ciphertext minCipher, maxCipher;
-// 	timeutils.start("MaxMin with Bootstrapping");
-//     fcnEncMaxMinWithBootAndDecrypt(maxCipher, minCipher, cipher1, cipher2, parameter, iter, scheme, boothelper, secretKey);
-//     timeutils.stop("MaxMin with Bootstrapping");
+    Ciphertext minCipher, maxCipher;
+	timeutils.start("MaxMin with Bootstrapping");
+    fcnEncMaxMinWithBootAndDecrypt(maxCipher, minCipher, cipher1, cipher2, parameter, iter, scheme, boothelper, secretKey);
+    timeutils.stop("MaxMin with Bootstrapping");
 
-// 	timeutils.start("Decryption");
-//     complex<double>* dvec1 = scheme.decrypt(secretKey, maxCipher);
-//     complex<double>* dvec2 = scheme.decrypt(secretKey, minCipher);
-//     // StringUtils::compare(mvec, dmult, n, "mult");
-// 	timeutils.stop("Decryption");
+	timeutils.start("Decryption");
+    complex<double>* dvec1 = scheme.decrypt(secretKey, maxCipher);
+    complex<double>* dvec2 = scheme.decrypt(secretKey, minCipher);
+    // StringUtils::compare(mvec, dmult, n, "mult");
+	timeutils.stop("Decryption");
 
-//     for(int i = 0; i < n; i++) {
-//         cout << i << " : " << 
-//             mvec1[i] << ", " << mvec2[i] << " /// -> /// " <<
-//             dvec1[i].real() << ", " << dvec2[i].real() << endl;
-//     }
+    for(int i = 0; i < n; i++) {
+        cout << i << " : " << 
+            mvec1[i] << ", " << mvec2[i] << " /// -> /// " <<
+            dvec1[i].real() << ", " << dvec2[i].real() << endl;
+    }
 	
-// 	return;
-// }
+	return;
+}
 
 void TestBootstrapping::testEncCompAndSwapWithBoot(Parameter parameter, long iter) {
          // HE parameter //
@@ -564,5 +563,64 @@ void TestBootstrapping::testEncSortWithDecrypt(Parameter parameter, long iter)  
     for(int i = 0; i < n; i++) {
         // cout << i << " : " << mvec[i] << ", " << dvec[i].real() << endl;
 		cout << i << " : " << mvec[i] << " // " << sort.ca.get(i) << " // " << dvec[i].real() << endl;
+    }
+}
+
+void TestBootstrapping::testSqrtWithBootAndDecrypt(Parameter parameter, long iter) {
+	// HE parameter //
+	long logN = parameter.logN;
+	long logQ = parameter.logQ;
+	long logp = parameter.logp;
+	long logc = parameter.logc;
+
+	// Decomposition related parameter //
+	long log2n = parameter.log2n;
+	long radix = parameter.radix;
+
+	// Bootstrapping parameter //
+	long logq = parameter.logq;
+	long logT = parameter.logT;
+
+	long n = 1 << log2n;
+
+	cout << "\n***************************" << endl;
+	cout << "Test for Sqrt with Boot" << endl;
+	cout << "logN = " << logN << ", logQ = " << logQ << ", logp = " << logp << ", logc = " << logc << endl;
+	cout << "slots = " << n << ", radix = " << radix << ", logq = " << logq << ", logT = " << logT << endl;
+	cout << "***************************" << endl;
+	cout << endl;
+
+	TimeUtils timeutils;
+	timeutils.start("KeyGen");
+	Ring ring(logN, logQ);
+	SecretKey secretKey(ring);
+	Scheme scheme(secretKey, ring);
+	scheme.addConjKey(secretKey);
+	scheme.addLeftRotKeys(secretKey);
+	timeutils.stop("KeyGen");
+
+	timeutils.start("Bootstrapping Helper construct");
+	BootHelper boothelper(log2n, radix, logc, scheme, ring, secretKey);
+	timeutils.stop("Bootstrapping Helper construct");
+
+	double* mvec = new double[n];
+    for(int i = 0; i < n; i++) {
+        mvec[i] = 0.00001 + (double) i / n;
+    }
+    
+	Ciphertext cipher = scheme.encrypt(mvec, n, logp, logQ);
+
+    Ciphertext sqrtCipher;
+    timeutils.start("Sqrt");
+    // fcnEncComputeSqrt(sqrtCipher, cipher, logp, 5, scheme);
+	fcnEncSqrtWithBootWithDecrypt(sqrtCipher, cipher, parameter, iter, scheme, boothelper, secretKey);
+    timeutils.stop("Sqrt");
+
+    // Print Result and Difference //	
+	complex<double>* dvec = scheme.decrypt(secretKey, sqrtCipher);
+    for(int i = 0; i < n; i++) {
+		double ans = dvec[i].real();
+        cout << i << " : " << mvec[i] << " ~simeq~ "
+			<< ans * ans << " = " << ans << " ^2" << endl;
     }
 }

@@ -1,6 +1,7 @@
 #include "../HEAAN/src/HEAAN.h"
 
-void fcnDecryptAndPrint(string str, Ciphertext cipher, Scheme scheme, SecretKey secretKey);
+void fcnDecryptAndPrint(string str, Ciphertext& cipher, Scheme& scheme, SecretKey& secretKey);
+void fcnDecryptAndPrintTwo(string str, Ciphertext& cipher1, Ciphertext& cipher2, Scheme& scheme, SecretKey& secretKey);
 
 void fcnEncComputeSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, long logp, long d, Scheme scheme);
 
@@ -160,14 +161,24 @@ void fcnEncCompAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double
     outCipher = max;
 }
 
-void fcnDecryptAndPrint(string str, Ciphertext cipher, Scheme scheme, SecretKey secretKey) {
+void fcnDecryptAndPrint(string str, Ciphertext& cipher, Scheme& scheme, SecretKey& secretKey) {
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     cout << "==== " << str << " ====" << endl;
     for(int i = 0; i < cipher.n; i++) {
         // if (i % 100 == 0) {
-            cout << i << " : " << dvec[i].real() << endl;
-        // }
-        
-        
+            cout << i << " : " << dvec[i] << endl;
+        // }        
+    }
+}
+
+void fcnDecryptAndPrintTwo(string str, Ciphertext& cipher1, Ciphertext& cipher2, Scheme& scheme, SecretKey& secretKey) {
+    complex<double>* dvec1 = scheme.decrypt(secretKey, cipher1);
+    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher2);
+    
+    cout << "==== " << str << " ====" << endl;
+    for(int i = 0; i < cipher1.n; i++) {
+        // if (i % 100 == 0) {
+            cout << i << " : " << dvec1[i].real() << ", " << dvec2[i].real() << endl;
+        // }        
     }
 }

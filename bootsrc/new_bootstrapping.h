@@ -524,17 +524,17 @@ void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long lo
 	
 	Ciphertext part1, part2;
 
-	time.start("CoeffToSlot");
+	// time.start("CoeffToSlot");
 	coeffToSlot(part1, part2, cipher);
-	time.stop("CoeffToSlot");
+	// time.stop("CoeffToSlot");
 
-	time.start("Evaluate Exp");
+	// time.start("Evaluate Exp");
 	evalExpAndEqual(part1, part2, logT, 4, logq);
-	time.stop("Evaluate Exp");
+	// time.stop("Evaluate Exp");
 
-	time.start("SlotToCoeff");
+	// time.start("SlotToCoeff");
 	slotToCoeff(cipher, part1, part2);
-	time.stop("SlotToCoeff");
+	// time.stop("SlotToCoeff");
 
 	cipher.logp = logp;
 }

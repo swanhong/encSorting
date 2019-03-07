@@ -19,19 +19,22 @@ int main() {
 
     // TestAlgorithm::testEncSorting(bootstrapping_test_param4);
     
-    Parameter sortingTestParam = {12, 850, 30, 30, 4, 4, 35, 4};
+    Parameter sortingTestParam = {12, 1600, 30, 30, 4, 4, 35, 4};
 
     // TestBootstrapping::testSqrtWithBoot(sortingTestParam, 20);
     // TestBootstrapping::testMaxMinWithBoot(sortingTestParam, 20);
-    // TestBootstrapping::testMaxMinWithBootAndDecrypt(bootstrapping_test_param4, 10);
+    
     // TestBootstrapping::testEncCompAndSwapWithBoot(sortingTestParam, 20);
     
 
     // TestBootstrapping::bootstrapping_test(sortingTestParam);
-    TestBootstrapping::bootstrapping_test_with_mult(sortingTestParam);
+    // TestBootstrapping::bootstrapping_test_with_mult(sortingTestParam);
 
-    // TestBootstrapping::testEncSort(sortingTestParam, 5);
-    // TestBootstrapping::testEncSortWithDecrypt(sortingTestParam, 3);
+    TestBootstrapping::testEncSort(sortingTestParam, 20);
+
+    // TestBootstrapping::testSqrtWithBootAndDecrypt(sortingTestParam, 25);
+    // TestBootstrapping::testMaxMinWithBootAndDecrypt(sortingTestParam, 25);
+    // TestBootstrapping::testEncSortWithDecrypt(sortingTestParam, 20);
 
 
 
