@@ -164,6 +164,10 @@ void fcnDecryptAndPrint(string str, Ciphertext cipher, Scheme scheme, SecretKey 
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     cout << "==== " << str << " ====" << endl;
     for(int i = 0; i < cipher.n; i++) {
-        cout << dvec[i].real() << endl;
+        // if (i % 100 == 0) {
+            cout << i << " : " << dvec[i].real() << endl;
+        // }
+        
+        
     }
 }

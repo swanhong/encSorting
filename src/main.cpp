@@ -18,23 +18,22 @@ int main() {
     // TestAlgorithm::testEncCompAndSwap(bootstrapping_test_param4);
 
     // TestAlgorithm::testEncSorting(bootstrapping_test_param4);
+    
+    Parameter sortingTestParam = {12, 850, 30, 30, 4, 4, 35, 4};
 
-    // TestBootstrapping::testSqrtWithBoot(bootstrapping_test_param4, 20);
-    // TestBootstrapping::testMaxMinWithBoot(bootstrapping_test_param4, 10);
-    // TestBootstrapping::testEncCompAndSwapWithBoot(bootstrapping_test_param4, 10);
+    // TestBootstrapping::testSqrtWithBoot(sortingTestParam, 20);
+    // TestBootstrapping::testMaxMinWithBoot(sortingTestParam, 20);
+    // TestBootstrapping::testMaxMinWithBootAndDecrypt(bootstrapping_test_param4, 10);
+    // TestBootstrapping::testEncCompAndSwapWithBoot(sortingTestParam, 20);
     
-    
-    Parameter sortingTestParam = {12, 1600, 30, 30, 9, 8, 35, 4};
 
     // TestBootstrapping::bootstrapping_test(sortingTestParam);
+    TestBootstrapping::bootstrapping_test_with_mult(sortingTestParam);
 
-    // TestBootstrapping::testEncSort(sortingTestParam, 9);
-    TestBootstrapping::testEncSortWithDecrypt(sortingTestParam, 12);
+    // TestBootstrapping::testEncSort(sortingTestParam, 5);
+    // TestBootstrapping::testEncSortWithDecrypt(sortingTestParam, 3);
 
 
 
     return 0;
 }
-
-
-

@@ -19,6 +19,8 @@ void encBatcherOddEvenSortWithDecrypt(Ciphertext& sortedCipher, const Ciphertext
 long encBatcherOddEvenSortRecWithDecrypt(Ciphertext& sortedCipher, const Ciphertext& inCipher, long logNum, long logJump, long loc, Parameter parameter, long iter, double** mask, Scheme& scheme, BootHelper& boothelper, SecretKey& secretKey);
 
 void fcnEncCompAndSwapWithBootAndDecrypt(Ciphertext& outCipher, const Ciphertext& inCipher, double* mask, long dist, Parameter parameter, long iter, Scheme& scheme, BootHelper& boothelper, SecretKey& secretKey);
+
+void fcnEncMaxMinWithBootAndDecrypt(Ciphertext& maxCipher, Ciphertext& minCipher, Ciphertext& input1, Ciphertext& input2, Parameter parameter, long iter, Scheme& scheme, BootHelper& boothelper, SecretKey& secretKey);
 // ======================================================================
 // ======================================================================
 // ======================================================================
@@ -275,3 +277,47 @@ void fcnEncCompAndSwapWithBootAndDecrypt(Ciphertext& outCipher, const Ciphertext
     cout << "final logq = " << outCipher.logq << endl;
     cout << "=== End CompAndSwap ===" << endl;
 }
+
+// void fcnEncMaxMinWithBootAndDecrypt(Ciphertext& maxCipher, Ciphertext& minCipher, Ciphertext& input1, Ciphertext& input2, Parameter parameter, long iter, Scheme& scheme, BootHelper& boothelper, SecretKey& secretKey) {
+    
+//     cout << "=== start MaxMin ===" << endl;
+//     cout << "initial logq = " << input1.logq << ", " << input2.logq << endl;
+//     cout << "----------------" << endl;
+
+//     cout << "inCipher.logq = " << inCipher.logq << endl;
+//     fcnDecryptAndPrint("inCipher", inCipher, scheme, secretKey);
+    
+//     Ciphertext x = scheme.add(input1, input2);
+//     Ciphertext y = scheme.sub(input1, input2);
+//     scheme.divByPo2AndEqual(x, 1); // x - 1
+//     scheme.divByPo2AndEqual(y, 1); // y - 1
+
+//     cout << "Compare " << x.logq - parameter.logp << " vs " << parameter.logq << endl;
+//     if (x.logq - parameter.logp < parameter.logq) {
+//         cout << " ---- Bootstrapping in MaxMin ---- " << endl;
+//         boothelper.bootstrapping(x, parameter.logq, parameter.logQ, parameter.logT);
+//         boothelper.bootstrapping(y, parameter.logq, parameter.logQ, parameter.logT);
+//     }
+    
+//     scheme.squareAndEqual(y);
+//     scheme.reScaleByAndEqual(y, parameter.logp); // y - logp + 1
+
+//     Ciphertext sqrtCipher;
+//     // sqrtCipher - (2 * iter + 1) * logp + 1
+//     fcnEncSqrtWithBoot(sqrtCipher, y, parameter, iter, scheme, boothelper);
+
+//     scheme.modDownToAndEqual(x, sqrtCipher.logq);
+
+//     maxCipher = scheme.add(x, sqrtCipher);
+//     minCipher = scheme.sub(x, sqrtCipher);
+
+//     cout << "inCipher.logq = " << inCipher.logq << endl;
+//     fcnDecryptAndPrint("inCipher", inCipher, scheme, secretKey);
+    
+//     cout << "outCipher.logq = " << outCipher.logq << endl;
+//     fcnDecryptAndPrint("outCipher", outCipher, scheme, secretKey);
+
+//     cout << "----------------" << endl;
+//     cout << "final logq = " << maxCipher.logq << ", " << minCipher.logq << endl;
+//     cout << "=== End MaxMin ===" << endl;    
+// }
