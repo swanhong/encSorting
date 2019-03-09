@@ -165,9 +165,15 @@ void fcnDecryptAndPrint(string str, Ciphertext& cipher, Scheme& scheme, SecretKe
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     cout << "==== " << str << " ====" << endl;
     for(int i = 0; i < cipher.n; i++) {
-        // if (i % 100 == 0) {
+        if (cipher.n > 100) {
+            if (i % 100 == 0) {
+                cout << i << " : " << dvec[i] << endl;
+            }        
+        } else {
             cout << i << " : " << dvec[i] << endl;
-        // }        
+        }
+        
+        
     }
 }
 
@@ -177,8 +183,8 @@ void fcnDecryptAndPrintTwo(string str, Ciphertext& cipher1, Ciphertext& cipher2,
     
     cout << "==== " << str << " ====" << endl;
     for(int i = 0; i < cipher1.n; i++) {
-        // if (i % 100 == 0) {
+        if (i % 100 == 0) {
             cout << i << " : " << dvec1[i].real() << ", " << dvec2[i].real() << endl;
-        // }        
+        }        
     }
 }

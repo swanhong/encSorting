@@ -914,6 +914,10 @@ void Scheme::modDownByAndEqual(Ciphertext& cipher, long dlogq) {
 }
 
 Ciphertext Scheme::modDownTo(Ciphertext& cipher, long logq) {
+	if (cipher.logq < logq) {
+		cerr << "ModDownTo error : logq of ciphertext is smaller than given logq" << endl;
+	}
+	
 	ZZ q = ring.qpows[logq];
 
 	ZZ* ax = new ZZ[ring.N];
@@ -925,6 +929,10 @@ Ciphertext Scheme::modDownTo(Ciphertext& cipher, long logq) {
 }
 
 void Scheme::modDownToAndEqual(Ciphertext& cipher, long logq) {
+	if (cipher.logq < logq) {
+		cerr << "ModDownToAndEqual error : logq of ciphertext is smaller than given logq" << endl;
+	}
+	
 	ZZ q = ring.qpows[logq];
 	cipher.logq = logq;
 	ring.modAndEqual(cipher.ax, q);

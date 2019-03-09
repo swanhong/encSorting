@@ -12,7 +12,5 @@ struct Parameter {
 Parameter bootstrapping_test_param1 = {16, 850, 30, 30, 6, 4, 35, 4};
 Parameter bootstrapping_test_param2 = {16, 850, 30, 30, 9, 8, 35, 4};
 Parameter bootstrapping_test_param3 = {16, 850, 30, 30, 12, 16, 35, 4};
-Parameter bootstrapping_test_param4 = {12, 800, 30, 30, 4, 16, 35, 4};
-
 
 #endif // !PARAMETER_H_
