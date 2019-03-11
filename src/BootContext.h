@@ -263,9 +263,16 @@ void fcnEncCompAndSwapWithBootAndDecrypt(Ciphertext& outCipher, Ciphertext& inCi
     cout << "----------------" << endl;
 
     cout << "Compare " << a.logq - parameter.logp << " vs " << parameter.logq << endl;
-    if (a.logq - parameter.logp < parameter.logq) {
+    if (a.logq - 2 * parameter.logp < parameter.logq) {
         cout << " ---- Bootstrapping in CompAndSwap ---- " << endl;
+        
+        // scheme.multByConstAndEqual(a, 10000, logp);
+        // scheme.reScaleByAndEqual(a, logp);
+        
         boothelper.bootstrapping(a, parameter.logq, parameter.logQ, parameter.logT);
+        
+        // scheme.multByConstAndEqual(a, 0.0001, logp);
+        // scheme.reScaleByAndEqual(a, logp);
     }
     
     Ciphertext maskCipher = scheme.encrypt(mask, n, logp, a.logq);
@@ -305,10 +312,21 @@ void fcnEncMaxMinWithBootAndDecrypt(Ciphertext& maxCipher, Ciphertext& minCipher
     scheme.divByPo2AndEqual(y, 1); // y - 1
 
     cout << "Compare " << x.logq - parameter.logp << " vs " << parameter.logq << endl;
-    if (x.logq - parameter.logp < parameter.logq) {
+    if (x.logq - 2 * parameter.logp < parameter.logq) {
         cout << " ---- Bootstrapping in MaxMin ---- " << endl;
+
+        // scheme.multByConstAndEqual(x, 10000, parameter.logp);
+        // scheme.reScaleByAndEqual(x, parameter.logp);
+        // scheme.multByConstAndEqual(y, 10000, parameter.logp);
+        // scheme.reScaleByAndEqual(y, parameter.logp);
+
         boothelper.bootstrapping(x, parameter.logq, parameter.logQ, parameter.logT);
         boothelper.bootstrapping(y, parameter.logq, parameter.logQ, parameter.logT);
+
+        // scheme.multByConstAndEqual(x, 0.0001, parameter.logp);
+        // scheme.reScaleByAndEqual(x, parameter.logp);
+        // scheme.multByConstAndEqual(y, 0.0001, parameter.logp);
+        // scheme.reScaleByAndEqual(y, parameter.logp);
     }
     
     scheme.squareAndEqual(y);
@@ -365,8 +383,20 @@ void fcnEncSqrtWithBootWithDecrypt(Ciphertext& outCipher, Ciphertext& inCipher, 
 
         cout << "Compare " << a.logq - 2 * logp << " vs " << parameter.logq << endl;
         if (a.logq - 2 * logp < parameter.logq) {
+
+            // scheme.multByConstAndEqual(a, 10000, parameter.logp);
+            // scheme.reScaleByAndEqual(a, parameter.logp);
+            // scheme.multByConstAndEqual(b, 10000, parameter.logp);
+            // scheme.reScaleByAndEqual(b, parameter.logp);
+
             boothelper.bootstrapping(a, parameter.logq, parameter.logQ, parameter.logT);
             boothelper.bootstrapping(b, parameter.logq, parameter.logQ, parameter.logT);
+
+            // scheme.multByConstAndEqual(a, 0.0001, parameter.logp);
+            // scheme.reScaleByAndEqual(a, parameter.logp);
+            // scheme.multByConstAndEqual(b, 0.0001, parameter.logp);
+            // scheme.reScaleByAndEqual(b, parameter.logp);
+            
             cout << "    after bootstrapping : logq = " << a.logq << ", " << b.logq << endl;
         }
 

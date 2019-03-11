@@ -5,11 +5,12 @@
 
 class TestAlgorithm {
 public:
+
     static void testBootstrapping(Parameter parameter);
 
     static void testOpreationsAndBoot(Parameter parameter);
 
-    static void testMult(long logq, long logp, long logn);
+    static void testMult(Parameter parameter);
 
     // static void testCompAndSwap(long length);
 
@@ -30,18 +31,31 @@ public:
 
 // void fcnEncBatcherOddEvenSort(Ciphertext& sortedCipher, const Ciphertext& inCipher, double** mask, long iter, Scheme scheme, BootHelper boothelper, Parameter parameter);
 
-void TestAlgorithm::testMult(long logq, long logp, long logn) {
+void TestAlgorithm::testMult(Parameter parameter){
+    
+    long logN = parameter.logN;
+    long logQ = parameter.logQ;
+    long logp = parameter.logp;
+    long logc = parameter.logc;
+
+    // Decomposition related parameter //
+    long log2n = parameter.log2n;
+    long radix = parameter.radix;
+
+    // Bootstrapping parameter //
+    long logq = parameter.logq;
+    long logT = parameter.logT;
 
     srand(time(NULL));
     SetNumThreads(8);
     TimeUtils timeutils;
-    Ring ring(logn, logq);
+    Ring ring(logN, logq);
     SecretKey secretKey(ring);
     Scheme scheme(secretKey, ring);
 
     // **********************************
 
-    long n = 1 << logn;
+    long n = 1 << log2n;
     complex<double>* mvec1 = EvaluatorUtils::randomComplexArray(n);
     complex<double>* mvec2 = EvaluatorUtils::randomComplexArray(n);
     complex<double>* mMult = new complex<double>[n];

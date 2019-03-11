@@ -171,9 +171,7 @@ void fcnDecryptAndPrint(string str, Ciphertext& cipher, Scheme& scheme, SecretKe
             }        
         } else {
             cout << i << " : " << dvec[i] << endl;
-        }
-        
-        
+        }        
     }
 }
 
