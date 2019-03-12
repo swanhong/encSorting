@@ -67,30 +67,37 @@ void TestBootstrapping::bootstrapping_test(Parameter parameter) {
 	complex<double>* mvec = EvaluatorUtils::randomComplexArray(n);
 	// complex<double>* mvec = new complex<double>[n];
 	// for(int i = 0; i < n; i++) {
-	// 	mvec[i] = 0.0000001;
+	// 	mvec[i] *= 0.0000001;
 	// }
+	mvec[0] = complex<double>(0.5, 0.3);
 	
 	Ciphertext cipher = scheme.encrypt(mvec, n, logp, logQ);
 	mvec = scheme.decrypt(secretKey, cipher);
 
 	complex<double>* dvec;
 	
+	// scheme.multByConstAndEqual(cipher, 0.01, logp);
+	// scheme.reScaleByAndEqual(cipher, logp);
+	
 	// Bootstrapping //
 	timeutils.start("Improved bootstrapping");
 	boothelper.bootstrapping(cipher, logq, logQ, logT);
 	timeutils.stop("Improved bootstrapping");
+
+	// scheme.multByConstAndEqual(cipher, 100, logp);
+	// scheme.reScaleByAndEqual(cipher, logp);
 
 	cout << "* Befor logQ = " << logq << endl;
 	cout << "* After logQ = " << cipher.logq << endl;
 
 	// Print Result and Difference //
 	dvec = scheme.decrypt(secretKey, cipher);
-	// cout << "log2(avg of error) = " << diff(mvec, dvec, n) << endl;
+	cout << "log2(avg of error) = " << diff(mvec, dvec, n) << endl;
 
-	for(int i = 0; i < n; i++)
-	{
-		cout << i << " : " << mvec[i] << " ~~ " << dvec[i] << endl;
-	}
+	// for(int i = 0; i < n; i++)
+	// {
+	// 	cout << i << " : " << mvec[i] << " ~~ " << dvec[i] << endl;
+	// }
 	
 	if(mvec != NULL) delete[] mvec;
 	if(dvec != NULL) delete[] dvec;
@@ -134,18 +141,18 @@ void TestBootstrapping::bootstrapping_test_with_mult(Parameter parameter, int it
 	BootHelper boothelper(log2n, radix, logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	complex<double>* mvec1 = EvaluatorUtils::randomComplexArray(n, 100.0);
+	complex<double>* mvec1 = EvaluatorUtils::randomComplexArray(n, 10);
 	
 	Ciphertext cipher1 = scheme.encrypt(mvec1, n, logp, logQ);
 
-	complex<double>* mvec2 = EvaluatorUtils::randomComplexArray(n, 0.7);
-	Ciphertext cipher2 = scheme.encrypt(mvec2, n, logp, logQ);
-	
-	// complex<double>* mvec2 = new complex<double>[n];
-	// for (int i = 0; i < n; i++) {
-	// 	mvec2[i] = 1;
-	// }
+	// complex<double>* mvec2 = EvaluatorUtils::randomComplexArray(n, 0.7);
 	// Ciphertext cipher2 = scheme.encrypt(mvec2, n, logp, logQ);
+	
+	complex<double>* mvec2 = new complex<double>[n];
+	for (int i = 0; i < n; i++) {
+		mvec2[i] = 1;
+	}
+	Ciphertext cipher2 = scheme.encrypt(mvec2, n, logp, logQ);
 
 	cout << "======= initial values ======= " << endl;
 	for(int i = 0; i < n; i++) {
@@ -159,24 +166,25 @@ void TestBootstrapping::bootstrapping_test_with_mult(Parameter parameter, int it
 
 	for(int i = 0; i < iter; i++) {
 		cout << cipher1.logq - logp << " vs " << logq << endl;
-		if (cipher1.logq - logp <  200) {
+		if (cipher1.logq - logp <  logq) {
+		// if (1) {
 			cout << "Bootstrapping" << endl;
 			cout << "...before bootstrapping : " << endl;
 			cout << "logq = " << cipher1.logq << endl;
 			complex<double>* dvec = scheme.decrypt(secretKey, cipher1);
 
-			scheme.multByConstAndEqual(cipher1, 1000000.0, logp);
-			scheme.multByConstAndEqual(cipher2, 1000000.0, logp);
-			scheme.reScaleByAndEqual(cipher1, logp);
-			scheme.reScaleByAndEqual(cipher2, logp);
+			// scheme.multByConstAndEqual(cipher1, 1000000.0, logp);
+			// scheme.multByConstAndEqual(cipher2, 1000000.0, logp);
+			// scheme.reScaleByAndEqual(cipher1, logp);
+			// scheme.reScaleByAndEqual(cipher2, logp);
 
 			boothelper.bootstrapping(cipher1, logq, logQ, logT);
 			boothelper.bootstrapping(cipher2, logq, logQ, logT);
 
-			scheme.multByConstAndEqual(cipher1, 0.000001, logp);
-			scheme.multByConstAndEqual(cipher2, 0.000001, logp);
-			scheme.reScaleByAndEqual(cipher1, logp);
-			scheme.reScaleByAndEqual(cipher2, logp);
+			// scheme.multByConstAndEqual(cipher1, 0.000001, logp);
+			// scheme.multByConstAndEqual(cipher2, 0.000001, logp);
+			// scheme.reScaleByAndEqual(cipher1, logp);
+			// scheme.reScaleByAndEqual(cipher2, logp);
 
 			complex<double>* dvec2 = scheme.decrypt(secretKey, cipher1);
 			cout << "...after bootstrapping : " << endl;
@@ -594,7 +602,7 @@ void TestBootstrapping::testEncSortWithDecrypt(Parameter parameter, long iter)  
 	scheme.addLeftRotKeys(secretKey);
 	scheme.addRightRotKeys(secretKey);
 	timeutils.stop("KeyGen");
-
+ 
 	timeutils.start("Bootstrapping Helper construct");
 	BootHelper boothelper(log2n, radix, logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
@@ -736,22 +744,12 @@ void TestBootstrapping::testEncCompAndSwapWithBootAndDecrypt(Parameter parameter
     double* mask = genMaskingComp(n, 1);
     
     timeutils.start("CompAndSwap");
-	for(int i = 0; i < 30; i++) {
-		cout << " ====== i = " << i << " ========" << endl;
-		Ciphertext dummy;
-		// fcnEncCompAndSwapWithBootAndDecrypt(dummy, cipher, mask, 1, parameter, iter, scheme, boothelper, secretKey);
-		fcnEncCompAndSwapWithBoot(dummy, cipher, mask, 1, parameter, iter, scheme, boothelper);
-		complex<double>* dvec = scheme.decrypt(secretKey, dummy);
-		// StringUtils::compare(mvec, dmult, n, "mult");
-		for(int i = 0; i < n; i++) {
-        	cout << i << " : " << mvec[i] << ", " << dvec[i].real() << endl;
-    	}
-		cipher = dummy;
-	}
-	cipher2 = cipher;
-	
-    
+	// fcnEncCompAndSwapWithBootAndDecrypt(dummy, cipher, mask, 1, parameter, iter, scheme, boothelper, secretKey);
+	fcnEncCompAndSwapWithBoot(cipher2, cipher, mask, 1, parameter, iter, scheme, boothelper);
     timeutils.stop("CompAndSwap");
+
+	cout << "cipher.logq = " << cipher.logq << endl;
+	cout << "cipher2.logq = " << cipher2.logq << endl;
 
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher2);
     // StringUtils::compare(mvec, dmult, n, "mult");
