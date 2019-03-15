@@ -632,6 +632,12 @@ void TestBootstrapping::testEncSortWithDecrypt(Parameter parameter, long iter)  
         // cout << i << " : " << mvec[i] << ", " << dvec[i].real() << endl;
 		cout << i << " : " << mvec[i] << " // " << sort.ca.get(i) << " // " << dvec[i].real() << endl;
     }
+	double* mSort = new double[n];
+	for(int i = 0; i < n; i++) {
+		mSort[i] = sort.ca.get(i);
+	}
+	
+	cout << "log2(avg of error) = " << difference(mSort, dvec, n);
 }
 
 void TestBootstrapping::testSqrtWithBootAndDecrypt(Parameter parameter, long iter) {
