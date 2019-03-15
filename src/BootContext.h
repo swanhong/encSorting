@@ -228,13 +228,14 @@ long encBatcherOddEvenSortRecWithDecrypt(Ciphertext& sortedCipher, const Ciphert
     if (logNum == 1) {
         // cout << "mask[" << loc << "] <- S(" << logNum << ", " << logJump << ")" << endl;
         // CompAndSwap()
-        // fcnEncCompAndSwapWithBootAndDecrypt(dummy, a, mask[loc], 1 << logJump, parameter, iter, scheme, boothelper, secretKey);
+        fcnEncCompAndSwapWithBootAndDecrypt(dummy, a, mask[loc], 1 << logJump, parameter, iter, scheme, boothelper, secretKey);
 
-        if (a.logq < 1500) {
-            cout << "run Bootstrapping..." << endl;
-            boothelper.bootstrapping(a, parameter.logq, parameter.logQ, parameter.logT);
-        }
-        fcnEncCompAndSwap(dummy, a, mask[loc], 1 << logJump, parameter.logp, iter, scheme);
+        // if (a.logq < 1500) {
+        //     cout << "run Bootstrapping..." << endl;
+        //     boothelper.bootstrapping(a, parameter.logq, parameter.logQ, parameter.logT);
+        // }
+
+        // fcnEncCompAndSwap(dummy, a, mask[loc], 1 << logJump, parameter.logp, iter, scheme);
         
         a = dummy;
         // compAndSwap(loc, 1 << logJump);
@@ -252,13 +253,13 @@ long encBatcherOddEvenSortRecWithDecrypt(Ciphertext& sortedCipher, const Ciphert
         // mask[loc] = genMaskingMerge(1 << log2n, 1 << logNum, 1 << logJump);
 
         
-        // fcnEncCompAndSwapWithBootAndDecrypt(dummy, a, mask[loc], 1 << logJump, parameter, iter, scheme, boothelper, secretKey);
+        fcnEncCompAndSwapWithBootAndDecrypt(dummy, a, mask[loc], 1 << logJump, parameter, iter, scheme, boothelper, secretKey);
 
-        if (a.logq < 600) {
-            cout << "run Bootstrapping..." << endl;
-            boothelper.bootstrapping(a, parameter.logq, parameter.logQ, parameter.logT);
-        }
-        fcnEncCompAndSwap(dummy, a, mask[loc], 1 << logJump, parameter.logp, iter, scheme);
+        // if (a.logq < 600) {
+        //     cout << "run Bootstrapping..." << endl;
+        //     boothelper.bootstrapping(a, parameter.logq, parameter.logQ, parameter.logT);
+        // }
+        // fcnEncCompAndSwap(dummy, a, mask[loc], 1 << logJump, parameter.logp, iter, scheme);
         
         a = dummy;
     }

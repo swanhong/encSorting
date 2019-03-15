@@ -22,10 +22,10 @@ public:
 
     static void testMaxMin(Parameter parameter);
 
-    static void testEncCompAndSwap(Parameter parameter);
+    static void testEncCompAndSwap(Parameter parameter, long iter);
 };
 
-
+double difference(double* a1, complex<double>* a2, long n);
 
 // int fcnEncBatcherOddEvenSortRec(Ciphertext& cipher, long num, long logJump, long loc, double** mask, long iter, Scheme scheme, BootHelper boothelper, Parameter parameter);
 
@@ -232,7 +232,7 @@ void TestAlgorithm::testMaxMin(Parameter parameter) {
     }
 }
 
-void TestAlgorithm::testEncCompAndSwap(Parameter parameter) {
+void TestAlgorithm::testEncCompAndSwap(Parameter parameter, long iter) {
          // HE parameter //
     long logN = parameter.logN;
     long logQ = parameter.logQ;
@@ -267,24 +267,46 @@ void TestAlgorithm::testEncCompAndSwap(Parameter parameter) {
     scheme.addRightRotKeys(secretKey);
     timeutils.stop("KeyGen");
 
-    double* mvec = new double[n];
-    for(int i = 0; i < n; i++) {
-        mvec[n - 1 - i] = 0.00001 + (double) i / n;
-    }
-    
+    // double* mvec = new double[n];
+    // for(int i = 0; i < n; i++) {
+    //     mvec[n - 1 - i] = 0.00001 + (double) i / n;
+    // }
+    double* mvec = EvaluatorUtils::randomRealArray(n);
+
 	Ciphertext cipher = scheme.encrypt(mvec, n, logp, logQ);
 
 	Ciphertext cipher2;
 
     double* mask = genMaskingComp(n, 1);
-    
+
     timeutils.start("CompAndSwap");
-    fcnEncCompAndSwap(cipher2, cipher, mask, 1, logp, 7, scheme);
+    fcnEncCompAndSwap(cipher2, cipher, mask, 1, logp, iter, scheme);
     timeutils.stop("CompAndSwap");
 
-	complex<double>* dmult = scheme.decrypt(secretKey, cipher2);
-    // StringUtils::compare(mvec, dmult, n, "mult");
-    for(int i = 0; i < n; i++) {
-        cout << i << " : " << mvec[i] << ", " << dmult[i].real() << endl;
+    for(int i = 0; i < n / 2; i++) {
+        if(mvec[2 * i] > mvec[2 * i + 1]) {
+            double x = mvec[2 * i];
+            mvec[2 * i] = mvec[2 * i + 1];
+            mvec[2 * i + 1] = x;
+        }
+        
     }
+    
+    cout << "comsumed logq = " << cipher.logq - cipher2.logq << endl;
+
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher2);
+    cout << "log2(avg of error) = " << difference(mvec, dvec, n) << endl;
+    // StringUtils::compare(mvec, dmult, n, "mult");
+    // for(int i = 0; i < n; i++) {
+    //     cout << i << " : " << mvec[i] << " // " << dvec[i].real() << endl;
+    // }
+}
+
+double difference(double* a1, complex<double>* a2, long n) {
+	double avg = 0.;
+	for(long i = 0; i < n; i++) {
+		avg += abs(a1[i] - a2[i].real());
+	}
+	avg /= n;
+	return log2(avg);
 }
