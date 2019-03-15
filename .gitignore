@@ -1,5 +1,4 @@
 *.o
 *.d
 src/output
-src/output.txt
-src/output
+src/*.txt
