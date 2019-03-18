@@ -164,14 +164,23 @@ void fcnEncCompAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double
 void fcnDecryptAndPrint(string str, Ciphertext& cipher, Scheme& scheme, SecretKey& secretKey) {
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     cout << "==== " << str << " ====" << endl;
+
+    long POWER_OF_TEN = 1;
+    while(POWER_OF_TEN * 100 < cipher.n){
+        POWER_OF_TEN *= 10;
+    }
+    
+    cout << "num_slots = " << cipher.n << endl;
+    cout << "POWER_OF_TEN = " << POWER_OF_TEN << endl;
+
     for(int i = 0; i < cipher.n; i++) {
         if (cipher.n > 100) {
-            if (i % 100 == 0) {
+            if (i % POWER_OF_TEN == 0) {
                 cout << i << " : " << dvec[i] << endl;
             }        
         } else {
             cout << i << " : " << dvec[i] << endl;
-        }        
+        }      
     }
 }
 
