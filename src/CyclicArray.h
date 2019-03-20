@@ -1,10 +1,3 @@
-/*
- * CyclicArray.h
- *
- *  Created on: 2018. 6. 15.
- *      Author: swan
- */
-
 #ifndef CYCLICARRAY_H_
 #define CYCLICARRAY_H_
 

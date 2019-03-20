@@ -1,4 +1,4 @@
-#include "SortingAlrogithm.h"
+#include "SortingAlgorithm.h"
 
 
 SortingAlgorithm::SortingAlgorithm(CyclicArray ca_, long log2n_) {
