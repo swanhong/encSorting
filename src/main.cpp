@@ -1,9 +1,6 @@
 #include "TestAlgorithm.h"
 #include "TestBootstrapping.h"
 
-// #include "../bootsrc/new_bootstrapping.h"
-// #include "Parameter.h"
-
 int main() {
     // TestAlgorithm::testMult(1000, 30, 15);
     
@@ -18,7 +15,12 @@ int main() {
     // TestAlgorithm::testEncCompAndSwap(bootstrapping_test_param4);
 
     // TestAlgorithm::testEncSorting(bootstrapping_test_param4);
-    
+
+    /* 
+        Parameters (long)
+        {logN, logQ, logp, logc, log2n, radix, logq, logT}
+    */
+
     Parameter sortingTestParamSmall = {11, 1500, 30, 30, 6, 4, 35, 4};
     Parameter sortingTestParam1 = {12, 1000, 40, 40, 10, 32, 45, 5};
     Parameter sortingTestParamBig = {15, 1200, 40, 40, 14, 128, 45, 5};
@@ -36,11 +38,11 @@ int main() {
     // TestBootstrapping::testMaxMinWithBootAndDecrypt(sortingTestParamSmall, 20);
     // TestBootstrapping::bootstrapping_test_with_mult(sortingTestParam1, 30);
 
-    // TestBootstrapping::testEncSort(sortingTestParam1, 3);
+    // TestBootstrapping::testEncSort(sortingTestParamSmall, 10);
 
-    TestBootstrapping::testSqrtWithBootAndDecrypt(sortingTestParamBig2, 10);
+    // TestBootstrapping::testSqrtWithBootAndDecrypt(sortingTestParamSmall, 10);
     
-    // TestBootstrapping::testEncSortWithDecrypt(sortingTestParamSmall, 20);
+    TestBootstrapping::testEncSortWithDecrypt(sortingTestParamSmall, 10);
     
     // TestBootstrapping::testEncCompAndSwapWithBootAndDecrypt(sortingTestParamBig, 9);
 

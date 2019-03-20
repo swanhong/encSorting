@@ -1,5 +1,5 @@
-#ifndef SORTINGALROTIGHM_H_
-#define SORTINGALROTIGHM_H_
+#ifndef SORTINGALGORITHM_H_
+#define SORTINGALGORITHM_H_
 
 #include "CyclicArray.h"
 #include "vector"
@@ -36,4 +36,4 @@ long genMaskingRec(long log2n, long logNum, long logJump, double**& mask, long l
 
 
 
-#endif // !SORTINGALROTIGHM_H_
+#endif // !SORTINGALGORITHM_H_
