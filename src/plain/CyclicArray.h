@@ -20,6 +20,8 @@ public:
 	CyclicArray(double** array, long rowNum_, long colNum_);
 	CyclicArray(double* array, long length_);
 	CyclicArray(long length_);
+	~CyclicArray() {}
+	
 	// --------------------
 
 	/*
@@ -55,6 +57,9 @@ public:
 	// Create Random CyclicArray
 
 	void randomGen(long length);
+
+	// output data as a normal double*
+	double* getArray();
 
 };
 

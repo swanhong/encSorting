@@ -180,7 +180,7 @@ void Ring::decode(ZZ* mx, complex<double>* vals, long slots, long logp, long log
 }
 
 void Ring::addBootContext(long logSlots, long logp) {
-	if (bootContextMap.find(logSlots) == bootContextMap.end()) {
+	if (BootContextMap.find(logSlots) == BootContextMap.end()) {
 		long slots = 1 << logSlots;
 		long dslots = slots << 1;
 		long logk = logSlots >> 1;
@@ -325,7 +325,7 @@ void Ring::addBootContext(long logSlots, long logp) {
 		}
 		delete[] pvals;
 		delete[] pvec;
-		bootContextMap.insert(pair<long, BootContext>(logSlots,BootContext(rpvec, rpvecInv, rp1, rp2, bndvec, bndvecInv, bnd1, bnd2, logp)));
+		BootContextMap.insert(pair<long, BootContext>(logSlots,BootContext(rpvec, rpvecInv, rp1, rp2, bndvec, bndvecInv, bnd1, bnd2, logp)));
 	}
 }
 
