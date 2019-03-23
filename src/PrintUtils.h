@@ -8,8 +8,12 @@
 #include <math.h>
 #include <string>
 
-static bool WANT_TO_PRINT = true;
+static bool WANT_TO_PRINT = false;
 static bool DEC_AND_PRINT = false;
+
+static long NUM_OF_MULT = 0;
+static long NUM_OF_BOOT = 0;
+static long NUM_OF_CONST_MULT = 0;
 
 class PrintUtils {
 public:

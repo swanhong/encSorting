@@ -44,11 +44,11 @@ void BootAlgo::approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, Par
     }
 
     outCipher = a; 
-    cout << "end Sqrt, logq = " << outCipher.logq << endl;
+    PrintUtils::nprint("end Sqrt, logq = " + to_string(outCipher.logq), WANT_TO_PRINT);
 }
 
 void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& input1, Ciphertext& input2, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper) {
-    cout << "start minMax with logq = " << input1.logq << ", " << input2.logq << endl;
+    PrintUtils::nprint("start minMax with logq = " + to_string(input1.logq) + ", " + to_string(input2.logq), WANT_TO_PRINT);
     Ciphertext x = scheme.add(input1, input2);
     Ciphertext y = scheme.sub(input1, input2);
     scheme.divByPo2AndEqual(x, 1); // x - logp + 1
@@ -66,11 +66,11 @@ void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& 
 
     maxCipher = scheme.add(x, sqrtCipher);
     minCipher = scheme.sub(x, sqrtCipher);
-    cout << "end minMax" << endl;
+    PrintUtils::nprint("end minMax", WANT_TO_PRINT);
 }
 
 void BootAlgo::compAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
-    cout << "start compAndSwap with logq = " << inCipher.logq << endl;
+    PrintUtils::nprint("start compAndSwap with logq = " + to_string(inCipher.logq), WANT_TO_PRINT);
     Ciphertext a = inCipher;
     long n = a.n;
     ZZ* maskPoly = new ZZ[1 << param.logN];
@@ -88,5 +88,5 @@ void BootAlgo::compAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, do
     scheme.addAndEqual(max, min);
 
     outCipher = max;
-    cout << "end compAndSwap" << endl;
+    PrintUtils::nprint("end compAndSwap", WANT_TO_PRINT);
 }

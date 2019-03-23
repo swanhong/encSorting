@@ -9,11 +9,18 @@ void EncSorting::runSorting(Ciphertext& sortedCipher, const Ciphertext& inCipher
 }
 
 long EncSorting::sortingRecursion(Ciphertext& sortedCipher, const Ciphertext& inCipher, long logNum, long logJump, long loc, Parameter param, long iter, double** mask, BootAlgo& bootAlgo, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    TimeUtils timeutils;
     Ciphertext a = inCipher;
     Ciphertext dummy;
     PrintUtils::nprint("run encBatcherSort with loc = " + to_string(loc), WANT_TO_PRINT);
     if (logNum == 1) {
+        timeutils.start(to_string(loc)+"th CompAndSwap");
         bootAlgo.compAndSwap(dummy, a, mask[loc], 1<< logJump, iter, param, scheme, ring, bootHelper);
+        cout << "Number of" << endl;
+        cout << "Mult = " << NUM_OF_MULT << endl;
+        cout << "Boot = " << NUM_OF_BOOT << endl;
+        cout << "ConstMult = " << NUM_OF_CONST_MULT << endl;
+        timeutils.stop(to_string(loc)+"th CompAndSwap");
         a = dummy;
     } else {
         if (logJump == 0) {
@@ -23,7 +30,13 @@ long EncSorting::sortingRecursion(Ciphertext& sortedCipher, const Ciphertext& in
         loc = sortingRecursion(dummy, a, logNum - 1, logJump + 1, loc, param, iter, mask, bootAlgo, scheme, ring, bootHelper);
         a = dummy;
 
+        timeutils.start(to_string(loc)+"th CompAndSwap");
         bootAlgo.compAndSwap(dummy, a, mask[loc], 1<< logJump, iter, param, scheme, ring, bootHelper);
+        cout << "Number of" << endl;
+        cout << "Mult = " << NUM_OF_MULT << endl;
+        cout << "Boot = " << NUM_OF_BOOT << endl;
+        cout << "ConstMult = " << NUM_OF_CONST_MULT << endl;
+        timeutils.stop(to_string(loc)+"th CompAndSwap");
         a = dummy;
     }
     sortedCipher = a;
