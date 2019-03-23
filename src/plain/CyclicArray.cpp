@@ -166,3 +166,23 @@ void getMinMax(CyclicArray& caToMin, CyclicArray& caToMax) {
         caToMax.set(i, max);
     }
 }
+
+double* CyclicArray::getArray() {
+	double* ans = new double[length];
+	for(int i = 0; i < length; i++) {
+		ans[i] = get(i);
+	}
+	return ans;	
+}
+
+
+
+void CyclicArray::randomGen(long length_) {
+    length = length_;
+    start = 0;
+    data = new double[length];
+    for(int i = 0; i < length; i++) {
+        data[i] = 0;
+        data[i] = (double) rand() / RAND_MAX;
+    }
+}

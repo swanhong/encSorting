@@ -52,7 +52,7 @@ public:
 
 	map<string, double*> taylorCoeffsMap;
 
-	map<long, BootContext> bootContextMap;
+	map<long, BootContext> BootContextMap;
 
 	RingMultiplier multiplier;
 

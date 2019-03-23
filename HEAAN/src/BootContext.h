@@ -5,8 +5,8 @@
 * You should have received a copy of the license along with this
 * work.  If not, see <http://creativecommons.org/licenses/by-nc/3.0/>.
 */
-#ifndef HEAAN_BOOTCONTEXT_H_
-#define HEAAN_BOOTCONTEXT_H_
+#ifndef HEAAN_BootContext_H_
+#define HEAAN_BootContext_H_
 
 #include <NTL/ZZ.h>
 
