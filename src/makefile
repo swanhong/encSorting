@@ -1,18 +1,31 @@
 RM = rm -rf
 CC = g++
 CFLAGS = -std=c++11 -O3
+TERGET = main.cpp
+OUTPUT = output
 
-HEAAN_DIR = ../HEAAN
-BOOT_DIR = ../bootsrc
-PLAIN_DIR = plain
-ENC_DIR = enc
-TEST_DIR = test
+HEAAN_DIR = ../HEAAN/
 
-BOOT_OBJS = $(BOOT_DIR)/common.o $(BOOT_DIR)/new_bootstrapping.o
-OUR_OBJS = PrintUtils.o MaskingGenerator.o \
-			$(PLAIN_DIR)/CyclicArray.o $(PLAIN_DIR)/PlainSorting.o \
-			$(ENC_DIR)/EncAlgorithm.o $(ENC_DIR)/BootScheme.o $(ENC_DIR)/BootAlgorithm.o $(ENC_DIR)/EncSorting.o \
-			$(TEST_DIR)/TestPlain.o $(TEST_DIR)/TestEnc.o $(TEST_DIR)/TestBoot.o $(TEST_DIR)/TestSort.o
+DEFAULT_FILES = PrintUtils MaskingGenerator
+
+BOOT_DIR = ../bootsrc/
+BOOT_FILES = common new_bootstrapping
+
+PLAIN_DIR = plain/
+PLAIN_FILES = CyclicArray PlainSorting
+
+ENC_DIR = enc/
+ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncSorting
+
+TEST_DIR = test/
+TEST_FILES = TestPlain TestEnc TestBoot TestSort
+
+# BOOT_OBJS = $(BOOT_DIR)/common.o $(BOOT_DIR)/new_bootstrapping.o
+BOOT_OBJS = $(addprefix $(BOOT_DIR), $(addsuffix .o, $(BOOT_FILES)))
+OUR_OBJS = $(addsuffix .o, $(DEFAULT_FILES)) \
+			$(addprefix $(PLAIN_DIR), $(addsuffix .o, $(PLAIN_FILES))) \
+			$(addprefix $(ENC_DIR), $(addsuffix .o, $(ENC_FILES))) \
+			$(addprefix $(TEST_DIR), $(addsuffix .o, $(TEST_FILES)))
 OBJS =  $(BOOT_OBJS) $(OUR_OBJS)
 
 LOCAL_LIBS = -lntl -lgmp -lm -lpthread
@@ -27,7 +40,7 @@ all: main run
 # Tool invocations
 main: $(OBJS)
 	@echo 'Building target: $@'
-	$(CC) main.cpp -o output $(OBJS) $(LIBS) $(CFLAGS) -I $(BOOT_LIBS) $(HEAAN_DIR)/lib/libHEAAN.a $(LOCAL_LIBS)
+	$(CC) $(TERGET) -o $(OUTPUT) $(OBJS) $(LIBS) $(CFLAGS) -I $(BOOT_LIBS) $(HEAAN_DIR)lib/libHEAAN.a $(LOCAL_LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -39,7 +52,7 @@ main: $(OBJS)
 
 # Other Targets
 clean:
-	$(RM) output $(OBJS)
+	$(RM) $(OUTPUT) $(OBJS)
 
 run:
-	./output
+	./$(OUTPUT)
