@@ -20,7 +20,6 @@ ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncSorting
 TEST_DIR = test/
 TEST_FILES = TestPlain TestEnc TestBoot TestSort
 
-# BOOT_OBJS = $(BOOT_DIR)/common.o $(BOOT_DIR)/new_bootstrapping.o
 BOOT_OBJS = $(addprefix $(BOOT_DIR), $(addsuffix .o, $(BOOT_FILES)))
 OUR_OBJS = $(addsuffix .o, $(DEFAULT_FILES)) \
 			$(addprefix $(PLAIN_DIR), $(addsuffix .o, $(PLAIN_FILES))) \
