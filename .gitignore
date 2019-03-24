@@ -1,4 +1,6 @@
 *.o
 *.d
+*.bin
+*.ipch
 src/output
 src/*.txt
