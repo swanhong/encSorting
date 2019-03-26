@@ -1,10 +1,24 @@
 #include "BootScheme.h"
 
+void BootScheme::countMult() {
+    NUM_OF_MULT += 1;
+    NUM_OF_CURRENT_MULT += 1;
+}
 
+void BootScheme::countBoot() {
+    NUM_OF_BOOT += 1;
+    NUM_OF_CURRENT_BOOT += 1;
+}
+
+void BootScheme::resetCount() {
+    NUM_OF_CURRENT_MULT = 0;
+    NUM_OF_CURRENT_BOOT = 0;
+
+}
 void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bootHelper, Parameter param) {
     if (condition) {
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- before : " + to_string(cipher.logq), WANT_TO_PRINT);
-        NUM_OF_BOOT += 1;
+        countBoot();
         bootHelper.bootstrapping(cipher, param.logq, param.logQ, param.logT);
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- after : " + to_string(cipher.logq), WANT_TO_PRINT);
     }
@@ -19,7 +33,7 @@ void BootScheme::multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, 
         bootHelper.bootstrapping(cipher2, param.logq, param.logQ, param.logT);
         PrintUtils::nprint("after boot : " + to_string(cipher1.logq), WANT_TO_PRINT);
     }
-    NUM_OF_MULT += 1;
+    countMult();
     multAndEqual(cipher1, cipher2);
 }
 
@@ -33,7 +47,7 @@ void BootScheme::modDownToAndEqualModified(Ciphertext& cipher1, Ciphertext& ciph
 }
 
 void BootScheme::squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param) {
-    NUM_OF_MULT += 1;
+    countMult();
     checkAndBoot(cipher, cipher.logq - param.logp < param.logq, bootHelper, param);
     squareAndEqual(cipher);
 }
@@ -41,7 +55,15 @@ void BootScheme::squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelp
 void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param) {
     PrintUtils::nprint("in multByPolyAndEqualWithBoot : cipher.logq - param.logp = " + to_string(cipher.logq - param.logp) + " < param.logq = " + to_string(param.logq), WANT_TO_PRINT);
     checkAndBoot(cipher, cipher.logq - param.logp < param.logq, bootHelper, param);
-    NUM_OF_CONST_MULT += 1;
     multByPolyAndEqual(cipher, poly, param.logp);
 }
 
+void BootScheme::showTotalNumOfMultAndBoot() {
+    cout << "Number of Total Multiplication = " << NUM_OF_MULT << endl;
+    cout << "Number of Total Bootstrapping  = " << NUM_OF_BOOT << endl;
+}
+
+void BootScheme::showCurrentNumOfMultAndBoot() {
+    cout << "Number of Multiplication = " << NUM_OF_CURRENT_MULT << endl;
+    cout << "Number of Bootstrapping  = " << NUM_OF_CURRENT_BOOT << endl;
+}

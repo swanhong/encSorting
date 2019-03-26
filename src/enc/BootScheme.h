@@ -7,15 +7,28 @@
 #include "../PrintUtils.h"
 
 class BootScheme : public Scheme {
+private:
+    long NUM_OF_MULT = 0;
+    long NUM_OF_BOOT = 0;
+    long NUM_OF_CURRENT_MULT = 0;
+    long NUM_OF_CURRENT_BOOT = 0;
+
 public:
     BootScheme(SecretKey& secretKey, Ring& ring) : Scheme(secretKey, ring) {}
     ~BootScheme() {}
+
+    void countMult();
+    void countBoot();
+    void resetCount();
 
     void checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bootHelper, Parameter param);
     void multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
     void modDownToAndEqualModified(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
     void squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
     void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
+
+    void showTotalNumOfMultAndBoot();
+    void showCurrentNumOfMultAndBoot();
 };
 
 #endif // !BOOTSCHEME_H_

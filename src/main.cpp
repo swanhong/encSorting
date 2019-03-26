@@ -9,7 +9,7 @@ int main() {
     // Parameters (long)
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
-    Parameter sortingTestParamSmall = {11, 1500, 30, 30, 6, 4, 35, 4};
+    Parameter sortingTestParamSmall = {8, 1500, 30, 30, 2, 2, 35, 4};
     Parameter sortingTestParam1 = {12, 1000, 40, 40, 10, 32, 45, 5};
     Parameter sortingTestParamBig = {15, 1200, 40, 40, 14, 128, 45, 5};
     Parameter sortingTestParamBig2 = {16, 1200, 40, 40, 15, 32, 45, 4};
@@ -39,6 +39,6 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParam1, 10);
+    TestSort::sort(sortingTestParamSmall, 10);
     return 0;
 }
