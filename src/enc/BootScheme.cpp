@@ -58,12 +58,12 @@ void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHe
     multByPolyAndEqual(cipher, poly, param.logp);
 }
 
-void BootScheme::showTotalNumOfMultAndBoot() {
-    cout << "Number of Total Multiplication = " << NUM_OF_MULT << endl;
-    cout << "Number of Total Bootstrapping  = " << NUM_OF_BOOT << endl;
+void BootScheme::showTotalCount() {
+    cout << "Total Number of Multiplication = " << NUM_OF_MULT << endl;
+    cout << "Total Number of Bootstrapping  = " << NUM_OF_BOOT << endl;
 }
 
-void BootScheme::showCurrentNumOfMultAndBoot() {
+void BootScheme::showCurrentCount() {
     cout << "Number of Multiplication = " << NUM_OF_CURRENT_MULT << endl;
     cout << "Number of Bootstrapping  = " << NUM_OF_CURRENT_BOOT << endl;
 }

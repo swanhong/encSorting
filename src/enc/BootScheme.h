@@ -27,8 +27,8 @@ public:
     void squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
     void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
 
-    void showTotalNumOfMultAndBoot();
-    void showCurrentNumOfMultAndBoot();
+    void showTotalCount();
+    void showCurrentCount();
 };
 
 #endif // !BOOTSCHEME_H_

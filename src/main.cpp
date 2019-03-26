@@ -37,8 +37,14 @@ int main() {
     // TestBoot::compAndSwap(sortingTestParam1, 12);
 
     // ******************************
+    // *** Check Parameters
+    // ******************************
+    // TestBoot::bootstrapping(sortingTestParam1);
+    // TestEnc::compAndSwap(sortingTestParam1, 10);
+
+    // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParamSmall, 10);
+    TestSort::sort(sortingTestParam1, 10);
     return 0;
 }

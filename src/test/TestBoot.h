@@ -17,18 +17,6 @@ public:
 	static void minMax(Parameter parameter, long iter);
 
 	static void compAndSwap(Parameter param, long iter);
-
-	// static void testEncCompAndSwapWithBoot(Parameter parameter, long iter);
-
-	// static void testEncSort(Parameter parameter, long iter);
-
-	// static void testEncSortWithDecrypt(Parameter parameter, long iter);
-
-	// static void testMaxMinWithBootAndDecrypt(Parameter parameter, long iter);
-
-	// static void testSqrtWithBootAndDecrypt(Parameter parameter, long iter);
-
-	// static void testEncCompAndSwapWithBootAndDecrypt(Parameter parameter, long iter);
 };
 
 #endif // !TestBoot_H_

@@ -6,6 +6,7 @@ void EncSorting::runSorting(Ciphertext& sortedCipher, const Ciphertext& inCipher
         double** mask = mg.getMasking();
         BootAlgo bootAlgo;
         sortingRecursion(sortedCipher, inCipher, param.log2n, 0, 0, param, iter, mask, bootAlgo, scheme, ring, bootHelper);
+        scheme.showTotalCount();
 }
 
 long EncSorting::sortingRecursion(Ciphertext& sortedCipher, const Ciphertext& inCipher, long logNum, long logJump, long loc, Parameter param, long iter, double** mask, BootAlgo& bootAlgo, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
@@ -16,10 +17,8 @@ long EncSorting::sortingRecursion(Ciphertext& sortedCipher, const Ciphertext& in
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
         bootAlgo.compAndSwap(dummy, a, mask[loc], 1<< logJump, iter, param, scheme, ring, bootHelper);
-        cout << "Number of" << endl;
-        cout << "Mult = " << NUM_OF_MULT << endl;
-        cout << "Boot = " << NUM_OF_BOOT << endl;
-        cout << "ConstMult = " << NUM_OF_CONST_MULT << endl;
+        scheme.showCurrentCount();
+        scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");
         a = dummy;
     } else {
@@ -32,10 +31,8 @@ long EncSorting::sortingRecursion(Ciphertext& sortedCipher, const Ciphertext& in
 
         timeutils.start(to_string(loc)+"th CompAndSwap");
         bootAlgo.compAndSwap(dummy, a, mask[loc], 1<< logJump, iter, param, scheme, ring, bootHelper);
-        cout << "Number of" << endl;
-        cout << "Mult = " << NUM_OF_MULT << endl;
-        cout << "Boot = " << NUM_OF_BOOT << endl;
-        cout << "ConstMult = " << NUM_OF_CONST_MULT << endl;
+        scheme.showCurrentCount();
+        scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");
         a = dummy;
     }

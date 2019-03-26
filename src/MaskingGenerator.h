@@ -1,6 +1,8 @@
 #ifndef MASKINGGENERATOR_H_
 #define MASKINGGENERATOR_H_
 
+#include "iostream"
+
 /*
  * class MaskingGenerator
  *      generate masking vectors for Batcher's Odd-Even Sort
@@ -14,6 +16,7 @@ private:
 public:
     // The initializer automatically generates masking vectors
     MaskingGenerator(long _log2n);
+    ~MaskingGenerator();
 
     long generateMaskingRec(long logNum, long logJump, long loc);
 

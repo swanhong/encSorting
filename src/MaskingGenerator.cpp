@@ -14,6 +14,10 @@ MaskingGenerator::MaskingGenerator(long _log2n)  {
     generateMaskingRec(log2n, 0, 0);
 }
 
+MaskingGenerator::~MaskingGenerator() {
+    if(mask != NULL) delete[] mask;
+}
+
 void MaskingGenerator::generateMaskingComparison(long loc, long jump) {
     for(int i = 0; i < length; i++) {
         mask[loc][i] = 0;
