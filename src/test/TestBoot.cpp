@@ -67,12 +67,11 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     
     timeutils.start("Sqrt");
     BootAlgo bootAlgo;
-	Ciphertext sqrtCipher;
-	bootAlgo.approxSqrt(sqrtCipher, cipher, parameter, iter, scheme, bootHelper);
+	bootAlgo.approxSqrt(cipher, parameter, iter, scheme, bootHelper);
     timeutils.stop("Sqrt");
 
     // Print Result and Difference //	
-	complex<double>* dvec = scheme.decrypt(secretKey, sqrtCipher);
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     for(int i = 0; i < n; i++) {
         mvec[i] = sqrt(mvec[i]);
     }
@@ -104,14 +103,13 @@ void TestBoot::minMax(Parameter param, long iter) {
 	Ciphertext cipher1 = scheme.encrypt(mvec1, n, param.logp, param.logQ);
     Ciphertext cipher2 = scheme.encrypt(mvec2, n, param.logp, param.logQ);
     
-    Ciphertext minCipher, maxCipher;
 	timeutils.start("minMax");
     BootAlgo bootAlgo;
-    bootAlgo.minMax(minCipher, maxCipher, cipher1, cipher2, iter, param, scheme, boothelper);
+    bootAlgo.minMax(cipher1, cipher2, iter, param, scheme, boothelper);
     timeutils.stop("minMax");
 
-	complex<double>* dmax = scheme.decrypt(secretKey, maxCipher);
-    complex<double>* dmin = scheme.decrypt(secretKey, minCipher);
+	complex<double>* dmax = scheme.decrypt(secretKey, cipher2);
+    complex<double>* dmin = scheme.decrypt(secretKey, cipher1);
     
     double* max = new double[n];
     for(int i = 0; i < n; i++) {
@@ -151,14 +149,12 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
 
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
-	Ciphertext cipher2;
-
     MaskingGenerator mg(param.log2n);
     double** mask = mg.getMasking();
 
     timeutils.start("CompAndSwap");
     BootAlgo bootAlgo;
-    bootAlgo.compAndSwap(cipher2, cipher, mask[0], 1, iter, param, scheme, ring, bootHelper);
+    bootAlgo.compAndSwap(cipher, mask[0], 1, iter, param, scheme, ring, bootHelper);
     timeutils.stop("CompAndSwap");
 
     for(int i = 0; i < n / 2; i++) {
@@ -168,6 +164,6 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
             mvec[2 * i + 1] = x;
         }
     }
-	complex<double>* dvec = scheme.decrypt(secretKey, cipher2);
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::averageDifference(mvec, dvec, n);
 }

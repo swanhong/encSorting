@@ -10,9 +10,9 @@ public:
     EncSorting() {}
     ~EncSorting() {}
     
-    void runSorting(Ciphertext& sortedCipher, const Ciphertext& inCipher, Parameter param, long iter, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    void runSorting(Ciphertext& cipher, Parameter param, long iter, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
-    long sortingRecursion(Ciphertext& sortedCipher, const Ciphertext& inCipher, long logNum, long logJump, long loc, Parameter param, long iter, double** mask, BootAlgo& bootAlgo, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, Parameter param, long iter, double** mask, BootAlgo& bootAlgo, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
 };
 

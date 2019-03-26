@@ -13,11 +13,11 @@ public:
     BootAlgo() {}
     ~BootAlgo() {}
 
-    void approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, Parameter parameter, long iter, BootScheme& scheme, BootHelper& bootHelper);
+    void approxSqrt(Ciphertext& cipher, Parameter param, long iter, BootScheme& scheme, BootHelper& bootHelper);
     
-    void minMax(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& input1, Ciphertext& input2, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper);
+    void minMax(Ciphertext& minCipher, Ciphertext& maxCipher, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper);
 
-    void compAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    void compAndSwap(Ciphertext& cipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
     
 };

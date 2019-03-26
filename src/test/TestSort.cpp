@@ -24,11 +24,10 @@ void TestSort::sort(Parameter param, long iter) {
 
     double* mvec = EvaluatorUtils::randomRealArray(n);
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
-    Ciphertext sortedCipher;
 
     timeutils.start("EncSort");
     EncSorting encSorting;
-    encSorting.runSorting(sortedCipher, cipher, param, iter, scheme, ring, bootHelper);
+    encSorting.runSorting(cipher, param, iter, scheme, ring, bootHelper);
     timeutils.stop("EncSort"); 
 
     // run PlainSort
@@ -38,6 +37,6 @@ void TestSort::sort(Parameter param, long iter) {
     mvec = ca.getArray();
 
     // Print Result and Difference //	
-	complex<double>* dvec = scheme.decrypt(secretKey, sortedCipher);
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::averageDifference(mvec, dvec, n);
 }

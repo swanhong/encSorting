@@ -1,11 +1,10 @@
 #include "BootAlgorithm.h"
 
 
-void BootAlgo::approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, Parameter param, long iter, BootScheme& scheme, BootHelper& bootHelper) {
+void BootAlgo::approxSqrt(Ciphertext& cipher, Parameter param, long iter, BootScheme& scheme, BootHelper& bootHelper) {
     PrintUtils::nprint("start BootAlgo::sqrt", WANT_TO_PRINT);
 
-    Ciphertext a = inCipher;
-    Ciphertext b = inCipher;
+    Ciphertext b = cipher;
     long logp = param.logp;    
     scheme.addConstAndEqual(b, -1.0, logp);
 
@@ -15,7 +14,6 @@ void BootAlgo::approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, Par
     for(int i = 0; i < iter; i++) {
         PrintUtils::nprint(to_string(i) + "/" + to_string(iter - 1) + "th iteration", WANT_TO_PRINT);
 
-
         // make dummy = 1 - b / 2
         dummy = scheme.divByPo2(b, 1); // b - 1
         scheme.negateAndEqual(dummy); 
@@ -23,9 +21,9 @@ void BootAlgo::approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, Par
 
         // Update a
         // a <- a * (1 - b / 2)
-        scheme.modDownToAndEqualModified(a, dummy, bootHelper, param); // a - 1
-        scheme.multAndEqualWithBoot(a, dummy, bootHelper, param);
-        scheme.reScaleByAndEqual(a, logp); // a - logp + 1
+        scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param); // a - 1
+        scheme.multAndEqualWithBoot(cipher, dummy, bootHelper, param);
+        scheme.reScaleByAndEqual(cipher, logp); // a - logp + 1
 
         // make dummy = (b - 3) / 4
         dummy = scheme.addConst(b, -3.0, logp);
@@ -38,55 +36,49 @@ void BootAlgo::approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher, Par
         scheme.modDownToAndEqualModified(dummy, b, bootHelper, param);
         scheme.multAndEqualWithBoot(b, dummy, bootHelper, param);
         scheme.reScaleByAndEqual(b, logp); // b - 2logp
-        scheme.modDownToAndEqualModified(a, b, bootHelper, param);
+        scheme.modDownToAndEqualModified(cipher, b, bootHelper, param);
 
-        PrintUtils::nprint("After iter : logq = " + to_string(a.logq), WANT_TO_PRINT);
+        PrintUtils::nprint("After iter : logq = " + to_string(cipher.logq), WANT_TO_PRINT);
     }
-
-    outCipher = a; 
-    PrintUtils::nprint("end Sqrt, logq = " + to_string(outCipher.logq), WANT_TO_PRINT);
+    PrintUtils::nprint("end Sqrt, logq = " + to_string(cipher.logq), WANT_TO_PRINT);
 }
 
-void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& input1, Ciphertext& input2, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper) {
-    PrintUtils::nprint("start minMax with logq = " + to_string(input1.logq) + ", " + to_string(input2.logq), WANT_TO_PRINT);
-    Ciphertext x = scheme.add(input1, input2);
-    Ciphertext y = scheme.sub(input1, input2);
+void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper) {
+    PrintUtils::nprint("start minMax with logq = " + to_string(minCipher.logq) + ", " + to_string(maxCipher.logq), WANT_TO_PRINT);
+    Ciphertext x = scheme.add(minCipher, maxCipher);
+    Ciphertext y = scheme.sub(minCipher, maxCipher);
     scheme.divByPo2AndEqual(x, 1); // x - logp + 1
     scheme.divByPo2AndEqual(y, 1); // y - logp + 1
     
     scheme.squareAndEuqalWithBoot(y, bootHelper, param);
     scheme.reScaleByAndEqual(y, param.logp); // y - logp + 1
 
-    Ciphertext sqrtCipher;
     // sqrtCipher - (2 * iter + 1) * logp + 1
-    approxSqrt(sqrtCipher, y, param, iter, scheme, bootHelper);
+    approxSqrt(y, param, iter, scheme, bootHelper);
 
     // scheme.modDownToAndEqual(x, sqrtCipher.logq);
-    scheme.modDownToAndEqualModified(x, sqrtCipher, bootHelper, param);
+    scheme.modDownToAndEqualModified(x, y, bootHelper, param);
 
-    maxCipher = scheme.add(x, sqrtCipher);
-    minCipher = scheme.sub(x, sqrtCipher);
+    maxCipher = scheme.add(x, y);
+    minCipher = scheme.sub(x, y);
     PrintUtils::nprint("end minMax", WANT_TO_PRINT);
 }
 
-void BootAlgo::compAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
-    PrintUtils::nprint("start compAndSwap with logq = " + to_string(inCipher.logq), WANT_TO_PRINT);
-    Ciphertext a = inCipher;
-    long n = a.n;
+void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    PrintUtils::nprint("start compAndSwap with logq = " + to_string(cipher.logq), WANT_TO_PRINT);
+    long n = cipher.n;
     ZZ* maskPoly = new ZZ[1 << param.logN];
     ring.encode(maskPoly, mask, n, param.logp);
     // Ciphertext maskCipher = scheme.encrypt(mask, n, param.logp, param.logQ);
-    Ciphertext dummy = a;
+    Ciphertext dummy = cipher;
     scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
     scheme.reScaleByAndEqual(dummy, param.logp);
-    scheme.modDownToAndEqualModified(a, dummy, bootHelper, param);
-    scheme.subAndEqual(a, dummy);
+    scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param);
+    scheme.subAndEqual(cipher, dummy);
     scheme.rightRotateFastAndEqual(dummy, dist);
-    Ciphertext min, max;
-    minMax(min, max, a, dummy, iter, param, scheme,  bootHelper);
-    scheme.leftRotateFastAndEqual(min, dist);
-    scheme.addAndEqual(max, min);
+    minMax(dummy, cipher, iter, param, scheme,  bootHelper);
+    scheme.leftRotateFastAndEqual(dummy, dist);
+    scheme.addAndEqual(cipher, dummy);
 
-    outCipher = max;
     PrintUtils::nprint("end compAndSwap", WANT_TO_PRINT);
 }

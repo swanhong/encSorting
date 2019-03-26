@@ -45,6 +45,6 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParam1, 10);
+    TestSort::sort(sortingTestParamSmall, 10);
     return 0;
 }
