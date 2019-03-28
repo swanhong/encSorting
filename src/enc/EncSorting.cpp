@@ -41,10 +41,10 @@ void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& schem
 
     bitonicMergeRec(cipher, 0, logNum, mask, mask2, scheme, ring, bootHelper, true);
 
-    for(int i = 0; i < (1 << logNum); i++) {
-        cout << "selfBitonicMerge" << i << endl;
-        bootAlgo.selfBitonicMerge(cipher[i], mask, scheme, ring, bootHelper);
-    }
+    // for(int i = 0; i < (1 << logNum); i++) {
+    //     cout << "selfBitonicMerge" << i << endl;
+    //     bootAlgo.selfBitonicMerge(cipher[i], mask, scheme, ring, bootHelper);
+    // }
 }
 
 void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** mask, double** mask2, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
@@ -64,6 +64,11 @@ void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, do
             for(int k = 0; k < (1 << (logNum - 1 - i)); k++) {
                 long left = 2 * j * (1 << (logNum - i - 1)) + k;
                 long right = (2 * j + 1) * (1 << (logNum - i - 1)) + k;
+                if (!increase) {
+                    long x = left;
+                    left = right;
+                    right = x;
+                }
                 cout << "minMax ( " << start + left << ", " << start + right << "), " << increase << endl;
                 bootAlgo.minMax(cipher[start + left], cipher[start + right], scheme ,bootHelper);
             }

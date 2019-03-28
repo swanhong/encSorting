@@ -38,3 +38,55 @@ void PlainSort::compAndSwap(CyclicArray& ca, double** mask, long loc, long dist,
     }  
     ca.add(dummy);
 }
+
+void PlainSort::selfBitonicMerge(CyclicArray& ca, long log2n, double** mask, bool increase) {
+    for(int i = 0; i <log2n; i++) {
+        compAndSwap(ca, mask, i, 1 << (log2n - 1 - i), increase);
+    }
+}
+
+void PlainSort::bitonicMerge(CyclicArray* ca, long log2n, long logNum) {
+    MaskingGenerator mg(log2n);
+    double** mask = mg.getBitonicMergeMasking();
+    MaskingGenerator mg2(log2n, false);
+    double** mask2 = mg2.getBitonicMergeMasking();
+
+    bitonicMergeRec(ca, log2n, 0, logNum, mask, mask2, true);
+}
+
+void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, double** mask, double** mask2, bool increase) {
+    if (logNum == 0) {
+        return;        
+    }
+
+    cout << "logNum = " << logNum << endl;
+
+    bitonicMergeRec(ca, log2n, start, logNum - 1, mask, mask2, true);
+    bitonicMergeRec(ca, log2n, start + (1 << (logNum - 1)), logNum - 1, mask, mask2, false);
+
+    for(int i = 0; i < logNum; i++) {
+        for(int j = 0; j < (1 << i); j++) {
+            for(int k = 0; k < (1 << (logNum - 1 - i)); k++) {
+                long left = 2 * j * (1 << (logNum - i - 1)) + k;
+                long right = (2 * j + 1) * (1 << (logNum - i - 1)) + k;
+                if (!increase) {
+                    long x = left;
+                    left = right;
+                    right = x;
+                }
+                cout << "minMax ( " << start + left << ", " << start + right << "), " << increase << endl;
+                getMinMax(ca[start+left], ca[start + right]);
+            }
+        }
+    }
+    
+    for(int i = 0; i < (1 << logNum); i++) {
+        cout << "self " << start + i << ", " << increase << endl;
+        if (increase) {
+            selfBitonicMerge(ca[i], log2n, mask, true);
+        } else {
+            selfBitonicMerge(ca[i], log2n, mask2, false);
+        }
+    } 
+    cout << " -- end " << logNum << " -- " << endl;
+}

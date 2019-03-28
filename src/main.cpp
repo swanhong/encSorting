@@ -22,6 +22,7 @@ int main() {
     // TestPlain::showMasking(5, false);
     // TestPlain::showBitonicMergeMasking(2);
     // TestPlain::plainSort(5);
+    TestPlain::bitonicMerge(4, 2);
 
     // ******************************
     // *** Test algorithms for encrypted data
@@ -35,7 +36,7 @@ int main() {
     // ******************************
     // TestBoot::approxSqrt(sortingTestParamSmall, 15);
     // TestBoot::minMax(sortingTestParam1, 12);
-    // TestBoot::compAndSwap(sortingTestParam1, 12);
+    // TestBoot::compAndSwap(sortingTestParamSmall, 10);
 
     // ******************************
     // *** Check Parameters
@@ -48,6 +49,6 @@ int main() {
     // ******************************
     // TestSort::sort(sortingTestParamSmall, 15);
     // TestSort::bitonicMerge(sortingTestParamSmall, 15);
-    TestSort::testMerge(sortingTestParamSmall, 15, 2);
+    // TestSort::testMerge(sortingTestParamSmall, 10, 1);
     return 0;
 }
