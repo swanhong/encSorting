@@ -66,8 +66,8 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
 
     
     timeutils.start("Sqrt");
-    BootAlgo bootAlgo;
-	bootAlgo.approxSqrt(cipher, parameter, iter, scheme, bootHelper);
+    BootAlgo bootAlgo(parameter, iter);
+	bootAlgo.approxSqrt(cipher, scheme, bootHelper);
     timeutils.stop("Sqrt");
 
     // Print Result and Difference //	
@@ -104,8 +104,8 @@ void TestBoot::minMax(Parameter param, long iter) {
     Ciphertext cipher2 = scheme.encrypt(mvec2, n, param.logp, param.logQ);
     
 	timeutils.start("minMax");
-    BootAlgo bootAlgo;
-    bootAlgo.minMax(cipher1, cipher2, iter, param, scheme, boothelper);
+    BootAlgo bootAlgo(param, iter);
+    bootAlgo.minMax(cipher1, cipher2, scheme, boothelper);
     timeutils.stop("minMax");
 
 	complex<double>* dmax = scheme.decrypt(secretKey, cipher2);
@@ -153,8 +153,8 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
     double** mask = mg.getMasking();
 
     timeutils.start("CompAndSwap");
-    BootAlgo bootAlgo;
-    bootAlgo.compAndSwap(cipher, mask[0], 1, iter, param, scheme, ring, bootHelper);
+    BootAlgo bootAlgo(param, iter);
+    bootAlgo.compAndSwap(cipher, mask[0], 1, scheme, ring, bootHelper);
     timeutils.stop("CompAndSwap");
 
     for(int i = 0; i < n / 2; i++) {

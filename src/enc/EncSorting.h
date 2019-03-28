@@ -6,14 +6,22 @@
 #include "../MaskingGenerator.h"
 
 class EncSorting {
+private:
+    Parameter param;
+    long iter;
+    BootAlgo bootAlgo;
+
 public:
-    EncSorting() {}
+    EncSorting(Parameter _param, long _iter) : param(_param), iter(_iter) {}
     ~EncSorting() {}
     
-    void runSorting(Ciphertext& cipher, Parameter param, long iter, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    void runEncSorting(Ciphertext& cipher, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase);
 
-    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, Parameter param, long iter, double** mask, BootAlgo& bootAlgo, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
+    void bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+
+    void bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** mask, double** mask2, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase);
 };
 
 #endif // !ENCSORTING_H_

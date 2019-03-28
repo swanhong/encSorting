@@ -6,8 +6,11 @@
 
 class TestSort {
 public:
-    static void sort(Parameter param, long iter);
+    static void sort(Parameter param, long iter, bool=true);
+    static void bitonicMerge(Parameter param, long iter);
+    static void testMerge(Parameter param, long iter, long logNum);
 };
+
 
 
 #endif // !TESTSORT_H_
