@@ -452,7 +452,7 @@ void BootHelper::evalExpAndEqual(Ciphertext& part1, Ciphertext& part2, long logT
 	return;
 }
 
-void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT)
+void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT, long logI)
 {
 	long logSlots = log2(cipher.n);
 	long logp = cipher.logp;
@@ -473,17 +473,17 @@ void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long lo
 	
 	Ciphertext part1, part2;
 
-	// time.start("CoeffToSlot");
+	time.start("CoeffToSlot");
 	coeffToSlot(part1, part2, cipher);
-	// time.stop("CoeffToSlot");
+	time.stop("CoeffToSlot");
 
-	// time.start("Evaluate Exp");
-	evalExpAndEqual(part1, part2, logT, 4, logq);
-	// time.stop("Evaluate Exp");
+	time.start("Evaluate Exp");
+	evalExpAndEqual(part1, part2, logT, logI, logq);
+	time.stop("Evaluate Exp");
 
-	// time.start("SlotToCoeff");
+	time.start("SlotToCoeff");
 	slotToCoeff(cipher, part1, part2);
-	// time.stop("SlotToCoeff");
+	time.stop("SlotToCoeff");
 
 	cipher.logp = logp;
 }
@@ -503,3 +503,63 @@ BootHelper::~BootHelper() {
 
 }
 
+
+void BootHelper::bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, long logK)
+{
+	long logSlots = log2(cipher.n);
+	long logp = cipher.logp;
+
+	scheme.modDownToAndEqual(cipher, logq);
+	scheme.normalizeAndEqual(cipher);
+
+	TimeUtils time;
+
+	cipher.logq = logQ;
+	cipher.logp = logq;
+
+	for (long i = logSlots; i < ring.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
+		scheme.addAndEqual(cipher, rot);
+	}
+	scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
+	
+	Ciphertext part1, part2;
+
+	time.start("CoeffToSlot");
+	coeffToSlot(part1, part2, cipher);
+	time.stop("CoeffToSlot");
+
+	time.start("Evaluate Cos");
+	evalSin2piAndEqual(part1, logK, logq);
+	evalSin2piAndEqual(part2, logK, logq);
+	time.stop("Evaluate Cos");
+
+	time.start("SlotToCoeff");
+	slotToCoeff(cipher, part1, part2);
+	time.stop("SlotToCoeff");
+
+	cipher.logp = logp;
+}
+
+void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
+
+	scheme.addConstAndEqual(cipher, -0.25, logq); // x -> x - 1/4
+	//cipher.logp += logI;
+	scheme.divByPo2AndEqual(cipher, logK); // x - 1/4 -> (x - 1/4) / K
+		
+	// evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
+	scheme.cos2piAndEqual(cipher, logq);
+	
+	// cos( (2pi * x - pi/2) / K) -> cos(2pi * x - pi/2) = sin(2pi * x)
+	for(int i = 0; i < logK; i++) {
+		scheme.squareAndEqual(cipher);
+		scheme.multByConstAndEqual(cipher, 2.0, logq);
+		scheme.reScaleByAndEqual(cipher, 2 * logq);
+		scheme.addConstAndEqual(cipher, -1.0, logq);
+	}	
+
+	RR c = 0.5 / to_RR(M_PI);
+	scheme.multByConstAndEqual(cipher, c, logq); // 1/2pi * (sin(2pi * x))
+	scheme.reScaleByAndEqual(cipher, logq);
+
+}

@@ -6,7 +6,7 @@
 #include "../enc/BootAlgorithm.h"
 #include "../MaskingGenerator.h"
 #include "stdlib.h"
-
+#include "../plain/PlainSorting.h"
 
 class TestBoot {
 public:
@@ -17,6 +17,10 @@ public:
 	static void minMax(Parameter parameter, long iter);
 
 	static void compAndSwap(Parameter param, long iter);
+
+	static void compAndSwapWithBoot(Parameter param, long iter);
+
+	static void testSelfBitonicMerge(Parameter param, long iter);
 };
 
 #endif // !TestBoot_H_

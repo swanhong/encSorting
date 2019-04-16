@@ -12,10 +12,11 @@ private:
     double** mask;
     long log2n;
     long length;
+    bool increase;
 
 public:
     // The initializer automatically generates masking vectors
-    MaskingGenerator(long _log2n);
+    MaskingGenerator(long _log2n, bool = true);
     ~MaskingGenerator();
 
     long generateMaskingRec(long logNum, long logJump, long loc);
@@ -26,6 +27,8 @@ public:
 
     // outputs mask
     double** getMasking();
+
+    double** getBitonicMergeMasking();
 };
 
 #endif // !MASKINGGENERATOR_H_

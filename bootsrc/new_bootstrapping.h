@@ -50,8 +50,11 @@ public:
 
 	void evalExpAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq);
 
-	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT);
+	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT, long = 4);
 
+	void bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, long=4);
+
+	void evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq);
 };
 
 

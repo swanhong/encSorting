@@ -1,7 +1,11 @@
 #include "BootAlgorithm.h"
 
-
-void BootAlgo::approxSqrt(Ciphertext& cipher, Parameter param, long iter, BootScheme& scheme, BootHelper& bootHelper) {
+BootAlgo::BootAlgo(Parameter _param, long _iter, bool _increase) {
+    param = _param;
+    iter = _iter;
+    increase = _increase;
+}
+void BootAlgo::approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper) {
     PrintUtils::nprint("start BootAlgo::sqrt", WANT_TO_PRINT);
 
     Ciphertext b = cipher;
@@ -43,7 +47,7 @@ void BootAlgo::approxSqrt(Ciphertext& cipher, Parameter param, long iter, BootSc
     PrintUtils::nprint("end Sqrt, logq = " + to_string(cipher.logq), WANT_TO_PRINT);
 }
 
-void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper) {
+void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper) {
     PrintUtils::nprint("start minMax with logq = " + to_string(minCipher.logq) + ", " + to_string(maxCipher.logq), WANT_TO_PRINT);
     Ciphertext x = scheme.add(minCipher, maxCipher);
     Ciphertext y = scheme.sub(minCipher, maxCipher);
@@ -54,7 +58,7 @@ void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, long iter, P
     scheme.reScaleByAndEqual(y, param.logp); // y - logp + 1
 
     // sqrtCipher - (2 * iter + 1) * logp + 1
-    approxSqrt(y, param, iter, scheme, bootHelper);
+    approxSqrt(y, scheme, bootHelper);
 
     // scheme.modDownToAndEqual(x, sqrtCipher.logq);
     scheme.modDownToAndEqualModified(x, y, bootHelper, param);
@@ -64,21 +68,47 @@ void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, long iter, P
     PrintUtils::nprint("end minMax", WANT_TO_PRINT);
 }
 
-void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     PrintUtils::nprint("start compAndSwap with logq = " + to_string(cipher.logq), WANT_TO_PRINT);
     long n = cipher.n;
     ZZ* maskPoly = new ZZ[1 << param.logN];
     ring.encode(maskPoly, mask, n, param.logp);
-    // Ciphertext maskCipher = scheme.encrypt(mask, n, param.logp, param.logQ);
     Ciphertext dummy = cipher;
     scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
     scheme.reScaleByAndEqual(dummy, param.logp);
+
+    for (long i = param.log2n; i < ring.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateFast(dummy, (1 << i));
+		scheme.addAndEqual(dummy, rot);
+	}
+	scheme.divByPo2AndEqual(dummy, ring.logNh - param.log2n);
+    
     scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param);
     scheme.subAndEqual(cipher, dummy);
-    scheme.rightRotateFastAndEqual(dummy, dist);
-    minMax(dummy, cipher, iter, param, scheme,  bootHelper);
-    scheme.leftRotateFastAndEqual(dummy, dist);
-    scheme.addAndEqual(cipher, dummy);
+    if(increase) {
+        scheme.rightRotateFastAndEqual(dummy, dist);
+        minMax(dummy, cipher, scheme,  bootHelper);
+        scheme.leftRotateFastAndEqual(dummy, dist);
+    } else {
+        scheme.leftRotateFastAndEqual(dummy, dist);
+        minMax(dummy, cipher, scheme,  bootHelper);
+        scheme.rightRotateFastAndEqual(dummy, dist);
+    }
+    scheme.addAndEqual(cipher, dummy);   
 
     PrintUtils::nprint("end compAndSwap", WANT_TO_PRINT);
 }
+
+void BootAlgo::selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    for(int i = 0; i < param.log2n; i++) {
+        // for(int i = 0; i < 1; i++) {
+        cout << "CompAndSwap with increase = " << increase << endl;
+        cout << "mask : " << endl;
+        for(int j = 0; j < cipher.n; j++) {
+            cout << mask[i][j] << ", ";
+        }
+        cout << "with dist = " << (1 << (param.log2n - 1 - i)) << endl;        
+        compAndSwap(cipher, mask[i], 1 << (param.log2n - 1 - i), scheme, ring, bootHelper);
+    }
+}
+

@@ -60,7 +60,7 @@ public:
 
 	// output data as a normal double*
 	double* getArray();
-
+	void getArray(double* mvec);
 };
 
 /*

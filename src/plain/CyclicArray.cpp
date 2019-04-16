@@ -175,6 +175,12 @@ double* CyclicArray::getArray() {
 	return ans;	
 }
 
+void CyclicArray::getArray(double* mvec) {
+	for(int i = 0; i < length; i++) {
+		mvec[i] = get(i);
+	}
+}
+
 
 
 void CyclicArray::randomGen(long length_) {

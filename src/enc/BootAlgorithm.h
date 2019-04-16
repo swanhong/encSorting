@@ -9,17 +9,23 @@
 
 
 class BootAlgo {
+private:
+    Parameter param;
+    long iter;
+    bool increase;
 public:
+    
     BootAlgo() {}
+    BootAlgo(Parameter _param, long _iter, bool=true);
     ~BootAlgo() {}
 
-    void approxSqrt(Ciphertext& cipher, Parameter param, long iter, BootScheme& scheme, BootHelper& bootHelper);
+    void approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
     
-    void minMax(Ciphertext& minCipher, Ciphertext& maxCipher, long iter, Parameter& param, BootScheme& scheme, BootHelper& bootHelper);
+    void minMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper);
 
-    void compAndSwap(Ciphertext& cipher, double* mask, long dist, long iter, Parameter& param, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    void compAndSwap(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
-    
+    void selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 };
 
 #endif // !BootAlgorithm_H_

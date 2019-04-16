@@ -3,12 +3,17 @@
 
 #include "../plain/CyclicArray.h"
 #include "../plain/PlainSorting.h"
+#include "../HEAAN/src/EvaluatorUtils.h"
 
 class TestPlain {
 public:
-    static void plainSort(long logn);
+    static void plainSort(long logn, bool=true);
 
-    static void showMasking(long log2n);
+    static void showMasking(long log2n, bool increase);
+
+    static void showBitonicMergeMasking(long log2n);
+
+    static void bitonicMerge(long log2n, long logNum);
 };
 
 
