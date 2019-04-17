@@ -149,21 +149,37 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
 
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
-    MaskingGenerator mg(param.log2n);
-    double** mask = mg.getMasking();
+    // MaskingGenerator mg(param.log2n);
+    // double** mask = mg.getMasking();
 
-    timeutils.start("CompAndSwap");
-    BootAlgo bootAlgo(param, iter);
-    bootAlgo.compAndSwap(cipher, mask[0], 1, scheme, ring, bootHelper);
-    timeutils.stop("CompAndSwap");
+    // timeutils.start("CompAndSwap");
+    // BootAlgo bootAlgo(param, iter);
+    // bootAlgo.compAndSwap(cipher, mask[0], 1, scheme, ring, bootHelper);
+	
+    // timeutils.stop("CompAndSwap");
 
-    for(int i = 0; i < n / 2; i++) {
-        if(mvec[2 * i] > mvec[2 * i + 1]) {
-            double x = mvec[2 * i];
-            mvec[2 * i] = mvec[2 * i + 1];
-            mvec[2 * i + 1] = x;
+    // for(int i = 0; i < n / 2; i++) {
+    //     if(mvec[2 * i] > mvec[2 * i + 1]) {
+    //         double x = mvec[2 * i];
+    //         mvec[2 * i] = mvec[2 * i + 1];
+    //         mvec[2 * i + 1] = x;
+    //     }
+    // }
+
+	MaskingGenerator mg(param.log2n);
+    double** maskIncrease = mg.getBitonicMergeMasking();
+	BootAlgo bootAlgo(param, iter);
+	bootAlgo.compAndSwap(cipher, maskIncrease[0], 1 << (param.log2n - 1), scheme, ring, bootHelper);
+	for(int i = 0; i < n / 2; i++) {
+        if(mvec[i] > mvec[i + n / 2]) {
+            double x = mvec[i];
+            mvec[i] = mvec[i + n / 2];
+            mvec[i + n / 2] = x;
         }
     }
+
+
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+	PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
 }

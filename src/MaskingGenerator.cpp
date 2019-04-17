@@ -84,7 +84,9 @@ double** MaskingGenerator::getBitonicMergeMasking() {
     for(int i = 0; i < log2n; i++) {
         for(int j = 0; j < (1 << i); j++) {
             for(int k = 0; k < (1 << (log2n - 1 - i)); k++) {
-                mask[i][j * (1 << (log2n - i)) + k] = 1; 
+                long loc = j * (1 << (log2n - i)) + k;
+                if (!increase) loc = length - 1 - loc;
+                mask[i][loc] = 1; 
             }
         }
     }

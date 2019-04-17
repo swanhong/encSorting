@@ -78,15 +78,14 @@ void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, BootSche
     scheme.reScaleByAndEqual(dummy, param.logp);
     scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param);
     scheme.subAndEqual(cipher, dummy);
-    if(increase) {
-        scheme.rightRotateFastAndEqual(dummy, dist);
-        minMax(dummy, cipher, scheme,  bootHelper);
-        scheme.leftRotateFastAndEqual(dummy, dist);
-    } else {
-        scheme.leftRotateFastAndEqual(dummy, dist);
-        minMax(dummy, cipher, scheme,  bootHelper);
-        scheme.rightRotateFastAndEqual(dummy, dist);
-    }
+    if(increase) scheme.rightRotateFastAndEqual(dummy, dist);
+    else         scheme.leftRotateFastAndEqual(dummy, dist); 
+    
+    minMax(dummy, cipher, scheme,  bootHelper);
+    
+    if(increase) scheme.leftRotateFastAndEqual(dummy, dist); 
+    else         scheme.rightRotateFastAndEqual(dummy, dist);
+        
     scheme.addAndEqual(cipher, dummy);   
 
     PrintUtils::nprint("end compAndSwap", WANT_TO_PRINT);
@@ -94,6 +93,8 @@ void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, BootSche
 
 void BootAlgo::selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     for(int i = 0; i < param.log2n; i++) {
+        cout << "run compAndSwap with i = " << i << ", inc = " << increase << endl;
         compAndSwap(cipher, mask[i], 1 << (param.log2n - 1 - i), scheme, ring, bootHelper);
     }
+    // compAndSwap(cipher, mask[0], 1 << (param.log2n - 1), scheme, ring, bootHelper);
 }

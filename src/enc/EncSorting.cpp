@@ -35,11 +35,11 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
 
 void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     MaskingGenerator mg(param.log2n);
-    double** mask = mg.getBitonicMergeMasking();
+    double** maskIncrease = mg.getBitonicMergeMasking();
     MaskingGenerator mg2(param.log2n, false);
-    double** mask2 = mg2.getBitonicMergeMasking();
+    double** maskDecrease = mg2.getBitonicMergeMasking();
 
-    bitonicMergeRec(cipher, 0, logNum, mask, mask2, scheme, ring, bootHelper, true);
+    bitonicMergeRec(cipher, 0, logNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
 
     // for(int i = 0; i < (1 << logNum); i++) {
     //     cout << "selfBitonicMerge" << i << endl;
@@ -47,15 +47,15 @@ void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& schem
     // }
 }
 
-void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** mask, double** mask2, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
+void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
     if (logNum == 0) {
         return;        
     }
 
     cout << "logNum = " << logNum << endl;
 
-    bitonicMergeRec(cipher, start, logNum - 1, mask, mask2, scheme, ring, bootHelper, true);
-    bitonicMergeRec(cipher, start + (1 << (logNum - 1)), logNum - 1, mask, mask2, scheme, ring, bootHelper, false);
+    bitonicMergeRec(cipher, start, logNum - 1, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
+    bitonicMergeRec(cipher, start + (1 << (logNum - 1)), logNum - 1, maskIncrease, maskDecrease, scheme, ring, bootHelper, false);
 
     BootAlgo bootAlgo(param, iter, increase);
 
@@ -78,9 +78,9 @@ void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, do
     for(int i = 0; i < (1 << logNum); i++) {
         cout << "self " << start + i << ", " << increase << endl;
         if (increase) {
-            bootAlgo.selfBitonicMerge(cipher[start + i], mask, scheme, ring, bootHelper);
+            bootAlgo.selfBitonicMerge(cipher[start + i], maskIncrease, scheme, ring, bootHelper);
         } else {
-            bootAlgo.selfBitonicMerge(cipher[start + i], mask2, scheme, ring, bootHelper);
+            bootAlgo.selfBitonicMerge(cipher[start + i], maskDecrease, scheme, ring, bootHelper);
         }
     } 
     cout << " -- end " << logNum << " -- " << endl;

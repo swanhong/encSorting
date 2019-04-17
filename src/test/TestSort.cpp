@@ -68,17 +68,18 @@ void TestSort::bitonicMerge(Parameter param, long iter) {
 
     double* mvec1 = EvaluatorUtils::randomRealArray(n);
     double* mvec2 = EvaluatorUtils::randomRealArray(n);
-	Ciphertext cipher1 = scheme.encrypt(mvec1, n, param.logp, param.logQ);
-    Ciphertext cipher2 = scheme.encrypt(mvec2, n, param.logp, param.logQ);
+    Ciphertext* cipher = new Ciphertext[2];
+	cipher[0] = scheme.encrypt(mvec1, n, param.logp, param.logQ);
+    cipher[1] = scheme.encrypt(mvec2, n, param.logp, param.logQ);
 
     timeutils.start("EncSort");
     EncSorting encSorting(param, iter);
-    encSorting.runEncSorting(cipher1, scheme, ring, bootHelper, false);
-    encSorting.runEncSorting(cipher2, scheme, ring, bootHelper, true);
+    encSorting.runEncSorting(cipher[0], scheme, ring, bootHelper, false);
+    encSorting.runEncSorting(cipher[1], scheme, ring, bootHelper, true);
     timeutils.stop("EncSort");
 
     timeutils.start("Bitonic Merge");
-    // encSorting.BitonicMerge(cipher1, cipher2, scheme, ring, bootHelper);
+    encSorting.bitonicMerge(cipher, 1, scheme, ring, bootHelper);
     timeutils.stop("Bitonic Merge"); 
 
     // // run PlainSort
@@ -88,8 +89,8 @@ void TestSort::bitonicMerge(Parameter param, long iter) {
     // mvec = ca.getArray();
 
     // Print Result and Difference //	
-	complex<double>* dvec1 = scheme.decrypt(secretKey, cipher1);
-    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher2);
+	complex<double>* dvec1 = scheme.decrypt(secretKey, cipher[0]);
+    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher[1]);
     // PrintUtils::averageDifference(mvec, dvec, n);
     for(int i = 0; i < 1 << param.log2n; i++) {
         cout << i << " : " << dvec1[i].real() << endl;
@@ -126,12 +127,13 @@ void TestSort:: testMerge(Parameter param, long iter, long logNum) {
     double ** mvec = new double*[num];
     Ciphertext* cipher = new Ciphertext[num];
     PlainSort plainSort;
+    CyclicArray* ca = new CyclicArray[num];
     for(int i = 0; i < num; i++) {
         mvec[i] = EvaluatorUtils::randomRealArray(n);
-        CyclicArray ca(mvec[i], n);
-        plainSort.runPlainSorting(ca, param.log2n, (i % 2 == 0));
-        ca.printAsVector();
-        cipher[i] = scheme.encrypt(ca.getArray(), n, param.logp, param.logQ);
+        ca[i] = CyclicArray(mvec[i], n);
+        plainSort.runPlainSorting(ca[i], param.log2n, (i % 2 == 0));
+        ca[i].printAsVector();
+        cipher[i] = scheme.encrypt(ca[i].getArray(), n, param.logp, param.logQ);
     }
 
     EncSorting encSorting(param, iter);
@@ -139,20 +141,42 @@ void TestSort:: testMerge(Parameter param, long iter, long logNum) {
     encSorting.bitonicMerge(cipher, logNum, scheme, ring, bootHelper);
     timeutils.stop("Bitonic Merge"); 
 
-    // // run PlainSort
-    // CyclicArray ca(mvec, 1 << param.log2n);
-    // PlainSort plainSort;
-    // plainSort.runPlainSorting(ca, param.log2n, increase);
-    // mvec = ca.getArray();
-
     // Print Result and Difference //	
+    complex<double>** dvec = new complex<double>*[num];
     for(int i = 0; i < num; i++) {
-        complex<double>* dvec = scheme.decrypt(secretKey, cipher[i]);
-        for(int i = 0; i < 1 << param.log2n; i++) {
-            cout << i << " : " << dvec[i].real() << endl;
-        }
-        cout << "===" << endl;
+         dvec[i] = scheme.decrypt(secretKey, cipher[i]);
+    } 
+
+    plainSort.bitonicMerge(ca, param.log2n, logNum);
+
+    for (int i = 0; i < num; i++) {
+        PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
     }
+
+    for (int i = 0; i < num; i++) {
+        PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
+    }
+    
+
+    // BootAlgo bootAlgo(param, iter, true);
+    // MaskingGenerator mg(param.log2n);
+    // double** maskIncrease = mg.getBitonicMergeMasking();
+    
+    // complex<double>** dvec2 = new complex<double>*[num];
+    // for (int i = 0; i < num; i++) {
+    //     bootAlgo.selfBitonicMerge(cipher[i], maskIncrease, scheme, ring, bootHelper);
+    //     dvec2[i] = scheme.decrypt(secretKey, cipher[i]);
+    // }
+
+    // for (int j = 0; j < num; j++) {
+    //     for(int i = 0; i < 1 << param.log2n; i++) {
+    //         cout << i << " : " << dvec[j][i].real() << " // " << dvec2[j][i].real() << " // " << dvec[j][i].real() - dvec2[j][i].real() << endl;
+    //     }
+    //     cout << "===" << endl;
+    //     PrintUtils::averageDifference(dvec[j], dvec2[j], n);
+    // }
+    
+
     
     
     // PrintUtils::averageDifference(mvec, dvec, n);
