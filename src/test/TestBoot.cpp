@@ -183,3 +183,39 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
 	PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
 }
+
+void TestBoot::reverse(Parameter param) {
+    srand(time(NULL));
+	SetNumThreads(8);
+    
+    long n = 1 << param.log2n;
+	
+    PrintUtils::parameter(param, "TestBoot::reverse");
+
+    TimeUtils timeutils;
+    timeutils.start("KeyGen");
+    Ring ring(param.logN, param.logQ);
+    SecretKey secretKey(ring);
+    BootScheme scheme(secretKey, ring);
+    scheme.addConjKey(secretKey);
+    scheme.addLeftRotKeys(secretKey);
+    scheme.addRightRotKeys(secretKey);
+    timeutils.stop("KeyGen");
+
+	timeutils.start("Bootstrapping Helper construct");
+	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
+	timeutils.stop("Bootstrapping Helper construct");
+
+
+    double* mvec = EvaluatorUtils::randomRealArray(n);
+
+	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
+
+	MaskingGenerator mg(param.log2n);
+    double** mask = mg.getBitonicMergeMasking();
+	BootAlgo bootAlgo(param, 0);
+	bootAlgo.reverse(cipher, mask, scheme, ring, bootHelper);
+
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+	PrintUtils::printArrays(mvec, dvec, n);
+}

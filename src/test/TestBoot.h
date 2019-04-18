@@ -17,6 +17,8 @@ public:
 	static void minMax(Parameter parameter, long iter);
 
 	static void compAndSwap(Parameter param, long iter);
+
+	static void reverse(Parameter param);
 };
 
 #endif // !TestBoot_H_

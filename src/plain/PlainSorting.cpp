@@ -60,11 +60,9 @@ void PlainSort::bitonicMerge(CyclicArray* ca, long log2n, long logNum) {
 }
 
 void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, double** maskIncrease, double** maskDecrease, bool increase) {
-    if (logNum == 0) {
-        return;        
-    }
-
-    cout << "logNum = " << logNum << endl;
+    if (logNum == 0) return;        
+    
+    // cout << "logNum = " << logNum << endl;
 
     bitonicMergeRec(ca, log2n, start, logNum - 1, maskIncrease, maskDecrease, true);
     bitonicMergeRec(ca, log2n, start + (1 << (logNum - 1)), logNum - 1, maskIncrease, maskDecrease, false);
@@ -79,19 +77,19 @@ void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long lo
                     left = right;
                     right = x;
                 }
-                cout << "minMax (" << start + left << ", " << start + right << "), " << increase << endl;
+                // cout << "minMax (" << start + left << ", " << start + right << "), " << increase << endl;
                 getMinMax(ca[start+left], ca[start + right]);
             }
         }
     }
     
     for(int i = 0; i < (1 << logNum); i++) {
-        cout << "self " << start + i << ", " << increase << endl;
+        // cout << "self " << start + i << ", " << increase << endl;
         double ** mask;
         if (increase) mask = maskIncrease;
         else          mask = maskDecrease;
         
         selfBitonicMerge(ca[start + i], log2n, mask, increase);
     } 
-    cout << " -- end " << logNum << " -- " << endl;
+    // cout << " -- end " << logNum << " -- " << endl;
 }

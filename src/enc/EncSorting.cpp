@@ -41,19 +41,12 @@ void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& schem
 
     bitonicMergeRec(cipher, 0, logNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
 
-    // for(int i = 0; i < (1 << logNum); i++) {
-    //     cout << "selfBitonicMerge" << i << endl;
-    //     bootAlgo.selfBitonicMerge(cipher[i], mask, scheme, ring, bootHelper);
-    // }
+    scheme.showTotalCount();
 }
 
 void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
-    if (logNum == 0) {
-        return;        
-    }
-
-    cout << "logNum = " << logNum << endl;
-
+    if (logNum == 0) return;        
+    
     bitonicMergeRec(cipher, start, logNum - 1, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
     bitonicMergeRec(cipher, start + (1 << (logNum - 1)), logNum - 1, maskIncrease, maskDecrease, scheme, ring, bootHelper, false);
 
@@ -69,19 +62,41 @@ void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, do
                     left = right;
                     right = x;
                 }
-                cout << "minMax ( " << start + left << ", " << start + right << "), " << increase << endl;
+                cout << "-- Run minMax (" << start + left << ", " << start + right << ")" << endl;
                 bootAlgo.minMax(cipher[start + left], cipher[start + right], scheme ,bootHelper);
             }
         }
     }
+    scheme.showCurrentCount();
+    scheme.resetCount();
     
-    for(int i = 0; i < (1 << logNum); i++) {
-        cout << "self " << start + i << ", " << increase << endl;
-        if (increase) {
-            bootAlgo.selfBitonicMerge(cipher[start + i], maskIncrease, scheme, ring, bootHelper);
-        } else {
-            bootAlgo.selfBitonicMerge(cipher[start + i], maskDecrease, scheme, ring, bootHelper);
-        }
+    double** mask;
+    if (increase) mask = maskIncrease;
+    else          mask = maskDecrease;
+
+    cout << "----- run selfBitonicMerge " << endl;
+    for(int i = 0; i < (1 << logNum); i++) {        
+        cout << "           -- ctxt " << start + i << endl;
+        bootAlgo.selfBitonicMerge(cipher[start + i], mask, scheme, ring, bootHelper);
     } 
-    cout << " -- end " << logNum << " -- " << endl;
+    scheme.showCurrentCount();
+    scheme.resetCount();
+    cout << "-----";
 }
+
+void EncSorting::reverseHalf(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    long num = 1 << logNum;
+    MaskingGenerator mg(param.log2n);
+    double** mask = mg.getBitonicMergeMasking();    
+    BootAlgo bootAlgo(param, 0);
+    cout << "---- Reverse odd ctxt " << endl;
+    for (int i = 0; i < num / 2; i++) {
+        
+        bootAlgo.reverse(cipher[2 * i + 1], mask, scheme, ring, bootHelper);
+    }
+    cout << "---- modDown even ctxt " << endl;
+    for (int i = 0; i < num / 2; i++) {
+        
+        scheme.modDownToAndEqualModified(cipher[2 * i], cipher[2 * i + 1], bootHelper, param);
+    }    
+} 

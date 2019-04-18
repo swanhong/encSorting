@@ -70,9 +70,8 @@ void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& 
 
 void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     PrintUtils::nprint("start compAndSwap with logq = " + to_string(cipher.logq), WANT_TO_PRINT);
-    long n = cipher.n;
     ZZ* maskPoly = new ZZ[1 << param.logN];
-    ring.encode(maskPoly, mask, n, param.logp);
+    ring.encode(maskPoly, mask, cipher.n, param.logp);
     Ciphertext dummy = cipher;
     scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
     scheme.reScaleByAndEqual(dummy, param.logp);
@@ -93,8 +92,23 @@ void BootAlgo::compAndSwap(Ciphertext& cipher, double* mask, long dist, BootSche
 
 void BootAlgo::selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     for(int i = 0; i < param.log2n; i++) {
-        cout << "run compAndSwap with i = " << i << ", inc = " << increase << endl;
         compAndSwap(cipher, mask[i], 1 << (param.log2n - 1 - i), scheme, ring, bootHelper);
     }
-    // compAndSwap(cipher, mask[0], 1 << (param.log2n - 1), scheme, ring, bootHelper);
+}
+
+void BootAlgo::reverse(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    scheme.leftRotateFastAndEqual(cipher, 1 << (param.log2n - 1));
+    for(int i = 1; i < param.log2n; i++) {
+        ZZ* maskPoly = new ZZ[1 << param.logN];
+        ring.encode(maskPoly, mask[i], cipher.n, param.logp);
+        Ciphertext dummy = cipher;
+        scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
+        scheme.reScaleByAndEqual(dummy, param.logp);
+        scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param);
+        scheme.subAndEqual(cipher, dummy);
+
+        scheme.leftRotateFastAndEqual(cipher, 1 << (param.log2n - i - 1));
+        scheme.rightRotateFastAndEqual(dummy, 1 << (param.log2n - i - 1));
+        scheme.addAndEqual(cipher, dummy);
+    }
 }

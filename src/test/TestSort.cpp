@@ -44,64 +44,7 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
     // }
 }
 
-void TestSort::bitonicMerge(Parameter param, long iter) {
-    srand(time(NULL));
-	SetNumThreads(8);
-    TimeUtils timeutils;
-    
-	PrintUtils::parameter(param, "Bitonic Merge");
-    long n = 1 << param.log2n;
-    long logp = param.logp;
-
-    timeutils.start("TestSort KeyGen");
-    Ring ring(param.logN, param.logQ);
-    SecretKey secretKey(ring);
-    BootScheme scheme(secretKey, ring);
-    scheme.addConjKey(secretKey);
-    scheme.addLeftRotKeys(secretKey);
-    scheme.addRightRotKeys(secretKey);
-    timeutils.stop("TestSort KeyGen");
-
-	timeutils.start("Bootstrapping Helper construct");
-	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
-	timeutils.stop("Bootstrapping Helper construct");
-
-    double* mvec1 = EvaluatorUtils::randomRealArray(n);
-    double* mvec2 = EvaluatorUtils::randomRealArray(n);
-    Ciphertext* cipher = new Ciphertext[2];
-	cipher[0] = scheme.encrypt(mvec1, n, param.logp, param.logQ);
-    cipher[1] = scheme.encrypt(mvec2, n, param.logp, param.logQ);
-
-    timeutils.start("EncSort");
-    EncSorting encSorting(param, iter);
-    encSorting.runEncSorting(cipher[0], scheme, ring, bootHelper, false);
-    encSorting.runEncSorting(cipher[1], scheme, ring, bootHelper, true);
-    timeutils.stop("EncSort");
-
-    timeutils.start("Bitonic Merge");
-    encSorting.bitonicMerge(cipher, 1, scheme, ring, bootHelper);
-    timeutils.stop("Bitonic Merge"); 
-
-    // // run PlainSort
-    // CyclicArray ca(mvec, 1 << param.log2n);
-    // PlainSort plainSort;
-    // plainSort.runPlainSorting(ca, param.log2n, increase);
-    // mvec = ca.getArray();
-
-    // Print Result and Difference //	
-	complex<double>* dvec1 = scheme.decrypt(secretKey, cipher[0]);
-    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher[1]);
-    // PrintUtils::averageDifference(mvec, dvec, n);
-    for(int i = 0; i < 1 << param.log2n; i++) {
-        cout << i << " : " << dvec1[i].real() << endl;
-    }
-    cout << " === " << endl;
-    for(int i = 0; i < 1 << param.log2n; i++) {
-        cout << i << " : " << dvec2[i].real() << endl;
-    }
-}
-
-void TestSort:: testMerge(Parameter param, long iter, long logNum) {
+void TestSort:: merge(Parameter param, long iter, long logNum) {
     srand(time(NULL));
 	SetNumThreads(8);
     TimeUtils timeutils;
@@ -131,8 +74,7 @@ void TestSort:: testMerge(Parameter param, long iter, long logNum) {
     for(int i = 0; i < num; i++) {
         mvec[i] = EvaluatorUtils::randomRealArray(n);
         ca[i] = CyclicArray(mvec[i], n);
-        plainSort.runPlainSorting(ca[i], param.log2n, (i % 2 == 0));
-        ca[i].printAsVector();
+        plainSort.runPlainSorting(ca[i], param.log2n, i % 2 == 0);
         cipher[i] = scheme.encrypt(ca[i].getArray(), n, param.logp, param.logQ);
     }
 
@@ -141,44 +83,103 @@ void TestSort:: testMerge(Parameter param, long iter, long logNum) {
     encSorting.bitonicMerge(cipher, logNum, scheme, ring, bootHelper);
     timeutils.stop("Bitonic Merge"); 
 
-    // Print Result and Difference //	
+    //* decrypt
     complex<double>** dvec = new complex<double>*[num];
     for(int i = 0; i < num; i++) {
          dvec[i] = scheme.decrypt(secretKey, cipher[i]);
     } 
 
+    //* run plain bitonicMerge
     plainSort.bitonicMerge(ca, param.log2n, logNum);
 
-    for (int i = 0; i < num; i++) {
-        PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
-    }
+    //* Print merged arrays
+    // for (int i = 0; i < num; i++) {
+    //     PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
+    // }
 
+    //* Print log2(avg of errors)
     for (int i = 0; i < num; i++) {
         PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
+    }    
+}
+
+void TestSort::sortAndMerge(Parameter param, long iter, long logNum) {
+    srand(time(NULL));
+	SetNumThreads(8);
+    TimeUtils timeutils;
+    
+	PrintUtils::parameter(param, "sortAndMerge");
+    long n = 1 << param.log2n;
+    long logp = param.logp;
+    long num = 1 << logNum;
+
+    timeutils.start("KeyGen");
+    Ring ring(param.logN, param.logQ);
+    SecretKey secretKey(ring);
+    BootScheme scheme(secretKey, ring);
+    scheme.addConjKey(secretKey);
+    scheme.addLeftRotKeys(secretKey);
+    scheme.addRightRotKeys(secretKey);
+    timeutils.stop("KeyGen");
+
+	timeutils.start("Bootstrapping Helper construct");
+	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
+	timeutils.stop("Bootstrapping Helper construct");
+
+    double** mvec = new double*[num];
+    Ciphertext* cipher = new Ciphertext[num];
+    for(int i = 0; i < num; i++) {
+        mvec[i] = EvaluatorUtils::randomRealArray(n);
+        cipher[i] = scheme.encrypt(mvec[i], n, param.logp, param.logQ);
     }
-    
 
-    // BootAlgo bootAlgo(param, iter, true);
-    // MaskingGenerator mg(param.log2n);
-    // double** maskIncrease = mg.getBitonicMergeMasking();
+    EncSorting encSorting(param, iter);
     
-    // complex<double>** dvec2 = new complex<double>*[num];
-    // for (int i = 0; i < num; i++) {
-    //     bootAlgo.selfBitonicMerge(cipher[i], maskIncrease, scheme, ring, bootHelper);
-    //     dvec2[i] = scheme.decrypt(secretKey, cipher[i]);
-    // }
+    TimeUtils timeTotal;
+    
+    timeTotal.start("Sort And Merge");
 
-    // for (int j = 0; j < num; j++) {
-    //     for(int i = 0; i < 1 << param.log2n; i++) {
-    //         cout << i << " : " << dvec[j][i].real() << " // " << dvec2[j][i].real() << " // " << dvec[j][i].real() - dvec2[j][i].real() << endl;
-    //     }
-    //     cout << "===" << endl;
-    //     PrintUtils::averageDifference(dvec[j], dvec2[j], n);
-    // }
-    
+    timeutils.start("EncSort");
+    for (int i = 0; i < num; i++) {
+        encSorting.runEncSorting(cipher[i], scheme, ring, bootHelper);
+    }
+    timeutils.stop("EncSort");
 
-    
-    
-    // PrintUtils::averageDifference(mvec, dvec, n);
-    
+    timeutils.start("Reverse");
+    encSorting.reverseHalf(cipher, logNum, scheme, ring, bootHelper);
+    timeutils.stop("Reverse");
+
+    timeutils.start("Bitonic Merge");
+    encSorting.bitonicMerge(cipher, logNum, scheme, ring, bootHelper);
+    timeutils.stop("Bitonic Merge"); 
+
+    timeTotal.stop("Total Sort And Merge");
+
+
+
+    //* run plain bitonicMerge
+    PlainSort plainSort;
+    CyclicArray* ca = new CyclicArray[num];
+    for (int i = 0; i < num; i++) {
+        ca[i] = CyclicArray(mvec[i], n);
+        plainSort.runPlainSorting(ca[i], param.log2n, i % 2 == 0);
+    }
+    plainSort.bitonicMerge(ca, param.log2n, logNum);
+
+    //* decrypt
+    complex<double>** dvec = new complex<double>*[num];
+    for(int i = 0; i < num; i++) {
+         dvec[i] = scheme.decrypt(secretKey, cipher[i]);
+    } 
+
+    //* Print full arrays
+    for (int i = 0; i < num; i++) {
+        PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
+        cout << "===" << endl;
+    }
+
+    //* Print log2(avg of errors)
+    for (int i = 0; i < num; i++) {
+        PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
+    }    
 }
