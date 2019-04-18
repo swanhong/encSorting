@@ -544,19 +544,35 @@ void BootHelper::bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, lon
 void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 
 	scheme.addConstAndEqual(cipher, -0.25, logq); // x -> x - 1/4
-	//cipher.logp += logI;
+	// cipher.logp += logK;
 	scheme.divByPo2AndEqual(cipher, logK); // x - 1/4 -> (x - 1/4) / K
 		
-	// evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
+	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
 	scheme.cos2piAndEqual(cipher, logq);
 	
-	// cos( (2pi * x - pi/2) / K) -> cos(2pi * x - pi/2) = sin(2pi * x)
-	for(int i = 0; i < logK; i++) {
-		scheme.squareAndEqual(cipher);
-		scheme.multByConstAndEqual(cipher, 2.0, logq);
-		scheme.reScaleByAndEqual(cipher, 2 * logq);
-		scheme.addConstAndEqual(cipher, -1.0, logq);
-	}	
+	
+	//* cos( (2pi * x - pi/2) / K) -> cos(2pi * x - pi/2) = sin(2pi * x)
+	// if (logK % 2 == 0) {
+	// 	//* only if logK divides 2 *//
+	// 	for (int i = 0; i < logK / 2; i++) {
+	// 		Ciphertext cipher2 = scheme.square(cipher);
+	// 		scheme.reScaleByAndEqual(cipher2, logq);
+	// 		cipher = scheme.square(cipher2);
+	// 		scheme.reScaleByAndEqual(cipher, logq);
+	// 		scheme.modDownByAndEqual(cipher2, logq);
+	// 		scheme.subAndEqual(cipher, cipher2);
+	// 		scheme.addConstAndEqual(cipher, 0.125, logq);
+	// 		scheme.multByConstAndEqual(cipher, 8., logq);
+	// 		scheme.reScaleByAndEqual(cipher, logq);
+	// 	}
+	// } else {
+		for(int i = 0; i < logK; i++) {
+			scheme.squareAndEqual(cipher);
+			scheme.multByConstAndEqual(cipher, 2.0, logq);
+			scheme.reScaleByAndEqual(cipher, 2 * logq);
+			scheme.addConstAndEqual(cipher, -1.0, logq);
+		}
+	// }
 
 	RR c = 0.5 / to_RR(M_PI);
 	scheme.multByConstAndEqual(cipher, c, logq); // 1/2pi * (sin(2pi * x))

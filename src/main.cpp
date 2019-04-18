@@ -59,7 +59,7 @@ int main() {
 
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
 
-    Parameter param = {11, 2000, 40, 40, 6, 8, 55, 4};
+    Parameter param = {11, 2000, 40, 40, 10, 32, 45, 4};
     srand(time(NULL));
 	SetNumThreads(8);
     
@@ -77,58 +77,63 @@ int main() {
 
     BootHelper boothelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
 
-    double* mvec = EvaluatorUtils::randomRealArray(n, 0.125);
+    // //****** bootstrapping start
+
+    double* mvec = EvaluatorUtils::randomRealArray(n);
     
     for(long i = 0; i < n; i++) {
         // mvec[i] =-0.25 + ((double)(i + 1) / (2*n + 1));
         // cout << "mvec[" << i << "] = " << mvec[i] << endl;
         // mvec[i] = 2 + (double) rand() / RAND_MAX / 100;
-        mvec[i] += 8.;
+        // mvec[i] += 3. + (double) (i % 3);
     }
 
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
-    // long logq = param.logq;
-    // long logQ = param.logQ;
-    // long logSlots = log2(cipher.n);
-	// long logp = cipher.logp;
+    long logq = param.logq;
+    long logQ = param.logQ;
+    long logSlots = log2(cipher.n);
+	long logp = cipher.logp;
 
-	// scheme.modDownToAndEqual(cipher, logq);
-	// scheme.normalizeAndEqual(cipher);
+	scheme.modDownToAndEqual(cipher, logq);
+	scheme.normalizeAndEqual(cipher);
 
-	// TimeUtils time;
+	TimeUtils time;
 
-	// cipher.logq = logQ;
-	// cipher.logp = logq;
+	cipher.logq = logQ;
+	cipher.logp = logq;
 
-	// for (long i = logSlots; i < ring.logNh; ++i) {
-	// 	Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
-	// 	scheme.addAndEqual(cipher, rot);
-	// }
-	// scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
+	for (long i = logSlots; i < ring.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
+		scheme.addAndEqual(cipher, rot);
+	}
+	scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
 	
-	// Ciphertext part1, part2;
+	Ciphertext part1, part2;
 
-	// boothelper.coeffToSlot(part1, part2, cipher);
+	boothelper.coeffToSlot(part1, part2, cipher);
 
     // complex<double>* dvec1 = scheme.decrypt(secretKey, part1);
     // complex<double>* dvec2 = scheme.decrypt(secretKey, part2);
     
     // boothelper.evalExpAndEqual(part1, part2, 4, 4, logq);
-    // boothelper.evalSin2piAndEqual(part1, 4, logq);
-	// boothelper.evalSin2piAndEqual(part2, 4, logq);
-
+    long logK = 8;
+    boothelper.evalSin2piAndEqual(part1, logK, logq);
+	boothelper.evalSin2piAndEqual(part2, logK, logq);
     // complex<double>* dvec3 = scheme.decrypt(secretKey, part1);
     // complex<double>* dvec4 = scheme.decrypt(secretKey, part2);
 
     // for(long i = 0; i < n; i++) {
-    //     cout << dvec1[i] << " // " << dvec3[i] << endl;
-    //     cout << dvec2[i] << " // " << dvec4[i] << endl;
+    //     cout << dvec1[i].real() << " // " << dvec3[i].real() << " // " << endl;
+    //     cout << dvec2[i].real() << " // " << dvec4[i].real() << " // " << endl;
     // }
 
-    // boothelper.slotToCoeff(cipher, part1, part2);
+    boothelper.slotToCoeff(cipher, part1, part2);
 
-    // boothelper.bootstrapping_cos(cipher, param.logq, param.logQ, 4, 4);
+    cipher.logp = logp;
+
+    // //* ========================================================
+
 
 	// // evaluate x -> cos(2pi * x)
     // double coeff[] = {1, -1, 2, 1};
@@ -138,8 +143,19 @@ int main() {
     // scheme.evalExpAndEqual(cipher, 4, 4);
 	// scheme.cos2piAndEqual(cipher, param.logp);
     // timeutils.stop("eval cos");
-    boothelper.evalSin2piAndEqual(cipher, 7, param.logp);
+    
+    // double* mvec = EvaluatorUtils::randomRealArray(n, 1./1024);
+    // for(long i = 0; i < n; i++) {
+    //     mvec[i] += 3. + (double) (i % 4);
+    // }
+    // Ciphertext cipher = scheme.encrypt(mvec, n, param.logq, param.logQ);
+    
+    // // cipher.logp = param.logq;
+    // // Ciphertext cipher2 = cipher;
+    // // boothelper.evalExpAndEqual(cipher, cipher2, 4, 4, param.logq);
+    // boothelper.evalSin2piAndEqual(cipher, 6, param.logq);
 	
+    // cipher.logp = param.logp;
 	// for(int i = 0; i < logK; i++) {
 	// 	scheme.squareAndEqual(cipher);
 	// 	scheme.multByConstAndEqual(cipher, 2.0, logp);
@@ -186,15 +202,18 @@ int main() {
         // mvec[i] = sin(2 * M_PI * mvec[i]) / (2 * M_PI);
         // mvec[i] = exp(2 * M_PI * mvec[i]);
         // cout << mvec[i] << " // " << dvec[i] << " // " << mvec[i] / dvec[i].real() << endl;
-        mvec[i] -= 8;
+        // mvec[i] -= 7.;
+        // mvec[i] -= 3. + (double) (i % 4);
     }
     
     for(long i = 0; i < n; i++) {
         // cout << dvec1[i] << " // " << dvec2[i] << endl;
         // cout << mvec[i] << " // " << dvec[i].imag() << endl;
+        // cout << mvec[i] << " // " << dvec[i].real() << " // " << mvec[i] / dvec[i].real() << endl;
     }
     PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
+    PrintUtils::arrayMax(mvec, n);
     // PrintUtils::averageDifference(mvec, dvec2, n);
 
     return 0;

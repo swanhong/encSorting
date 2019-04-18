@@ -25,6 +25,7 @@ public:
 
     static void decAndPrintTwo(std::string str, Ciphertext& cipher1, Ciphertext& cipher2, Scheme& scheme, SecretKey& secretKey);
 
+    static void arrayMax(double* array, long n);
     static void nprint(std::string str, bool isPrint);
 };
 
