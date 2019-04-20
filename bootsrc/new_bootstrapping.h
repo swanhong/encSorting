@@ -48,7 +48,9 @@ public:
 
 	void slotToCoeff(Ciphertext& cipher, Ciphertext& part1, Ciphertext& part2);
 
-	void evalExpAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq);
+	void evalExpAndEqual(Ciphertext& cipher, long logT, long logI, long logq);
+	
+	void evalExpAllAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq);
 
 	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT, long = 4);
 

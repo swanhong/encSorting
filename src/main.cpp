@@ -8,6 +8,7 @@ int main() {
     // Parameters (long)
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
+    Parameter bootTestParam = {7, 2000, 50, 50, 6, 8, 60, 4};
     Parameter sortingTestParamSmall = {9, 2000, 70, 70, 6, 64, 75, 4};
     Parameter sortingTestParam1 = {12, 1500, 30, 30, 10, 32, 35, 5};
     Parameter sortingTestParamBig = {15, 1200, 40, 40, 8, 16, 45, 5};
@@ -44,7 +45,7 @@ int main() {
     // *** Check Parameters
     // ******************************
     // Parameter sortingTestParamSmall = {9, b , 70, 70, 6, 64, 75, 4};
-    // TestBoot::bootstrapping(sortingTestParamSmall);
+    TestBoot::bootstrapping(bootTestParam);
     // TestEnc::compAndSwap(sortingTestParamSmall, 10);
     // TestEnc::compAndSwap(sortingTestParamBig3, 15);
     // TestBoot::compAndSwap(sortingTestParamSmall, 15);
@@ -53,84 +54,84 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    // TestSort::sort(sortingTestParamSmall, 15);
+    // TestSort::sort(bootTestParam, 15);
     // TestSort::bitonicMerge(sortingTestParamSmall, 15);
     // TestSort::testMerge(sortingTestParamSmall, 15, 2);
 
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
 
-    Parameter param = {11, 2000, 40, 40, 10, 32, 45, 4};
-    srand(time(NULL));
-	SetNumThreads(8);
+    // Parameter param = {11, 2000, 50, 50, 10, 32, 60, 4};
+    // srand(time(NULL));
+	// SetNumThreads(8);
     
-    long n = 1 << param.log2n;
+    // long n = 1 << param.log2n;
 	
-    TimeUtils timeutils;
-    timeutils.start("KeyGen");
-    Ring ring(param.logN, param.logQ);
-    SecretKey secretKey(ring);
-    Scheme scheme(secretKey, ring);
-    scheme.addConjKey(secretKey);
-    scheme.addLeftRotKeys(secretKey);
-    scheme.addRightRotKeys(secretKey);
-    timeutils.stop("KeyGen");
+    // TimeUtils timeutils;
+    // timeutils.start("KeyGen");
+    // Ring ring(param.logN, param.logQ);
+    // SecretKey secretKey(ring);
+    // Scheme scheme(secretKey, ring);
+    // scheme.addConjKey(secretKey);
+    // scheme.addLeftRotKeys(secretKey);
+    // scheme.addRightRotKeys(secretKey);
+    // timeutils.stop("KeyGen");
 
-    BootHelper boothelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
+    // BootHelper boothelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
 
     // //****** bootstrapping start
 
-    double* mvec = EvaluatorUtils::randomRealArray(n);
+    // double* mvec = EvaluatorUtils::randomRealArray(n);
     
-    for(long i = 0; i < n; i++) {
-        // mvec[i] =-0.25 + ((double)(i + 1) / (2*n + 1));
-        // cout << "mvec[" << i << "] = " << mvec[i] << endl;
-        // mvec[i] = 2 + (double) rand() / RAND_MAX / 100;
-        // mvec[i] += 3. + (double) (i % 3);
-    }
-
-	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
-
-    long logq = param.logq;
-    long logQ = param.logQ;
-    long logSlots = log2(cipher.n);
-	long logp = cipher.logp;
-
-	scheme.modDownToAndEqual(cipher, logq);
-	scheme.normalizeAndEqual(cipher);
-
-	TimeUtils time;
-
-	cipher.logq = logQ;
-	cipher.logp = logq;
-
-	for (long i = logSlots; i < ring.logNh; ++i) {
-		Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
-		scheme.addAndEqual(cipher, rot);
-	}
-	scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
-	
-	Ciphertext part1, part2;
-
-	boothelper.coeffToSlot(part1, part2, cipher);
-
-    // complex<double>* dvec1 = scheme.decrypt(secretKey, part1);
-    // complex<double>* dvec2 = scheme.decrypt(secretKey, part2);
-    
-    // boothelper.evalExpAndEqual(part1, part2, 4, 4, logq);
-    long logK = 8;
-    boothelper.evalSin2piAndEqual(part1, logK, logq);
-	boothelper.evalSin2piAndEqual(part2, logK, logq);
-    // complex<double>* dvec3 = scheme.decrypt(secretKey, part1);
-    // complex<double>* dvec4 = scheme.decrypt(secretKey, part2);
-
     // for(long i = 0; i < n; i++) {
-    //     cout << dvec1[i].real() << " // " << dvec3[i].real() << " // " << endl;
-    //     cout << dvec2[i].real() << " // " << dvec4[i].real() << " // " << endl;
+    //     // mvec[i] =-0.25 + ((double)(i + 1) / (2*n + 1));
+    //     // cout << "mvec[" << i << "] = " << mvec[i] << endl;
+    //     // mvec[i] = 2 + (double) rand() / RAND_MAX / 100;
+    //     // mvec[i] += 3. + (double) (i % 3);
     // }
 
-    boothelper.slotToCoeff(cipher, part1, part2);
+	// Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
-    cipher.logp = logp;
+    // long logq = param.logq;
+    // long logQ = param.logQ;
+    // long logSlots = log2(cipher.n);
+	// long logp = cipher.logp;
+
+	// scheme.modDownToAndEqual(cipher, logq);
+	// scheme.normalizeAndEqual(cipher);
+
+	// TimeUtils time;
+
+	// cipher.logq = logQ;
+	// cipher.logp = logq;
+
+	// for (long i = logSlots; i < ring.logNh; ++i) {
+	// 	Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
+	// 	scheme.addAndEqual(cipher, rot);
+	// }
+	// scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
+	
+	// Ciphertext part1, part2;
+
+	// boothelper.coeffToSlot(part1, part2, cipher);
+
+    // // complex<double>* dvec1 = scheme.decrypt(secretKey, part1);
+    // // complex<double>* dvec2 = scheme.decrypt(secretKey, part2);
+    
+    // // boothelper.evalExpAndEqual(part1, part2, 4, 4, logq);
+    // long logK = 7;
+    // boothelper.evalSin2piAndEqual(part1, logK, logq);
+	// boothelper.evalSin2piAndEqual(part2, logK, logq);
+    // // complex<double>* dvec3 = scheme.decrypt(secretKey, part1);
+    // // complex<double>* dvec4 = scheme.decrypt(secretKey, part2);
+
+    // // for(long i = 0; i < n; i++) {
+    // //     cout << dvec1[i].real() << " // " << dvec3[i].real() << " // " << endl;
+    // //     cout << dvec2[i].real() << " // " << dvec4[i].real() << " // " << endl;
+    // // }
+
+    // boothelper.slotToCoeff(cipher, part1, part2);
+
+    // cipher.logp = logp;
 
     // //* ========================================================
 
@@ -148,14 +149,14 @@ int main() {
     // for(long i = 0; i < n; i++) {
     //     mvec[i] += 3. + (double) (i % 4);
     // }
-    // Ciphertext cipher = scheme.encrypt(mvec, n, param.logq, param.logQ);
+    // Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
     
-    // // cipher.logp = param.logq;
-    // // Ciphertext cipher2 = cipher;
+    // cipher.logp = param.logq;
+    // Ciphertext cipher2 = cipher;
     // // boothelper.evalExpAndEqual(cipher, cipher2, 4, 4, param.logq);
-    // boothelper.evalSin2piAndEqual(cipher, 6, param.logq);
-	
+    // boothelper.evalSin2piAndEqual(cipher, 8, param.logq);
     // cipher.logp = param.logp;
+
 	// for(int i = 0; i < logK; i++) {
 	// 	scheme.squareAndEqual(cipher);
 	// 	scheme.multByConstAndEqual(cipher, 2.0, logp);
@@ -191,29 +192,12 @@ int main() {
 	// scheme.multByConstAndEqual(cipher, c, logq + logI); // 1/2pi * (sin(2pi * theta))
 	// scheme.reScaleByAndEqual(cipher, logq + 2 * logI);
 
-    complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+    // complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     // complex<double>* dvec1 = scheme.decrypt(secretKey, part1);
     // complex<double>* dvec2 = scheme.decrypt(secretKey, part2);
-    
-    for(long i = 0; i < n; i++) {
-        // mvec[i] = 1 - mvec[i] + 2 * mvec[i] * mvec[i] + mvec[i] * mvec[i] * mvec[i];
-        // mvec[i] = cos(2 * M_PI * mvec[i]);
-        // mvec[i] = sin(2 * M_PI * mvec[i]);
-        // mvec[i] = sin(2 * M_PI * mvec[i]) / (2 * M_PI);
-        // mvec[i] = exp(2 * M_PI * mvec[i]);
-        // cout << mvec[i] << " // " << dvec[i] << " // " << mvec[i] / dvec[i].real() << endl;
-        // mvec[i] -= 7.;
-        // mvec[i] -= 3. + (double) (i % 4);
-    }
-    
-    for(long i = 0; i < n; i++) {
-        // cout << dvec1[i] << " // " << dvec2[i] << endl;
-        // cout << mvec[i] << " // " << dvec[i].imag() << endl;
-        // cout << mvec[i] << " // " << dvec[i].real() << " // " << mvec[i] / dvec[i].real() << endl;
-    }
-    PrintUtils::printArrays(mvec, dvec, n);
-    PrintUtils::averageDifference(mvec, dvec, n);
-    PrintUtils::arrayMax(mvec, n);
+    // PrintUtils::printArrays(mvec, dvec, n);
+    // PrintUtils::averageDifference(mvec, dvec, n);
+    // PrintUtils::arrayMax(mvec, n);
     // PrintUtils::averageDifference(mvec, dvec2, n);
 
     return 0;

@@ -82,9 +82,9 @@ void decAndPrintTwo(std::string str, Ciphertext& cipher1, Ciphertext& cipher2, S
 }
 
 void PrintUtils::arrayMax(double* array, long n) {
-    double max = array[0];
-    for (int i = 1; i < n; i++) if (array[i] > max) max = array[i];
-    cout << "maximum = " << max << endl;
+    double max = abs(array[0]);
+    for (int i = 1; i < n; i++) if (abs(array[i]) > max) max = abs(array[i]);
+    cout << "log2(max) = " << log2(max) << endl;
 }
 
 void PrintUtils::nprint(std::string str, bool isPrint) {

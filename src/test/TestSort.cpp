@@ -22,7 +22,7 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-    double* mvec = EvaluatorUtils::randomRealArray(n, 0.25);
+    double* mvec = EvaluatorUtils::randomRealArray(n);
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
     timeutils.start("EncSort");

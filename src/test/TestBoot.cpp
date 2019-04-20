@@ -28,7 +28,8 @@ void TestBoot::bootstrapping(Parameter parameter) {
     
     timeutils.start("Improved bootstrapping");
     // cout << "i, j  = " << i << ", " << j << endl;
-    boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, 4, 4); 
+    // boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, 4, 4); 
+    boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 6);
 
     timeutils.stop("Improved bootstrapping");
 
