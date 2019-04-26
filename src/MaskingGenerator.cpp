@@ -1,9 +1,10 @@
 #include "MaskingGenerator.h"
 
 
-MaskingGenerator::MaskingGenerator(long _log2n, bool _increase)  {
+MaskingGenerator::MaskingGenerator(long _log2n, bool _increase, long _logData) {
     log2n = _log2n;
     length = 1 << log2n;
+    logData = _logData;
     increase = _increase;
 }
 

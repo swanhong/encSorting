@@ -16,6 +16,8 @@ public:
 
     void compAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher, double* mask, long dist, long iter, Parameter& param, Scheme scheme);
 
+    void tableCompAndSwap(Ciphertext& cipher, double* mask, long dist, long iter, long logData, Parameter& param, Scheme scheme);
+
 };
 
 #endif // !ENCALGORITHM_H_

@@ -46,12 +46,14 @@ void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& schem
 
 void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
     if (logNum == 0) return;        
-    
+    TimeUtils time;
+
     bitonicMergeRec(cipher, start, logNum - 1, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
     bitonicMergeRec(cipher, start + (1 << (logNum - 1)), logNum - 1, maskIncrease, maskDecrease, scheme, ring, bootHelper, false);
 
     BootAlgo bootAlgo(param, iter, increase);
 
+    
     for(int i = 0; i < logNum; i++) {
         for(int j = 0; j < (1 << i); j++) {
             for(int k = 0; k < (1 << (logNum - 1 - i)); k++) {
@@ -62,8 +64,10 @@ void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, do
                     left = right;
                     right = x;
                 }
-                cout << "-- Run minMax (" << start + left << ", " << start + right << ")" << endl;
+                std::string s = "minMax (" + to_string(start + left) + ", " + to_string(start + right)+ ")";
+                time.start(s);
                 bootAlgo.minMax(cipher[start + left], cipher[start + right], scheme ,bootHelper);
+                time.stop("minMax");
             }
         }
     }
@@ -74,14 +78,14 @@ void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, do
     if (increase) mask = maskIncrease;
     else          mask = maskDecrease;
 
-    cout << "----- run selfBitonicMerge " << endl;
+    time.start("selfBitonicMerge ");
     for(int i = 0; i < (1 << logNum); i++) {        
         cout << "           -- ctxt " << start + i << endl;
         bootAlgo.selfBitonicMerge(cipher[start + i], mask, scheme, ring, bootHelper);
     } 
     scheme.showCurrentCount();
     scheme.resetCount();
-    cout << "-----";
+    time.stop("selfBitonicMerge");
 }
 
 void EncSorting::reverseHalf(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {

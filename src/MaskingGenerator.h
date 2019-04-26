@@ -12,11 +12,13 @@ private:
     double** mask;
     long log2n;
     long length;
+    long logData;
     bool increase;
+    
 
 public:
     // The initializer automatically generates masking vectors
-    MaskingGenerator(long _log2n, bool = true);
+    MaskingGenerator(long _log2n, bool _increase = true, long _logData = 0);
     ~MaskingGenerator();
 
     long generateMaskingRec(long logNum, long logJump, long loc);

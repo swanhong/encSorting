@@ -38,11 +38,57 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+    PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
     // for(int i = 0; i < 1 << param.log2n; i++) {
     //     cout << i << " : " << mvec[i] << " .. " << dvec[i].real() << endl;
     // }
 }
+
+// void TestSort::sortWithDec(Parameter param, long iter, bool increase) {
+//     srand(time(NULL));
+// 	SetNumThreads(8);
+//     TimeUtils timeutils;
+    
+// 	PrintUtils::parameter(param, "TestSort");
+//     long n = 1 << param.log2n;
+//     long logp = param.logp;
+
+//     timeutils.start("TestSort KeyGen");
+//     Ring ring(param.logN, param.logQ);
+//     SecretKey secretKey(ring);
+//     BootScheme scheme(secretKey, ring);
+//     scheme.addConjKey(secretKey);
+//     scheme.addLeftRotKeys(secretKey);
+//     scheme.addRightRotKeys(secretKey);
+//     timeutils.stop("TestSort KeyGen");
+
+// 	timeutils.start("Bootstrapping Helper construct");
+// 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
+// 	timeutils.stop("Bootstrapping Helper construct");
+
+//     double* mvec = EvaluatorUtils::randomRealArray(n);
+// 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
+
+//     timeutils.start("EncSort");
+//     EncSorting encSorting(param, iter);
+//     encSorting.runEncSorting(cipher, scheme, ring, bootHelper, increase);
+//     timeutils.stop("EncSort"); 
+
+//     // run PlainSort
+//     CyclicArray ca(mvec, 1 << param.log2n);
+//     PlainSort plainSort;
+//     plainSort.runPlainSorting(ca, param.log2n, increase);
+//     mvec = ca.getArray();
+
+//     // Print Result and Difference //	
+// 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+//     PrintUtils::printArrays(mvec, dvec, n);
+//     PrintUtils::averageDifference(mvec, dvec, n);
+//     // for(int i = 0; i < 1 << param.log2n; i++) {
+//     //     cout << i << " : " << mvec[i] << " .. " << dvec[i].real() << endl;
+//     // }
+// }
 
 void TestSort:: merge(Parameter param, long iter, long logNum) {
     srand(time(NULL));

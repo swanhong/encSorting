@@ -18,7 +18,7 @@ PLAIN_DIR = plain/
 PLAIN_FILES = CyclicArray PlainSorting
 
 ENC_DIR = enc/
-ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncSorting
+ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncSorting DecSorting
 
 TEST_DIR = test/
 TEST_FILES = TestPlain TestEnc TestBoot TestSort

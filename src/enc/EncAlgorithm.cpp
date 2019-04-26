@@ -85,3 +85,8 @@ void EncAlgorithm::compAndSwap(Ciphertext& outCipher, const Ciphertext& inCipher
     outCipher = max;
 }
 
+
+
+void EncAlgorithm::tableCompAndSwap(Ciphertext& cipher, double* mask, long dist, long iter, long logData, Parameter& param, Scheme scheme) {
+
+}

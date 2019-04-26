@@ -6,12 +6,12 @@
 #include "../MaskingGenerator.h"
 
 class EncSorting {
-private:
+protected:
     Parameter param;
     long iter;
     BootAlgo bootAlgo;
-
-public:
+public:    
+    EncSorting() {}
     EncSorting(Parameter _param, long _iter) : param(_param), iter(_iter) {}
     ~EncSorting() {}
     
