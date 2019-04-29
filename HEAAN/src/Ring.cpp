@@ -149,11 +149,14 @@ void Ring::encode(ZZ* mx, double* vals, long slots, long logp) {
 void Ring::encode(ZZ* mx, complex<double>* vals, long slots, long logp) {
 	complex<double>* uvals = new complex<double> [slots];
 	long i, jdx, idx;
+	cout << "encode1" << endl;
 	copy(vals, vals + slots, uvals);
-
+cout << "encode2" << endl;
 	long gap = Nh / slots;
 	EMBInv(uvals, slots);
+	cout << "encode3" << endl;
 	for (i = 0, jdx = Nh, idx = 0; i < slots; ++i, jdx += gap, idx += gap) {
+		cout << "i = " << i << ", ";
 		mx[idx] = EvaluatorUtils::scaleUpToZZ(uvals[i].real(), logp);
 		mx[jdx] = EvaluatorUtils::scaleUpToZZ(uvals[i].imag(), logp);
 	}

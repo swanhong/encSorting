@@ -135,6 +135,8 @@ public:
 
 	void addConstAndEqual(Ciphertext& cipher, complex<double> cnst, long logp);
 
+	void addByPolyAndEqual(Ciphertext& cipher, ZZ* poly, long logp);
+
 	Ciphertext sub(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	void subAndEqual(Ciphertext& cipher1, Ciphertext& cipher2);

@@ -9,10 +9,6 @@ class TestPlain {
 public:
     static void plainSort(long logn, bool increase);
 
-    static void showMasking(long log2n, bool increase);
-
-    static void showBitonicMergeMasking(long log2n);
-
     static void bitonicMerge(long log2n, long logNum);
 };
 

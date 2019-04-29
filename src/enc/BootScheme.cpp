@@ -59,6 +59,11 @@ void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHe
     multByPolyAndEqual(cipher, poly, param.logp);
 }
 
+void BootScheme::decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher) {
+    complex<double>* dvec = decrypt(secretKey, cipher);
+    PrintUtils::printSingleArray(str, dvec, cipher.n);
+}
+
 void BootScheme::showTotalCount() {
     cout << "Total Number of Multiplication = " << NUM_OF_MULT << endl;
     cout << "Total Number of Bootstrapping  = " << NUM_OF_BOOT << endl;

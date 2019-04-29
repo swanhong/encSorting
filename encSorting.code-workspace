@@ -67,7 +67,11 @@
             "utility": "cpp",
             "vector": "cpp",
             "array": "cpp",
-            "*.tcc": "cpp"
+            "*.tcc": "cpp",
+            "clocale": "cpp",
+            "deque": "cpp",
+            "unordered_map": "cpp",
+            "optional": "cpp"
         }
     }
 }

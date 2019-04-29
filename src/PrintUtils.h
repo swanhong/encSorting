@@ -18,6 +18,9 @@ public:
     static void averageDifference(double* a1, std::complex<double>* a2, long n);
     static void averageDifference(std::complex<double>* a1, std::complex<double>* a2, long n);
 
+    static void printSingleArray(std::string str, double* array, long n);
+    static void printSingleArray(std::string str, complex<double>* array, long n);
+    static void printSingleMatrix(std::string str, double** matrix, long row, long col);
     static void printArrays(double* a1, std::complex<double>* a2, long n);
     static void printArrays(std::complex<double>* a1, std::complex<double>* a2, long n);
 

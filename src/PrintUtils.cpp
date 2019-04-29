@@ -29,6 +29,28 @@ void PrintUtils::averageDifference(std::complex<double>* a1, std::complex<double
 	std::cout << "log2(avg of error) = " << log2(avg) << std::endl;
 }
 
+void PrintUtils::printSingleArray(std::string str, double* array, long n) {
+    for (int i = 0; i < n; i++) {
+        std::cout << str << "[" << i << "] : " << array[i] << std::endl;
+    }
+}
+
+void PrintUtils::printSingleArray(std::string str, complex<double>* array, long n) {
+    for (int i = 0; i < n; i++) {
+        std::cout << str << "[" << i << "] : " << array[i].real() << std::endl;
+    }
+}
+
+void PrintUtils::printSingleMatrix(std::string str, double** matrix, long row, long col) {
+    for(int i = 0; i < row; i++) {
+        std::cout << str << "[" << i << "] = [";
+        for (int j = 0; j < col; j++) {
+            std::cout << matrix[i][j] << ", ";
+        }
+        std::cout << "]" << std::endl;
+    }
+}
+
 void PrintUtils::printArrays(double* a1, std::complex<double>* a2, long n) {
     for(int i = 0; i < n; i++) {
         std::cout << i << " : " << a1[i] << " // " << a2[i].real() << std::endl;

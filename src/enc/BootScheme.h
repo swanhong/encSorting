@@ -6,6 +6,8 @@
 #include "../Parameter.h"
 #include "../PrintUtils.h"
 
+#include <string>
+
 class BootScheme : public Scheme {
 private:
     long NUM_OF_MULT = 0;
@@ -26,6 +28,8 @@ public:
     void modDownToAndEqualModified(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
     void squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
     void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
+
+    void decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher);
 
     void showTotalCount();
     void showCurrentCount();

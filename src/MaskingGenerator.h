@@ -7,28 +7,66 @@
  * class MaskingGenerator
  *      generate masking vectors for Batcher's Odd-Even Sort
  */
-class MaskingGenerator {
+class MaskingGenerator
+{
 private:
-    double** mask;
+    double **mask;
     long log2n;
     long length;
     bool increase;
+    long logDataNum;
+    long dataNum;
+    long colNum;
+    long maskNum;
 
 public:
-    // The initializer automatically generates masking vectors
     MaskingGenerator(long _log2n, bool = true);
+    MaskingGenerator(long _log2n, long _logDataNum, bool = true);
+    MaskingGenerator(long _log2n, long _logDataNum, long _colNum, bool=true);
     ~MaskingGenerator();
 
+    // set Number of masking vectors
+    void setMaskNum();
+    void printMask(double** mask, long maskNum);
+
+    // ********************
+    // *** get functions
+    // ********************
+    double **getMasking();
+    double **getMaskingOther();
+    // double **getTableMasking();
+    double **getBitonicMergeMasking();
+    // double **getTableMaskingBy(long = 0);
+
+    // ********************
+    // *** Odd-Even maskings
+    // ********************
     long generateMaskingRec(long logNum, long logJump, long loc);
-
     void generateMaskingComparison(long loc, long jump);
-
     void generateMaskingMerge(long loc, long num, long jump);
 
-    // outputs mask
-    double** getMasking();
+    long generateMaskingRecOther(long logNum, long logJump, long loc);
+    void generateMaskingComparisonOther(long loc, long jump);
+    void generateMaskingMergeOther(long loc, long num, long jump);
 
-    double** getBitonicMergeMasking();
+    // ********************
+    // *** Bitonic Maskings
+    // ********************
+    void generateBitonicMergeMasking(long num);
+    
+    // // ********************
+    // // *** Table Odd-Even Maskings
+    // // ********************
+    // long generateMaskingTableRec(long logNum, long logJump, long loc);
+    // void generateMaskingTableComp(long loc, long jump);
+    // void generateMaskingTableMerge(long loc, long num, long jump);
+
+    // // ********************
+    // // *** Table Odd-Even Maskings By colNum
+    // // ********************
+    // long generateMaskingTableByRec(long colNum, long logNum, long logJump, long loc);
+    // void generateMaskingTableCompBy(long colNum, long loc, long jump);
+    // void generateMaskingTableMergeBy(long colNum, long loc, long num, long jump);
 };
 
 #endif // !MASKINGGENERATOR_H_

@@ -13,10 +13,16 @@ public:
     static void bootstrapping(Parameter parameter);
 	
 	static void approxSqrt(Parameter parameter, long iter);
+
+	static void approxInverse(Parameter parameter, long iter);
+
+	static void approxComp(Parameter parameter, long invIter, long compIter);
 	
 	static void minMax(Parameter parameter, long iter);
 
 	static void compAndSwap(Parameter param, long iter);
+
+	static void compAndSwapTable(Parameter param, long logDataNum, long colNum, long invIter, long compIter);
 
 	static void reverse(Parameter param);
 };
