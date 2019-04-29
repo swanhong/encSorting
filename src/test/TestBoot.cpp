@@ -369,7 +369,7 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     BootAlgo bootAlgo(parameter, invIter, compIter);
 	bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper);
     timeutils.stop("compAndSwapTable");
-
+    double* temp = double[10]();
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     // for (int i = 0; i < n; i++)
