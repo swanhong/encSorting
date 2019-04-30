@@ -190,37 +190,40 @@ void BootAlgo::reverse(Ciphertext& cipher, double** mask, BootScheme& scheme, Ri
 }
 
 void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
-    std::cout <<  "run compAndSwapTable" << endl;
-    ZZ* maskPoly = new ZZ[1 << param.logN]();
-    ZZ* maskRightPoly = new ZZ[1 << param.logN]();
-    ZZ* maskTablePoly = new ZZ[1 << param.logN]();
-    ZZ* maskTableRightPoly = new ZZ[1 << param.logN]();
-    std::cout << "check1" << std::endl;
+    cout << "Start compAndSwap with ctxt.logq = " << cipher.logq << endl;
+    ZZ* maskPoly = new ZZ[1 << param.logN];
+    ZZ* maskRightPoly = new ZZ[1 << param.logN];
+    ZZ* maskTablePoly = new ZZ[1 << param.logN];
+    ZZ* maskTableRightPoly = new ZZ[1 << param.logN];
     ring.encode(maskPoly,           mask,           cipher.n, param.logp);
-    std::cout << "check2" << std::endl;
     ring.encode(maskRightPoly,      maskRight,      cipher.n, param.logp);
-    std::cout << "check3" << std::endl;
     ring.encode(maskTablePoly,      maskTable,      cipher.n, param.logp);
-    std::cout << "check4" << std::endl;
     ring.encode(maskTableRightPoly, maskTableRight, cipher.n, param.logp);
-    std::cout << "check5" << std::endl;
-    Ciphertext cipherTable = cipher;
-    Ciphertext cipherTableRight = cipher;
-    scheme.multByPolyAndEqualWithBoot(cipherTable, maskTablePoly, bootHelper, param);
-    scheme.multByPolyAndEqualWithBoot(cipherTableRight, maskTableRightPoly, bootHelper, param);
+    
+    // Ciphertext cipherTable = cipher;
+    // Ciphertext cipherTableRight = cipher;
+    // scheme.multByPolyAndEqualWithBoot(cipherTable, maskTablePoly, bootHelper, param);
+    // scheme.multByPolyAndEqualWithBoot(cipherTableRight, maskTableRightPoly, bootHelper, param);
+    
+    Ciphertext cipherTable = scheme.multByPolyWithBoot(cipher, maskTablePoly, bootHelper, param);
+    Ciphertext cipherTableRight = scheme.multByPolyWithBoot(cipher, maskTableRightPoly, bootHelper, param);
+    
     scheme.reScaleByAndEqual(cipherTable, param.logp);
     scheme.reScaleByAndEqual(cipherTableRight, param.logp);
 
     // scheme.decryptAndPrint("table", secretKey, cipherTable);
     // scheme.decryptAndPrint("tableRight", secretKey, cipherTableRight);
-    std::cout << "check" << std::endl;
-    Ciphertext cipher1 = cipher;
-    Ciphertext cipher1Right = cipher;
-    scheme.multByPolyAndEqualWithBoot(cipher1, maskPoly, bootHelper, param);
-    scheme.multByPolyAndEqualWithBoot(cipher1Right, maskRightPoly, bootHelper, param);
+    
+    // Ciphertext cipher1 = cipher;
+    // Ciphertext cipher1Right = cipher;
+    // scheme.multByPolyAndEqualWithBoot(cipher1, maskPoly, bootHelper, param);
+    // scheme.multByPolyAndEqualWithBoot(cipher1Right, maskRightPoly, bootHelper, param);
+    
+    Ciphertext cipher1 = scheme.multByPolyWithBoot(cipher, maskPoly, bootHelper, param);
+    Ciphertext cipher1Right = scheme.multByPolyWithBoot(cipher, maskRightPoly, bootHelper, param);
+    
     scheme.reScaleByAndEqual(cipher1, param.logp);
     scheme.reScaleByAndEqual(cipher1Right, param.logp);
-    std::cout << "check" << std::endl;
     // scheme.decryptAndPrint("1", secretKey, cipher1);
     // scheme.decryptAndPrint("1Right", secretKey, cipher1Right);
     
@@ -269,20 +272,24 @@ void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, double* mas
     scheme.modDownToAndEqualModified(cipher1, cipherTable, bootHelper, param);
     scheme.modDownToAndEqualModified(cipher1Right, cipherTableRight, bootHelper, param);
     
-    Ciphertext cipherLeftSmall = cipher1;
-    scheme.multAndEqualWithBoot(cipherLeftSmall, cipherTableFlip, bootHelper, param);
+    // Ciphertext cipherLeftSmall = cipher1;
+    // scheme.multAndEqualWithBoot(cipherLeftSmall, cipherTableFlip, bootHelper, param);
+    Ciphertext cipherLeftSmall = scheme.multWithBoot(cipher1, cipherTableFlip, bootHelper, param);
     scheme.reScaleByAndEqual(cipherLeftSmall, param.logp);
 
-    Ciphertext cipherLeftBig = cipher1;
-    scheme.multAndEqualWithBoot(cipherLeftBig, cipherTable, bootHelper, param);
+    // Ciphertext cipherLeftBig = cipher1;
+    // scheme.multAndEqualWithBoot(cipherLeftBig, cipherTable, bootHelper, param);
+    Ciphertext cipherLeftBig = scheme.multWithBoot(cipher1, cipherTable, bootHelper, param);
     scheme.reScaleByAndEqual(cipherLeftBig, param.logp);
 
-    Ciphertext cipherRightSmall = cipher1Right;
-    scheme.multAndEqualWithBoot(cipherRightSmall, cipherTableFlipRight, bootHelper, param);
+    // Ciphertext cipherRightSmall = cipher1Right;
+    // scheme.multAndEqualWithBoot(cipherRightSmall, cipherTableFlipRight, bootHelper, param);
+    Ciphertext cipherRightSmall = scheme.multWithBoot(cipher1Right, cipherTableFlipRight, bootHelper, param);
     scheme.reScaleByAndEqual(cipherRightSmall, param.logp);
 
-    Ciphertext cipherRightBig = cipher1Right;
-    scheme.multAndEqualWithBoot(cipherRightBig, cipherTableRight, bootHelper, param);
+    // Ciphertext cipherRightBig = cipher1Right;
+    // scheme.multAndEqualWithBoot(cipherRightBig, cipherTableRight, bootHelper, param);
+    Ciphertext cipherRightBig = scheme.multWithBoot(cipher1Right, cipherTableRight, bootHelper, param);
     scheme.reScaleByAndEqual(cipherRightBig, param.logp);
  
     // scheme.decryptAndPrint("LeftSmall", secretKey, cipherLeftSmall);
@@ -298,4 +305,6 @@ void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, double* mas
     scheme.addAndEqual(cipher, cipherLeftBig);
     scheme.addAndEqual(cipher, cipherRightSmall);
     scheme.addAndEqual(cipher, cipherRightBig);
+
+    cout << "End compAndSwap with ctxt.logq = " << cipher.logq << endl;
 }

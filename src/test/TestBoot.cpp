@@ -355,19 +355,20 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     MaskingGenerator mgTable2(parameter.log2n, logDataNum, colNum, true);
     double** maskTableOther = mgTable2.getMaskingOther();
     
-    long logn = parameter.log2n - logDataNum;
-    long maskNum = logn * (logn + 1) / 2;
-    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+    // long logn = parameter.log2n - logDataNum;
+    // long maskNum = logn * (logn + 1) / 2;
+    // PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    // cout << endl;
+    // PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    // cout << endl;
+    // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    // cout << endl;
+    // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
     
     timeutils.start("compAndSwapTable");
     BootAlgo bootAlgo(parameter, invIter, compIter);
-	bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper);
+	// bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper);
+    bootAlgo.compAndSwapTable(cipher, logDataNum, mask[1], maskOther[1], maskTable[1], maskTableOther[1], 1 << (logDataNum + 1), scheme, ring, bootHelper);
     timeutils.stop("compAndSwapTable");
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);

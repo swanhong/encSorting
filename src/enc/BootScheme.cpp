@@ -24,6 +24,13 @@ void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bo
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- after : " + to_string(cipher.logq), WANT_TO_PRINT);
     }
 }
+
+Ciphertext BootScheme::multWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param) {
+    Ciphertext res = cipher1;
+    multAndEqualWithBoot(res, cipher2, bootHelper, param);
+    return res;
+}
+
 void BootScheme::multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param) {
     PrintUtils::nprint("multAndEqualWithBoot", WANT_TO_PRINT);
     if (cipher1.logq - param.logp < param.logq) {
@@ -47,10 +54,21 @@ void BootScheme::modDownToAndEqualModified(Ciphertext& cipher1, Ciphertext& ciph
     }    
 }
 
+Ciphertext BootScheme::squareWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param) {
+    Ciphertext res = cipher;
+    squareAndEuqalWithBoot(res, bootHelper, param);
+    return res;
+}
 void BootScheme::squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param) {
     countMult();
     checkAndBoot(cipher, cipher.logq - param.logp < param.logq, bootHelper, param);
     squareAndEqual(cipher);
+}
+
+Ciphertext BootScheme::multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param) {
+    Ciphertext res = cipher;
+    multByPolyAndEqualWithBoot(res, poly, bootHelper, param);
+    return res;
 }
 
 void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param) {

@@ -24,9 +24,16 @@ public:
     void resetCount();
 
     void checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bootHelper, Parameter param);
+
+    Ciphertext multWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
     void multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
+    
     void modDownToAndEqualModified(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
+    
+    Ciphertext squareWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
     void squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
+
+    Ciphertext multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
     void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
 
     void decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher);

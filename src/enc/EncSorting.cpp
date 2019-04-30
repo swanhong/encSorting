@@ -9,33 +9,6 @@ void EncSorting::runEncSorting(Ciphertext& cipher, BootScheme& scheme, Ring& rin
         scheme.showTotalCount();
 }
 
-void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
-    MaskingGenerator mg(param.log2n, logDataNum);
-    double** mask = mg.getMasking();
-    MaskingGenerator mg2(param.log2n, logDataNum);
-    double** maskOther = mg2.getMaskingOther();
-    MaskingGenerator mgTable(param.log2n, logDataNum, colNum, true);
-    double** maskTable = mgTable.getMasking();
-    MaskingGenerator mgTable2(param.log2n, logDataNum, colNum, true);
-    double** maskTableOther = mgTable2.getMaskingOther();
-
-    
-    long logn = param.log2n - logDataNum;
-    long n = 1 << param.log2n;
-    long maskNum = logn * (logn + 1) / 2;
-    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
-
-    BootAlgo bootAlgo(param, invIter, compIter);
-    sortingTableRecursion(cipher, logDataNum, param.log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, scheme, ring, bootHelper);
-    scheme.showTotalCount();
-}
-
 long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     TimeUtils timeutils;
     PrintUtils::nprint("run encBatcherSort with loc = " + to_string(loc), WANT_TO_PRINT);
@@ -60,6 +33,33 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
     return loc + 1;
 }
 
+void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
+    MaskingGenerator mg(param.log2n, logDataNum);
+    double** mask = mg.getMasking();
+    MaskingGenerator mg2(param.log2n, logDataNum);
+    double** maskOther = mg2.getMaskingOther();
+    MaskingGenerator mgTable(param.log2n, logDataNum, colNum, true);
+    double** maskTable = mgTable.getMasking();
+    MaskingGenerator mgTable2(param.log2n, logDataNum, colNum, true);
+    double** maskTableOther = mgTable2.getMaskingOther();
+
+    
+    long logn = param.log2n - logDataNum;
+    long n = 1 << param.log2n;
+    long maskNum = logn * (logn + 1) / 2;
+    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    cout << endl;
+    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    cout << endl;
+    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    cout << endl;
+    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+
+    bootAlgo = BootAlgo(param, invIter, compIter);
+    sortingTableRecursion(cipher, logDataNum, param.log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, scheme, ring, bootHelper);
+    scheme.showTotalCount();
+}
+
 long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long logNum, long logJump, long loc,
                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
@@ -68,25 +68,17 @@ long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long
     TimeUtils timeutils;
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        bootAlgo.compAndSwapTable(cipher, logDataNum,
-                            mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc],
-                            1 << (logJump + logDataNum), scheme, ring, bootHelper);
+        bootAlgo.compAndSwapTable(cipher, logDataNum, mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], 1 << (logJump + logDataNum), scheme, ring, bootHelper);
         scheme.showCurrentCount();
         scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");
     } else {
         if (logJump == 0) {
-            loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump, loc,
-                                        mask, maskRight, maskTable, maskTableRight,
-                                        scheme, ring, bootHelper);
+            loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper);
         }
-        loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump + 1, loc,
-                                        mask, maskRight, maskTable, maskTableRight,
-                                        scheme, ring, bootHelper);
+        loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump + 1, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper);
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        bootAlgo.compAndSwapTable(cipher, logDataNum,
-                                    mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc],
-                                    1 << (logJump + logDataNum), scheme, ring, bootHelper);
+        bootAlgo.compAndSwapTable(cipher, logDataNum, mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], 1 << (logJump + logDataNum), scheme, ring, bootHelper);
         scheme.showCurrentCount();
         scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");

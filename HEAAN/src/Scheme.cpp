@@ -424,6 +424,15 @@ void Scheme::addConstAndEqual(Ciphertext& cipher, complex<double> cnst, long log
 	AddMod(cipher.bx[ring.Nh], cipher.bx[ring.Nh], cnstiZZ, q);
 }
 
+Ciphertext Scheme::addByPoly(Ciphertext& cipher, ZZ* poly, long logp) {
+	Ciphertext res = cipher;
+	ZZ q = ring.qpows[res.logq];
+	for (int i = 0; i < res.N; i++) {
+		AddMod(res.bx[i], res.bx[i], poly[i], q);
+	}
+	return res;
+}
+
 void Scheme::addByPolyAndEqual(Ciphertext& cipher, ZZ* poly, long logp) {
 	ZZ q = ring.qpows[cipher.logq];
 	for (int i = 0; i < cipher.N; i++) {
