@@ -1,6 +1,6 @@
 RM = rm -rf
 CC = g++
-CFLAGS = -std=c++11 -O3
+CFLAGS = -std=c++11
 TERGET = main.cpp
 OUTPUT = output
 

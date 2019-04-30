@@ -54,7 +54,7 @@ int main() {
     // TestBoot::minMax(sortingTestParam1, 12);
     // TestBoot::compAndSwap(sortingTestParamSmall, 15);
     // TestBoot::reverse(sortingTestParamSmall);
-    TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 5, 6);
+    // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 5, 6);
 
     // ******************************
     // *** Check Parameters

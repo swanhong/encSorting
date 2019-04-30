@@ -37,6 +37,10 @@ void BootAlgo::approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bo
     for(int i = 0; i < sqrtIter; i++) {
         PrintUtils::nprint(to_string(i) + "/" + to_string(sqrtIter - 1) + "th sqrtIteration", WANT_TO_PRINT);
 
+        scheme.checkAndBoot(cipher, cipher.logq - param.logp < param.logq, bootHelper, param);
+        scheme.checkAndBoot(b, b.logq - param.logp < param.logq, bootHelper, param);
+
+
         // make dummy = 1 - b / 2
         dummy = scheme.divByPo2(b, 1); // b - 1
         scheme.negateAndEqual(dummy); 

@@ -39,7 +39,7 @@ void BootScheme::multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, 
 }
 
 void BootScheme::modDownToAndEqualModified(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param) {
-    checkAndBoot(cipher1, cipher1.logq < cipher2.logq, bootHelper, param);
+    // checkAndBoot(cipher1, cipher1.logq < cipher2.logq, bootHelper, param);
     if (cipher1.logq < cipher2.logq) {
         modDownToAndEqual(cipher2, cipher1.logq);
     } else {

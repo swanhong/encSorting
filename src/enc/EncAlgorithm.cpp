@@ -19,9 +19,7 @@ void EncAlgorithm::approxSqrt(Ciphertext& outCipher, const Ciphertext& inCipher,
         // make dummy = 1 - b / 2
         dummy = scheme.divByPo2(b, 1); // b - 1
         scheme.negateAndEqual(dummy); 
-        // scheme.reScaleByAndEqual(dummy, logp); 
-        scheme.addConstAndEqual(dummy, 1.0, param.logp);
-        // dummy - 1
+        scheme.addConstAndEqual(dummy, 1.0, param.logp); // dummy - 1
 
         // Update a
         // a <- a * (1 - b / 2)
