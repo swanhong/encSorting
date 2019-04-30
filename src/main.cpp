@@ -49,12 +49,12 @@ int main() {
     // ******************************
     // ******************************
     // TestBoot::approxSqrt(sortingTestParamSmall, 15);
-    // TestBoot::approxInverse(sortingTestParamSmall, 3);
-    // TestBoot::approxComp(sortingTestParamSmall, 3, 6);
+    TestBoot::approxInverse(sortingTestParamSmall, 3);
+    // TestBoot::approxComp(sortingTestParamSmall, 4, 6);
     // TestBoot::minMax(sortingTestParam1, 12);
     // TestBoot::compAndSwap(sortingTestParamSmall, 15);
     // TestBoot::reverse(sortingTestParamSmall);
-    TestBoot::compAndSwapTable(sortingTestParam1, 2, 0, 5, 6);
+    // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 3, 6);
 
     // ******************************
     // *** Check Parameters

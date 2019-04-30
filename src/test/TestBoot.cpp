@@ -106,6 +106,7 @@ void TestBoot::approxInverse(Parameter parameter, long iter) {
     
     timeutils.start("approxInverse");
     BootAlgo bootAlgo(parameter, iter);
+    // bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
 	bootAlgo.approxInverse(cipher, scheme, bootHelper);
     timeutils.stop("approxInverse");
 
@@ -139,7 +140,6 @@ void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
 
 	timeutils.start("Bootstrapping Helper construct");
 	BootHelper bootHelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
-    cout << 1 << endl;
 	timeutils.stop("Bootstrapping Helper construct");
 
 
@@ -159,6 +159,8 @@ void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
     
     timeutils.start("approxComp");
     BootAlgo bootAlgo(parameter, invIter, compIter);
+    // bootHelper.bootstrapping(cipher1, parameter.logq, parameter.logQ, parameter.logT);
+    // bootHelper.bootstrapping(cipher2, parameter.logq, parameter.logQ, parameter.logT);
 	bootAlgo.comparison(cipher1, cipher2, scheme, bootHelper);
     timeutils.stop("approxComp");
 
@@ -367,8 +369,8 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     
     timeutils.start("compAndSwapTable");
     BootAlgo bootAlgo(parameter, invIter, compIter);
-	// bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper);
-    bootAlgo.compAndSwapTable(cipher, logDataNum, mask[1], maskOther[1], maskTable[1], maskTableOther[1], 1 << (logDataNum + 1), scheme, ring, bootHelper);
+    bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+	bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper);
     timeutils.stop("compAndSwapTable");
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
