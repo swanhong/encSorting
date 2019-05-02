@@ -47,13 +47,16 @@ public:
 	void coeffToSlot(Ciphertext& part1, Ciphertext& part2, Ciphertext& cipher);
 
 	void slotToCoeff(Ciphertext& cipher, Ciphertext& part1, Ciphertext& part2);
+	
+	void evalExpAndEqual(Ciphertext& cipher, long logT, long logI, long logq);
 
-	void evalExpAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq);
+	void evalExpAllAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq);
 
-	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT);
+	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT, long=4);
 
-	void bootstrappingWithDec(Ciphertext& cipher, long logq, long logQ, long logT, SecretKey& secretKey);
+	void bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, long logK);
 
+	void evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq);
 };
 
 

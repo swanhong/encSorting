@@ -158,6 +158,20 @@ BootHelper::BootHelper(long logSlots, long radix, long logp, Scheme& scheme, Rin
 	delete[] tmpPoly;
 }
 
+BootHelper::~BootHelper() {
+	delete[] V0Decomp;
+	for(long i = 0; i < logrSlots; i++) {
+		if(i == 0) {
+			for(long j = 0; j < radix; j++) delete[] encodeV0poly[i][j];
+		}
+		else {
+			for(long j = 0; j < 2 * radix - 1; j++) delete[] encodeV0poly[i][j];
+		}
+		delete[] encodeV0poly[i];
+	}
+	delete[] encodeV0poly;
+}
+
 void BootHelper::buildPartialMatrix(MatrixXc& A, long start_row, long start_col, long size)
 {
 	long hsize = size / 2;
@@ -421,8 +435,25 @@ void BootHelper::slotToCoeff(Ciphertext& cipher, Ciphertext& part1, Ciphertext& 
 /*
 This part can be improved using Chebychev's method (or mini-max poly).
 */
-void BootHelper::evalExpAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq) {
-	complex<double>* dvec;
+void BootHelper::evalExpAndEqual(Ciphertext& cipher, long logT, long logI, long logq) {
+	scheme.imultAndEqual(cipher); // i * theta
+	cipher.logp += logI;
+	scheme.divByPo2AndEqual(cipher, logT); // i * theta / (2^(logT + logI))
+	scheme.exp2piAndEqual(cipher, logq + logI); // exp(2pi*i * theta / (2^(logT + logI)))
+	for (long i = 0; i < logI + logT; ++i) {
+		scheme.squareAndEqual(cipher);
+		scheme.reScaleByAndEqual(cipher, logq + logI);
+	}
+	Ciphertext tmp1 = scheme.conjugate(cipher);
+	scheme.subAndEqual(cipher, tmp1);
+	scheme.imultAndEqual(cipher);
+	scheme.negateAndEqual(cipher); // 2 * sin(2pi * theta)
+	RR c = 0.25 / to_RR(M_PI);
+	scheme.multByConstAndEqual(cipher, c, logq + logI); // 1/2pi * (sin(2pi * theta))
+	scheme.reScaleByAndEqual(cipher, logq + 2 * logI);
+}
+
+void BootHelper::evalExpAllAndEqual(Ciphertext& part1, Ciphertext& part2, long logT, long logI, long logq) {
 	scheme.imultAndEqual(part1); // i * theta
 	scheme.imultAndEqual(part2); // i * theta
 	part1.logp += logI; part2.logp += logI;
@@ -452,8 +483,7 @@ void BootHelper::evalExpAndEqual(Ciphertext& part1, Ciphertext& part2, long logT
 	return;
 }
 
-void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT)
-{
+void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT, long logI) {
 	long logSlots = log2(cipher.n);
 	long logp = cipher.logp;
 
@@ -478,7 +508,8 @@ void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long lo
 	// time.stop("CoeffToSlot");
 
 	// time.start("Evaluate Exp");
-	evalExpAndEqual(part1, part2, logT, 4, logq);
+	evalExpAndEqual(part1, logT, logI, logq);
+	evalExpAndEqual(part2, logT, logI, logq);
 	// time.stop("Evaluate Exp");
 
 	// time.start("SlotToCoeff");
@@ -488,7 +519,9 @@ void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long lo
 	cipher.logp = logp;
 }
 
-void BootHelper::bootstrappingWithDec(Ciphertext& cipher, long logq, long logQ, long logT, SecretKey& secretKey) {
+
+
+void BootHelper::bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, long logK) {
 	long logSlots = log2(cipher.n);
 	long logp = cipher.logp;
 
@@ -512,23 +545,10 @@ void BootHelper::bootstrappingWithDec(Ciphertext& cipher, long logq, long logQ, 
 	coeffToSlot(part1, part2, cipher);
 	// time.stop("CoeffToSlot");
 
-	complex<double>* dvec1 = scheme.decrypt(secretKey, part1);
-	complex<double>* dvec2 = scheme.decrypt(secretKey, part2);
-
-	for(int i = 0; i < cipher.n; i++) {
-		cout << i << " : " << dvec1[i].real() << " // " << dvec2[i].real() << endl;
-	} cout << endl;
-
-	// time.start("Evaluate Exp");
-	evalExpAndEqual(part1, part2, 4, 4, logq);
-	// time.stop("Evaluate Exp");
-
-	dvec1 = scheme.decrypt(secretKey, part1);
-	dvec2 = scheme.decrypt(secretKey, part2);
-
-	for(int i = 0; i < cipher.n; i++) {
-		cout << i << " : " << dvec1[i].real() << " // " << dvec2[i].real() << endl;
-	} cout << endl;
+	// time.start("Evaluate Sin * 2");
+	evalSin2piAndEqual(part1, logK, logq);
+	evalSin2piAndEqual(part2, logK, logq);
+	// time.stop("Evaluate Sin * 2");
 
 	// time.start("SlotToCoeff");
 	slotToCoeff(cipher, part1, part2);
@@ -537,18 +557,34 @@ void BootHelper::bootstrappingWithDec(Ciphertext& cipher, long logq, long logQ, 
 	cipher.logp = logp;
 }
 
-BootHelper::~BootHelper() {
-	delete[] V0Decomp;
-	for(long i = 0; i < logrSlots; i++) {
-		if(i == 0) {
-			for(long j = 0; j < radix; j++) delete[] encodeV0poly[i][j];
-		}
-		else {
-			for(long j = 0; j < 2 * radix - 1; j++) delete[] encodeV0poly[i][j];
-		}
-		delete[] encodeV0poly[i];
-	}
-	delete[] encodeV0poly;
+void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
+	// cout << "logq = " << cipher.logq << endl;
+	
+	scheme.addConstAndEqual(cipher, -0.25, logq); // x -> x - 1/4
+	// cipher.logp += logI;
+	//cout << " ======== cipher.logp = " << cipher.logp << endl;
+	scheme.divByPo2AndEqual(cipher, logK); // x - 1/4 -> (x - 1/4) / K
 
+	// cout << "logq = " << cipher.logq << endl;
+
+	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
+	scheme.cos2piAndEqual(cipher, logq);
+	
+	// cout << "logq = " << cipher.logq << endl;
+
+	//* cos( (2pi * x - pi/2) / K) -> cos(2pi * x - pi/2) = sin(2pi * x)
+	for(int i = 0; i < logK; i++) {
+		scheme.squareAndEqual(cipher);
+		scheme.reScaleByAndEqual(cipher, logq);
+		scheme.multByConstAndEqual(cipher, 2.0, 0);
+		scheme.addConstAndEqual(cipher, -1.0, logq);
+	}
+	// cout << "logq = " << cipher.logq << endl;
+
+	RR c = 0.5 / to_RR(M_PI);
+	scheme.multByConstAndEqual(cipher, c, logq); // 1/2pi * (sin(2pi * x))
+	scheme.reScaleByAndEqual(cipher, logq);
+
+	// cout << "logq = " << cipher.logq << endl;
 }
 

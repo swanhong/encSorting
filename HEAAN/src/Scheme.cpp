@@ -440,6 +440,22 @@ void Scheme::addByPolyAndEqual(Ciphertext& cipher, ZZ* poly, long logp) {
 	}
 }
 
+Ciphertext Scheme::subByPoly(Ciphertext& cipher, ZZ* poly, long logp) {
+	Ciphertext res = cipher;
+	ZZ q = ring.qpows[res.logq];
+	for (int i = 0; i < res.N; i++) {
+		AddMod(res.bx[i], res.bx[i], -poly[i], q);
+	}
+	return res;
+}
+
+void Scheme::subByPolyAndEqual(Ciphertext& cipher, ZZ* poly, long logp) {
+	ZZ q = ring.qpows[cipher.logq];
+	for (int i = 0; i < cipher.N; i++) {
+		AddMod(cipher.bx[i], cipher.bx[i], -poly[i], q);
+	}
+}
+
 //-----------------------------------------
 
 Ciphertext Scheme::sub(Ciphertext& cipher1, Ciphertext& cipher2) {
@@ -1364,4 +1380,102 @@ void Scheme::bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long lo
 	slotToCoeffAndEqual(cipher);
 
 	cipher.logp = logp;
+}
+
+void Scheme::cos2piAndEqual(Ciphertext& cipher, long logp) {
+	double coeff[] = {1.00000000000000, -19.73920880217871, 64.93939402266795, -85.45681720652267, 60.24464132885654, -26.42625090743547, 7.90309162853548, -1.69684835340442};
+	squareAndEqual(cipher);
+	reScaleByAndEqual(cipher, logp);
+	evalPoly8AndEqual(cipher, logp, coeff);
+	
+	// double coeff[] = {0.99999999999957, -19.73920878817273, 64.93932228786641, -85.33923964210925};
+	// squareAndEqual(cipher);
+	// reScaleByAndEqual(cipher, logp);
+	// evalPoly4AndEqual(cipher, logp, coeff);
+}
+
+void Scheme::evalPoly4AndEqual(Ciphertext& cipher, long logp, double* coeff) {
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+
+	Ciphertext cipher01 = multByConst(cipher, coeff[1], logp);
+	reScaleByAndEqual(cipher01, logp);
+	addConstAndEqual(cipher01, coeff[0], logp);
+
+	Ciphertext cipher23 = multByConst(cipher, coeff[3], logp);
+	reScaleByAndEqual(cipher23, logp);
+	addConstAndEqual(cipher23, coeff[2], logp);
+
+	multAndEqual(cipher23, cipher2);
+	reScaleByAndEqual(cipher23, logp);
+	modDownByAndEqual(cipher01, logp);
+	addAndEqual(cipher01, cipher23);
+
+	cipher = cipher01;
+}
+
+void Scheme::evalPoly8AndEqual(Ciphertext& cipher, long logp, double* coeff) {
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+	Ciphertext cipher4 = square(cipher2);
+	reScaleByAndEqual(cipher4, logp);
+
+	Ciphertext cipher01 = multByConst(cipher, coeff[1], logp);
+	reScaleByAndEqual(cipher01, logp);
+	addConstAndEqual(cipher01, coeff[0], logp);
+
+	Ciphertext cipher23 = multByConst(cipher, coeff[3], logp);
+	reScaleByAndEqual(cipher23, logp);
+	addConstAndEqual(cipher23, coeff[2], logp);
+
+	Ciphertext cipher45 = multByConst(cipher, coeff[5], logp);
+	reScaleByAndEqual(cipher45, logp);
+	addConstAndEqual(cipher45, coeff[4], logp);
+
+	Ciphertext cipher67 = multByConst(cipher, coeff[7], logp);
+	reScaleByAndEqual(cipher67, logp);
+	addConstAndEqual(cipher67, coeff[6], logp);
+
+	multAndEqual(cipher23, cipher2);
+	reScaleByAndEqual(cipher23, logp);
+	modDownByAndEqual(cipher01, logp);
+	addAndEqual(cipher01, cipher23);
+
+	multAndEqual(cipher67, cipher2);
+	reScaleByAndEqual(cipher67, logp);
+	modDownByAndEqual(cipher45, logp);
+	addAndEqual(cipher45, cipher67);
+
+	multAndEqual(cipher45, cipher4);
+	reScaleByAndEqual(cipher45, logp);
+	modDownByAndEqual(cipher01, logp);
+	addAndEqual(cipher01, cipher45);
+
+	cipher = cipher01;
+}
+
+void Scheme::evalPolyAndEqual(Ciphertext& cipher, long logp, double* coeff, long start, long num) {
+	if (num == 2) {
+		multByConstAndEqual(cipher, coeff[start + 1], logp);
+		reScaleByAndEqual(cipher, logp);
+		addConstAndEqual(cipher, coeff[start], logp);
+		return;
+	} else {
+		// c_0 + ... + c_n x^n + ... + c_2n x^2n = (c_0 + ... + c_n x^n) + x^n * (c_n+1 + ... + c_2n x^n)
+		// left = c_0 + ... + c_n x^n
+		// right = c_n+1 + ... + c_2n x^n
+		Ciphertext left = cipher;
+		Ciphertext right = cipher;
+		evalPolyAndEqual(left, logp, coeff, start, num / 2);
+		evalPolyAndEqual(right, logp, coeff, start + num / 2, num / 2);
+		long logn = log(num);
+		for(int i = 0; i < logn; i++) {
+			squareAndEqual(cipher);
+			reScaleByAndEqual(cipher, logp);
+		}
+		multAndEqual(right, cipher);
+		reScaleByAndEqual(right, logp);
+		modDownByAndEqual(left, logp);
+		cipher = add(left, right);
+	}
 }

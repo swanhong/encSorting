@@ -9,12 +9,11 @@ int main() {
     // Parameters (long)
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
-    Parameter sortingTestParamSmall = {6, 1000, 40, 40, 4, 4, 50, 4};
-    Parameter sortingTestParam1 = {12, 1000, 40, 40, 10, 32, 45, 5};
-    Parameter sortingTestParamBig = {15, 1200, 40, 40, 14, 128, 45, 5};
-    Parameter sortingTestParamBig2 = {16, 1200, 40, 40, 15, 32, 45, 4};
-    Parameter sortingTestParamBig3 = {17, 1200, 40, 40, 16, 256, 45, 4};
-    Parameter sortingTestParam3 = {13, 2000, 30, 30, 12, 64, 35, 4};
+    Parameter sortingTestParamSmall = {6, 1350, 40, 40, 4, 4, 50, 4};
+    Parameter sortingTestParam1 = {12, 1350, 40, 40, 8, 16, 50, 5};
+    Parameter sortingTestParamBig = {15, 1350, 40, 40, 14, 128, 50, 5};
+    Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
+    Parameter sortingTestParamBig3 = {17, 1350, 40, 40, 16, 256, 50, 4};
 
 
     // ******************************
@@ -39,21 +38,14 @@ int main() {
     // TestPlain::plainTableSort(4, 1);
 
     // ******************************
-    // *** Test algorithms for encrypted data
-    // ******************************
-    // TestEnc::approxSqrt(sortingTestParam1, 10);
-    // TestEnc::minMax(sortingTestParam1, 10);
-    // TestEnc::compAndSwap(sortingTestParamSmall, 10);
-
-    // ******************************
     // *** Test algorithms for encrypted data with Bootstrapping
     // ******************************
     // ******************************
-    // TestBoot::approxSqrt(sortingTestParamSmall, 15);
+    // TestBoot::approxSqrt(sortingTestParam1, 25);
     // TestBoot::approxInverse(sortingTestParamSmall, 5);
     // TestBoot::approxComp(sortingTestParamSmall, 5, 5);
-    // TestBoot::minMax(sortingTestParam1, 12);
-    // TestBoot::compAndSwap(sortingTestParamSmall, 15);
+    // TestBoot::minMax(sortingTestParamSmall, 20);
+    TestBoot::compAndSwap(sortingTestParam1, 15);
     // TestBoot::reverse(sortingTestParamSmall);
     // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 4, 5);
 
@@ -69,7 +61,7 @@ int main() {
     // TestSort::sort(sortingTestParamSmall, 15);
     // TestSort::merge(sortingTestParamSmall, 15, 4);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
-    TestSort::tableSort(sortingTestParam1, 4, 0, 5, 5);
+    // TestSort::tableSort(sortingTestParam1, 4, 0, 5, 5);
 
     return 0;
 }

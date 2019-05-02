@@ -139,6 +139,10 @@ public:
 
 	void addByPolyAndEqual(Ciphertext& cipher, ZZ* poly, long logp);
 
+	Ciphertext subByPoly(Ciphertext& cipher, ZZ* poly, long logp);
+
+	void subByPolyAndEqual(Ciphertext& cipher, ZZ* poly, long logp);
+
 	Ciphertext sub(Ciphertext& cipher1, Ciphertext& cipher2);
 
 	void subAndEqual(Ciphertext& cipher1, Ciphertext& cipher2);
@@ -258,7 +262,12 @@ public:
 	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 
 	Ciphertext bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
+	void cos2piAndEqual(Ciphertext& cipher, long logp);
 
-};
+	void evalPolyAndEqual(Ciphertext& cipher, long logp, double* coeff, long start, long end);
+
+	void evalPoly4AndEqual(Ciphertext& cipher, long logp, double* coeff);
+	
+	void evalPoly8AndEqual(Ciphertext& cipher, long logp, double* coeff);};
 
 #endif
