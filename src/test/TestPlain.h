@@ -10,6 +10,8 @@ public:
     static void plainSort(long logn, bool increase);
 
     static void bitonicMerge(long log2n, long logNum);
+
+    static void plainTableSort(long logn, long logDataNum, bool=true);
 };
 
 

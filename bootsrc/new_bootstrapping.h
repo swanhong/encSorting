@@ -52,6 +52,8 @@ public:
 
 	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT);
 
+	void bootstrappingWithDec(Ciphertext& cipher, long logq, long logQ, long logT, SecretKey& secretKey);
+
 };
 
 

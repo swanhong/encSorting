@@ -71,14 +71,14 @@ void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long inv
 
     timeutils.start("EncTableSort");
     EncSorting encSorting(param, invIter, compIter);
-    encSorting.runEncTableSorting(cipher, logDataNum, colNum, scheme, ring, bootHelper, true);
+    encSorting.runEncTableSorting(cipher, logDataNum, colNum, scheme, ring, bootHelper, secretKey, true);
     timeutils.stop("EncTableSort"); 
 
     // run PlainSort
-    // CyclicArray ca(mvec, 1 << param.log2n);
-    // PlainSort plainSort;
-    // plainSort.runPlainSorting(ca, param.log2n, increase);
-    // mvec = ca.getArray();
+    CyclicArray ca(mvec, 1 << param.log2n);
+    PlainSort plainSort;
+    plainSort.runPlainTableSorting(ca, param.log2n, logDataNum, 0);
+    mvec = ca.getArray();
 
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);

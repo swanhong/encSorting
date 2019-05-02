@@ -32,3 +32,17 @@ void TestPlain::bitonicMerge(long log2n, long logNum) {
     }
     
 }
+
+void TestPlain::plainTableSort(long logn, long logDataNum, bool increase) {
+    CyclicArray ca;
+    ca.randomGen(1 << logn);
+
+    CyclicArray plain(ca);
+    PlainSort plainSort;
+    plainSort.runPlainTableSorting(ca, logn, logDataNum, 0);
+    // ca.printAsVector();
+    for (int i = 0; i < ca.length; i++) {
+        cout << i << " : " << plain.get(i) << " // " << ca.get(i) << endl;
+    }
+    
+}

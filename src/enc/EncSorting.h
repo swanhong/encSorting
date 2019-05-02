@@ -20,13 +20,13 @@ public:
     
     void runEncSorting(Ciphertext& cipher, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool=true);
 
-    void runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool=true);
+    void runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool=true);
 
     long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
     
     long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long logNum, long logJump, long loc,
                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
-                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey);
 
     void bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 

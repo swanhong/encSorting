@@ -9,7 +9,7 @@ int main() {
     // Parameters (long)
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
-    Parameter sortingTestParamSmall = {6, 1000, 40, 40, 4, 4, 45, 4};
+    Parameter sortingTestParamSmall = {6, 1000, 40, 40, 4, 4, 50, 4};
     Parameter sortingTestParam1 = {12, 1000, 40, 40, 10, 32, 45, 5};
     Parameter sortingTestParamBig = {15, 1200, 40, 40, 14, 128, 45, 5};
     Parameter sortingTestParamBig2 = {16, 1200, 40, 40, 15, 32, 45, 4};
@@ -36,6 +36,7 @@ int main() {
     
     // TestPlain::plainSort(5);
     // TestPlain::bitonicMerge(4, 4);
+    // TestPlain::plainTableSort(4, 1);
 
     // ******************************
     // *** Test algorithms for encrypted data
@@ -49,17 +50,17 @@ int main() {
     // ******************************
     // ******************************
     // TestBoot::approxSqrt(sortingTestParamSmall, 15);
-    TestBoot::approxInverse(sortingTestParamSmall, 3);
-    // TestBoot::approxComp(sortingTestParamSmall, 4, 6);
+    // TestBoot::approxInverse(sortingTestParamSmall, 5);
+    // TestBoot::approxComp(sortingTestParamSmall, 5, 5);
     // TestBoot::minMax(sortingTestParam1, 12);
     // TestBoot::compAndSwap(sortingTestParamSmall, 15);
     // TestBoot::reverse(sortingTestParamSmall);
-    // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 3, 6);
+    // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 4, 5);
 
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParamBig3);
+    // TestBoot::bootstrapping(sortingTestParamSmall);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
@@ -68,7 +69,7 @@ int main() {
     // TestSort::sort(sortingTestParamSmall, 15);
     // TestSort::merge(sortingTestParamSmall, 15, 4);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
-    // TestSort::tableSort(sortingTestParamSmall, 2, 0, 5, 6);
+    TestSort::tableSort(sortingTestParam1, 4, 0, 5, 5);
 
     return 0;
 }

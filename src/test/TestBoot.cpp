@@ -21,14 +21,31 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	BootHelper boothelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	complex<double>* mvec = EvaluatorUtils::randomComplexArray(n);
+	// complex<double>* mvec = EvaluatorUtils::randomComplexArray(n, 2);
+    double* mvec = new double[n];
+    mvec[0] = 15.1112;
+    mvec[1] = 0.96606;
+    mvec[2] = 6.59871;
+    mvec[3] = 0.981954;
+    mvec[4] = 0.823864;
+    mvec[5] = 1.21633;
+    mvec[6] = 1.00539;
+    mvec[7] = 6.87365;
+    mvec[8] = 1.87189;
+    mvec[9] = 3.32999;
+    mvec[10] = 1.1563;
+    mvec[11] = 9.71361;
+    mvec[12] = 4.11788;
+    mvec[13] = 1.8787;
+    mvec[14] = 3.49933;
+    mvec[15] = 24.463;
 	
 	Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
-	mvec = scheme.decrypt(secretKey, cipher);
 
 
 	timeutils.start("Improved bootstrapping");
-	boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+	// boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+    boothelper.bootstrappingWithDec(cipher, parameter.logq, parameter.logQ, parameter.logT, secretKey);
 	timeutils.stop("Improved bootstrapping");
 
 	cout << "* Before logQ = " << parameter.logq << endl;
@@ -36,7 +53,9 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
 	// Print Result and Difference //
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-	cout << "log2(avg of error) = " << diff(mvec, dvec, n) << endl;
+    PrintUtils::printArrays(mvec, dvec, n);
+    PrintUtils::averageDifference(mvec, dvec, n);
+	// cout << "log2(avg of error) = " << diff(mvec, dvec, n) << endl;
 	
 	if(mvec != NULL) delete[] mvec;
 	if(dvec != NULL) delete[] dvec;
@@ -98,16 +117,21 @@ void TestBoot::approxInverse(Parameter parameter, long iter) {
 
 	double* mvec = EvaluatorUtils::randomRealArray(n);
     for (int i = 0; i < n; i++) {
-        mvec[i] += 0.5;
+        if (mvec[i] < 1 / (double) (1 << iter)) {
+            mvec[i] = 1 / (double) (1 << iter);
+        }
+        
     }
+    
     
 	Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
 
     
     timeutils.start("approxInverse");
     BootAlgo bootAlgo(parameter, iter);
-    // bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
-	bootAlgo.approxInverse(cipher, scheme, bootHelper);
+    bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+	// bootAlgo.approxInverse(cipher, scheme, bootHelper);
+    bootAlgo.approxInverseWithDec(cipher, scheme, bootHelper, secretKey);
     timeutils.stop("approxInverse");
 
     // Print Result and Difference //	
@@ -116,6 +140,7 @@ void TestBoot::approxInverse(Parameter parameter, long iter) {
     for(int i = 0; i < n; i++) {
         invvec[i] = 1 / mvec[i];
     }
+    cout << "mvec // invvec // dvec" << endl;
     for (int i = 0; i < n; i++)
     {
         cout << i << " : " << mvec[i] << " // " << invvec[i] << " // " << dvec[i].real() << endl;
@@ -145,13 +170,10 @@ void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
 
 	double* mvec1 = EvaluatorUtils::randomRealArray(n);
     double* mvec2 = EvaluatorUtils::randomRealArray(n);
-    for (int i = 0; i < n; i++) {     
-        mvec1[i] += 0.5;
-        mvec2[i] += 0.5;
-                if (i < 10) {
-        }
-    }
-    mvec1[52] = 0.7;
+    mvec1[0] = 0.568379;
+    mvec1[1] = 0.958254;
+    mvec2[0] = 0.403887;
+    mvec2[1] = 0.839273;
 
 	Ciphertext cipher1 = scheme.encrypt(mvec1, n, parameter.logp, parameter.logQ);
     Ciphertext cipher2 = scheme.encrypt(mvec2, n, parameter.logp, parameter.logQ);
@@ -168,6 +190,7 @@ void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher1);
     complex<double>* dvec2 = scheme.decrypt(secretKey, cipher2);
     double* compvec = new double[n];    
+    cout << "mvec1 // mvec2 // compvec // dvec1 // dvec2" << endl;
     for (int i = 0; i < n; i++) {
         if (mvec1[i] >= mvec2[i]) {
             compvec[i] = 1.;
@@ -357,27 +380,36 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     MaskingGenerator mgTable2(parameter.log2n, logDataNum, colNum, true);
     double** maskTableOther = mgTable2.getMaskingOther();
     
-    // long logn = parameter.log2n - logDataNum;
-    // long maskNum = logn * (logn + 1) / 2;
-    // PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-    // cout << endl;
-    // PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-    // cout << endl;
-    // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-    // cout << endl;
-    // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+    long logn = parameter.log2n - logDataNum;
+    long maskNum = logn * (logn + 1) / 2;
+    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    cout << endl;
+    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    cout << endl;
+    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    cout << endl;
+    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
     
+    complex<double>* dvec;
+
     timeutils.start("compAndSwapTable");
     BootAlgo bootAlgo(parameter, invIter, compIter);
-    bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
-	bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper);
-    timeutils.stop("compAndSwapTable");
-    // Print Result and Difference //	
-	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    // for (int i = 0; i < n; i++)
-    // {
-    //     cout << i << " : " << mvec[i] << " // " << invvec[i] << " // " << dvec[i].real() << endl;
-    // }
+    // bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+	bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper, secretKey);
+    dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
+    bootAlgo.compAndSwapTable(cipher, logDataNum, mask[1], maskOther[1], maskTable[1], maskTableOther[1], 1 << (logDataNum + 1), scheme, ring, bootHelper, secretKey);
+    dvec = scheme.decrypt(secretKey, cipher);
+    PrintUtils::printArrays(mvec, dvec, n);
+    PrintUtils::averageDifference(mvec, dvec, n);
+    bootAlgo.compAndSwapTable(cipher, logDataNum, mask[2], maskOther[2], maskTable[2], maskTableOther[2], 1 << (logDataNum), scheme, ring, bootHelper, secretKey);
+    dvec = scheme.decrypt(secretKey, cipher);
+    PrintUtils::printArrays(mvec, dvec, n);
+    PrintUtils::averageDifference(mvec, dvec, n);
+    timeutils.stop("compAndSwapTable");
+    // Print Result and Difference //	
+	// dvec = scheme.decrypt(secretKey, cipher);
+    // PrintUtils::printArrays(mvec, dvec, n);
+    // PrintUtils::averageDifference(mvec, dvec, n);
 }

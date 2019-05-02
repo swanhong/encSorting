@@ -93,3 +93,130 @@ void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long lo
     } 
     // cout << " -- end " << logNum << " -- " << endl;
 }
+
+void PlainSort::runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNum, long colNum, bool increase) {
+    MaskingGenerator mg(log2n, logDataNum);
+    double** mask = mg.getMasking();
+    MaskingGenerator mg2(log2n, logDataNum);
+    double** maskOther = mg2.getMaskingOther();
+    MaskingGenerator mgTable(log2n, logDataNum, colNum, true);
+    double** maskTable = mgTable.getMasking();
+    MaskingGenerator mgTable2(log2n, logDataNum, colNum, true);
+    double** maskTableOther = mgTable2.getMaskingOther();
+
+    plainSortingTableRecursion(ca, logDataNum, log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther);
+}
+
+long PlainSort::plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther) {
+    if (logNum == 1) {
+        compAndSwapTable(ca, logDataNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum));
+    } else {
+        if (logJump == 0) {
+            loc = plainSortingTableRecursion(ca, logDataNum, logNum - 1, logJump, loc, mask, maskOther, maskTable, maskTableOther);
+        }
+        loc = plainSortingTableRecursion(ca, logDataNum, logNum - 1, logJump + 1, loc, mask, maskOther, maskTable, maskTableOther);
+        compAndSwapTable(ca, logDataNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum));
+    }
+    return loc + 1;
+}
+
+void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist) {
+    long length = ca.length;
+    CyclicArray maskPoly(mask, length);
+    CyclicArray maskRightPoly(maskRight, length);
+    CyclicArray maskTablePoly(maskTable, length);
+    CyclicArray maskTableRightPoly(maskTableRight, length);
+    CyclicArray ca1, ca1Right, caTable, caTableRight;
+    mult(ca1, ca, maskPoly);
+    mult(ca1Right, ca, maskRightPoly);
+    mult(caTable, ca, maskTablePoly);
+    mult(caTableRight, ca, maskTableRightPoly);
+
+    // ca.printAsVector();
+    // maskTablePoly.printAsVector();
+    // caTable.printAsVector();
+
+    ca.sub(ca1);
+    ca.sub(ca1Right);
+
+    caTable.rightRotate(dist);
+
+    // cout << "before comp" << endl;
+    // caTable.printAsVector();
+    // caTableRight.printAsVector();
+
+    for (int i = 0; i < length; i++)
+    {
+        if(caTable.get(i) >= caTableRight.get(i)) {
+            caTable.set(i, 1);
+            caTableRight.set(i, 0);
+        } else {
+            caTable.set(i, 0);
+            caTableRight.set(i, 1);
+        }
+    }
+
+    // cout << "after comp" << endl;
+    // caTable.printAsVector();
+    // caTableRight.printAsVector();
+    // maskTableRightPoly.printAsVector();
+    
+    caTable.mult(maskTableRightPoly);
+    caTableRight.mult(maskTableRightPoly);
+    
+    caTable.leftRotate(dist);
+
+    // cout << "muly mask and rot" << endl;
+    // caTable.printAsVector();
+    // caTableRight.printAsVector();
+
+    for (int i = 0; i < logDataNum; i++) {
+        CyclicArray tmpTable(caTable);
+        tmpTable.rightRotate(1 << i);
+        caTable.add(tmpTable);
+        
+        CyclicArray tmpTableRight(caTableRight);
+        tmpTableRight.rightRotate(1 << i);
+        caTableRight.add(tmpTableRight);
+    }
+
+    // cout << "copy" << endl;
+    // caTable.printAsVector();
+    // caTableRight.printAsVector();
+    
+    CyclicArray caTableFlip(caTable);
+    CyclicArray caTableFlipRight(caTableRight);
+    for (int i = 0; i < length; i++) {
+        caTableFlip.data[i] *= -1;
+        caTableFlipRight.data[i] *= -1;
+    }
+    caTableFlip.add(maskPoly);
+    caTableFlipRight.add(maskRightPoly);
+
+    // cout << "flip" << endl;
+    // caTableFlip.printAsVector();
+    // caTableFlipRight.printAsVector();
+    // cout << endl;
+
+    CyclicArray caLeftSmall, caLeftBig, caRightSmall, caRightBig;
+    mult(caLeftSmall, ca1, caTableFlip);
+    mult(caLeftBig, ca1, caTable);
+    mult(caRightSmall, ca1Right, caTableFlipRight);
+    mult(caRightBig, ca1Right, caTableRight);
+
+    // caLeftSmall.printAsVector();
+    // caLeftBig.printAsVector();
+    // caRightSmall.printAsVector();
+    // caRightBig.printAsVector();
+
+
+    caLeftBig.rightRotate(dist);
+    caRightSmall.leftRotate(dist);
+
+    ca.add(caLeftSmall);
+    ca.add(caLeftBig);
+    ca.add(caRightSmall);
+    ca.add(caRightBig);
+
+    // cout << "End compAndSwapTable" << endl;
+}

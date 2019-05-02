@@ -7,7 +7,6 @@
 
 #include "CyclicArray.h"
 
-
 CyclicArray::CyclicArray(double* array, long length_, long rowNum_, long colNum_) {
 	data = array;
 	length = length_;
@@ -51,6 +50,17 @@ CyclicArray::CyclicArray(long length_) {
 		data[i] = 0;
 	}
 }
+CyclicArray::CyclicArray(CyclicArray& _ca) {
+	length = _ca.length;
+	start = 0;
+	rowNum = _ca.rowNum;
+	colNum = _ca.colNum;
+	data = new double[length];
+	for (int i = 0; i < length; i++) {
+		data[i] = _ca.get(i);
+	}
+	
+}
 
 double CyclicArray::get(long index) const {
 	if (start + index < length) {
@@ -69,6 +79,7 @@ void CyclicArray::set(long index, double data_) const {
 }
 
 void CyclicArray::setLength(long length_) {
+	start = 0;
 	length = length_;
 	data = new double[length];
 }
@@ -128,6 +139,17 @@ void CyclicArray::sub(CyclicArray given) {
 	}
 }
 
+void CyclicArray::mult(CyclicArray given) {
+    if (length != given.length) {
+		cout << "CyclicArray::add Error, lengths are different" << endl;
+		return;
+	}
+
+    for (long i = 0; i < length; ++i) {
+		set(i, get(i) * given.get(i));
+	}
+}
+
 void mult(CyclicArray& result, const CyclicArray& array1, const CyclicArray& array2) {
 	if (array1.length != array2.length) {
 		cout << "CyclicArray::mult Error, lengths are different" << endl;
@@ -135,7 +157,6 @@ void mult(CyclicArray& result, const CyclicArray& array1, const CyclicArray& arr
 	}
 	result.setLength(array1.length);
 	for (long i = 0; i < array1.length; ++i) {
-		// result.data[i] = array1.get(i) * array2.get(i);
         result.set(i, array1.get(i) * array2.get(i));
 	}
 	if(array1.rowNum==array2.rowNum) {

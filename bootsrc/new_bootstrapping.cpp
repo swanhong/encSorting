@@ -488,6 +488,55 @@ void BootHelper::bootstrapping(Ciphertext& cipher, long logq, long logQ, long lo
 	cipher.logp = logp;
 }
 
+void BootHelper::bootstrappingWithDec(Ciphertext& cipher, long logq, long logQ, long logT, SecretKey& secretKey) {
+	long logSlots = log2(cipher.n);
+	long logp = cipher.logp;
+
+	scheme.modDownToAndEqual(cipher, logq);
+	scheme.normalizeAndEqual(cipher);
+
+	TimeUtils time;
+
+	cipher.logq = logQ;
+	cipher.logp = logq;
+
+	for (long i = logSlots; i < ring.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
+		scheme.addAndEqual(cipher, rot);
+	}
+	scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
+	
+	Ciphertext part1, part2;
+
+	// time.start("CoeffToSlot");
+	coeffToSlot(part1, part2, cipher);
+	// time.stop("CoeffToSlot");
+
+	complex<double>* dvec1 = scheme.decrypt(secretKey, part1);
+	complex<double>* dvec2 = scheme.decrypt(secretKey, part2);
+
+	for(int i = 0; i < cipher.n; i++) {
+		cout << i << " : " << dvec1[i].real() << " // " << dvec2[i].real() << endl;
+	} cout << endl;
+
+	// time.start("Evaluate Exp");
+	evalExpAndEqual(part1, part2, 4, 4, logq);
+	// time.stop("Evaluate Exp");
+
+	dvec1 = scheme.decrypt(secretKey, part1);
+	dvec2 = scheme.decrypt(secretKey, part2);
+
+	for(int i = 0; i < cipher.n; i++) {
+		cout << i << " : " << dvec1[i].real() << " // " << dvec2[i].real() << endl;
+	} cout << endl;
+
+	// time.start("SlotToCoeff");
+	slotToCoeff(cipher, part1, part2);
+	// time.stop("SlotToCoeff");
+
+	cipher.logp = logp;
+}
+
 BootHelper::~BootHelper() {
 	delete[] V0Decomp;
 	for(long i = 0; i < logrSlots; i++) {

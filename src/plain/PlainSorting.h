@@ -23,6 +23,12 @@ public:
 
     void bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, double** mask, double** mask2, bool increase);
 
+    void compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist);
+    
+    void runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNum, long colNum, bool=true);
+
+    long plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther);
+
 };
 
 

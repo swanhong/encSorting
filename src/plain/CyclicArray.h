@@ -20,6 +20,7 @@ public:
 	CyclicArray(double** array, long rowNum_, long colNum_);
 	CyclicArray(double* array, long length_);
 	CyclicArray(long length_);
+	CyclicArray(CyclicArray& _ca);
 	~CyclicArray() {}
 	
 	// --------------------
@@ -47,6 +48,7 @@ public:
 
     void add(CyclicArray given);
     void sub(CyclicArray given);
+	void mult(CyclicArray given);
     
 	/*
 	 * Print CyclicArray
