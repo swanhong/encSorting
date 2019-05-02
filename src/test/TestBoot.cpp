@@ -23,23 +23,24 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
     complex<double>* mvec = EvaluatorUtils::randomComplexArray(n);
 
-    Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
-    mvec = scheme.decrypt(secretKey, cipher);
+    Ciphertext cipher1 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
+    Ciphertext cipher2 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     
     timeutils.start("Improved bootstrapping");
-    // cout << "i, j  = " << i << ", " << j << endl;
-    // boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, 4, 4); 
-    boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 6);
-
+    boothelper.bootstrapping(cipher1, parameter.logq, parameter.logQ, 4, 4); 
     timeutils.stop("Improved bootstrapping");
-
-    cout << "* Before logQ = " << parameter.logq << endl;
-    cout << "* After logQ = " << cipher.logq << endl;
-
+    cout << "* consumed logQ = " << parameter.logQ - cipher1.logq << endl;
+    complex<double>* dvec1 = scheme.decrypt(secretKey, cipher1);
+    cout << "log2(avg of error) = " << diff(mvec, dvec1, n) << endl;
+    
+    timeutils.start("Improved cos bootstrappingg");
+    boothelper.bootstrapping_cos(cipher2, parameter.logq, parameter.logQ, 8);
+    timeutils.stop("Improved cos bootstrappingg");
+    cout << "* consumed logQ = " << parameter.logQ - cipher2.logq << endl;
+    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher2);
+    cout << "log2(avg of error) = " << diff(mvec, dvec2, n) << endl;
+    
     // Print Result and Difference //
-    complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    // PrintUtils::printArrays(mvec, dvec, n);
-    cout << "log2(avg of error) = " << diff(mvec, dvec, n) << endl;
     
     // if(mvec != NULL) delete[] mvec;
     // if(dvec != NULL) delete[] dvec;

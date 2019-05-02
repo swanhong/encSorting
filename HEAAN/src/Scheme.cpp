@@ -1379,13 +1379,77 @@ void Scheme::cos2piAndEqual(Ciphertext& cipher, long logp) {
 	// cipher = z;
 
 	// double coeff[] = {0.9999952352, -19.7385872730, 64.9260865312, -85.3480712582, 59.8059397453, -25.4550327865, 6.6862223073, -0.8765572660};
-	double coeff[] = {1.00000000000000, -19.73920880217871, 64.93939402266829, -85.45681720669355, 60.24464137170761, -26.42625669105607, 7.90350843921616, -1.70998914889149};
+	// double coeff[] = {1.00000000000000, -19.73920880217871, 64.93939402266829, -85.45681720669355, 60.24464137170761, -26.42625669105607, 7.90350843921616, -1.70998914889149};
+	// double coeff[] = {1.00000000000000, -19.73920880217871, 64.93939402266795, -85.45681720652267, 60.24464132885654, -26.42625090743547, 7.90309162853548, -1.69684835340442};
 	// double coeff[] = {1.0,-19.7392088021,64.9393940226,-85.4568172066,60.2446413718,-26.4262567833,7.9035363712,-1.714390710,0.28200596695,-0.036382837356,0.0037798271850,-0.0003229815167571,0.00002309051161369,-0.00000139638287051,0.00000007013591135869,-0.00000000241433349460};
 	// double coeff[] = {1.00000000000000, -19.73920880217871, 64.93939402266829, -85.45681720669372, 60.24464137187666, -26.42625678337439, 7.90353637131846, -1.71439071108867, 0.28200596845579, -0.03638284114254, 0.00377983420068, -0.00032299106720, 0.00002309995694, -0.00000140299961, 0.00000007326481, -0.00000000332354};
 	// double coeff[] = {1.0000000000, -0.0000000000, -19.7392088021, 0.0000000000, 64.9393940226, -0.0000000000, -85.4568172066, 0.0000000000, 60.2446413718, -0.0000000000, -26.4262567819, 0.0000000000, 7.9035346243, -0.0000000473, -1.7132895737, 0.0000130194};
 	squareAndEqual(cipher);
 	reScaleByAndEqual(cipher, logp);
-	evalPolyAndEqual(cipher, logp, coeff, 0, 8);
+	// evalPolyAndEqual(cipher, logp, coeff, 0, 8);
+	// evalPoly8AndEqual(cipher, logp, coeff);
+	double coeff[] = {0.99999999999957, -19.73920878817273, 64.93932228786641, -85.33923964210925};
+	evalPoly4AndEqual(cipher, logp, coeff);
+}
+
+void Scheme::evalPoly4AndEqual(Ciphertext& cipher, long logp, double* coeff) {
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+
+	Ciphertext cipher01 = multByConst(cipher, coeff[1], logp);
+	reScaleByAndEqual(cipher01, logp);
+	addConstAndEqual(cipher01, coeff[0], logp);
+
+	Ciphertext cipher23 = multByConst(cipher, coeff[3], logp);
+	reScaleByAndEqual(cipher23, logp);
+	addConstAndEqual(cipher23, coeff[2], logp);
+
+	multAndEqual(cipher23, cipher2);
+	reScaleByAndEqual(cipher23, logp);
+	modDownByAndEqual(cipher01, logp);
+	addAndEqual(cipher01, cipher23);
+
+	cipher = cipher01;
+}
+
+void Scheme::evalPoly8AndEqual(Ciphertext& cipher, long logp, double* coeff) {
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+	Ciphertext cipher4 = square(cipher2);
+	reScaleByAndEqual(cipher4, logp);
+
+	Ciphertext cipher01 = multByConst(cipher, coeff[1], logp);
+	reScaleByAndEqual(cipher01, logp);
+	addConstAndEqual(cipher01, coeff[0], logp);
+
+	Ciphertext cipher23 = multByConst(cipher, coeff[3], logp);
+	reScaleByAndEqual(cipher23, logp);
+	addConstAndEqual(cipher23, coeff[2], logp);
+
+	Ciphertext cipher45 = multByConst(cipher, coeff[5], logp);
+	reScaleByAndEqual(cipher45, logp);
+	addConstAndEqual(cipher45, coeff[4], logp);
+
+	Ciphertext cipher67 = multByConst(cipher, coeff[7], logp);
+	reScaleByAndEqual(cipher67, logp);
+	addConstAndEqual(cipher67, coeff[6], logp);
+
+	multAndEqual(cipher23, cipher2);
+	reScaleByAndEqual(cipher23, logp);
+	modDownByAndEqual(cipher01, logp);
+	addAndEqual(cipher01, cipher23);
+
+	multAndEqual(cipher67, cipher2);
+	reScaleByAndEqual(cipher67, logp);
+	modDownByAndEqual(cipher45, logp);
+	addAndEqual(cipher45, cipher67);
+
+	multAndEqual(cipher45, cipher4);
+	reScaleByAndEqual(cipher45, logp);
+	modDownByAndEqual(cipher01, logp);
+	addAndEqual(cipher01, cipher45);
+
+	cipher = cipher01;
 }
 
 void Scheme::evalPolyAndEqual(Ciphertext& cipher, long logp, double* coeff, long start, long num) {

@@ -258,6 +258,9 @@ public:
 	void cos2piAndEqual(Ciphertext& cipher, long logp);
 
 	void evalPolyAndEqual(Ciphertext& cipher, long logp, double* coeff, long start, long end);
+
+	void evalPoly4AndEqual(Ciphertext& cipher, long logp, double* coeff);
+	void evalPoly8AndEqual(Ciphertext& cipher, long logp, double* coeff);
 };
 
 #endif
