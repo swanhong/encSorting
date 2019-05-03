@@ -2,6 +2,7 @@
 #define NEW_BOOTSTRAPPING_H_
 
 #include "common.h"
+#include "../src/PrintUtils.h"
 
 class BootHelper
 {
@@ -55,6 +56,7 @@ public:
 	void bootstrapping(Ciphertext& cipher, long logq, long logQ, long logT, long=4);
 
 	void bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, long logK);
+	void bootstrapping_cosDec(Ciphertext& cipher, long logq, long logQ, long logK, SecretKey sk);
 
 	void evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq);
 };

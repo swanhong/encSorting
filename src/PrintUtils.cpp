@@ -37,7 +37,7 @@ void PrintUtils::printSingleArray(std::string str, double* array, long n) {
 
 void PrintUtils::printSingleArray(std::string str, complex<double>* array, long n) {
     for (int i = 0; i < n; i++) {
-        std::cout << str << "[" << i << "] : " << array[i].real() << std::endl;
+        std::cout << str << "[" << i << "] = " << array[i].real() << std::endl;
     }
 }
 
@@ -59,7 +59,7 @@ void PrintUtils::printArrays(double* a1, std::complex<double>* a2, long n) {
 
 void PrintUtils::printArrays(std::complex<double>* a1, std::complex<double>* a2, long n) {
     for(int i = 0; i < n; i++) {
-        std::cout << i << " i " << a1[i].real() << " // " << a2[i].real() << std::endl;
+        std::cout << i << " : " << a1[i].real() << " // " << a2[i].real() << std::endl;
     }
 }
 

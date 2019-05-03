@@ -23,11 +23,16 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 	timeutils.stop("Bootstrapping Helper construct");
 
     double* mvec = EvaluatorUtils::randomRealArray(n);
+    // for (int i = 0; i < n; i++) {
+    //     mvec[i] += 1.;
+    // }
+    
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
     timeutils.start("EncSort");
     EncSorting encSorting(param, iter);
-    encSorting.runEncSorting(cipher, scheme, ring, bootHelper, increase);
+    // encSorting.runEncSorting(cipher, scheme, ring, bootHelper, increase);
+    encSorting.runEncSortingDec(cipher, scheme, ring, bootHelper, increase, secretKey);
     timeutils.stop("EncSort"); 
 
     // run PlainSort
@@ -39,9 +44,9 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::averageDifference(mvec, dvec, n);
-    // for(int i = 0; i < 1 << param.log2n; i++) {
-    //     cout << i << " : " << mvec[i] << " .. " << dvec[i].real() << endl;
-    // }
+    for(int i = 0; i < 1 << param.log2n; i++) {
+        cout << i << " : " << mvec[i] << " .. " << dvec[i].real() << endl;
+    }
 }
 
 void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long invIter, long compIter, bool increase) {

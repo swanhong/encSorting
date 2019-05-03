@@ -9,8 +9,8 @@ int main() {
     // Parameters (long)
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
-    Parameter sortingTestParamSmall = {6, 1350, 40, 40, 4, 4, 50, 4};
-    Parameter sortingTestParam1 = {12, 1350, 40, 40, 8, 16, 50, 5};
+    Parameter sortingTestParamSmall = {7, 1350, 40, 40, 4, 4, 50, 4};
+    Parameter sortingTestParam1 = {10, 1350, 50, 50, 6, 16, 60, 5};
     Parameter sortingTestParamBig = {15, 1350, 40, 40, 14, 128, 50, 5};
     Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
     Parameter sortingTestParamBig3 = {17, 1350, 40, 40, 16, 256, 50, 4};
@@ -41,24 +41,27 @@ int main() {
     // *** Test algorithms for encrypted data with Bootstrapping
     // ******************************
     // ******************************
-    // TestBoot::approxSqrt(sortingTestParam1, 25);
+    // TestBoot::approxSqrt(sortingTestParamSmall, 20);
     // TestBoot::approxInverse(sortingTestParamSmall, 5);
     // TestBoot::approxComp(sortingTestParamSmall, 5, 5);
-    // TestBoot::minMax(sortingTestParamSmall, 20);
-    TestBoot::compAndSwap(sortingTestParam1, 15);
+    // TestBoot::minMax(sortingTestParamSmall, 15);
+    // TestBoot::compAndSwap(sortingTestParamSmall, 15);
     // TestBoot::reverse(sortingTestParamSmall);
     // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 4, 5);
 
+
+    Parameter param = sortingTestParamSmall;
+    
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParamSmall);
+    // TestBoot::bootstrapping(param);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
     // *** Test EncSorting
     // ******************************
-    // TestSort::sort(sortingTestParamSmall, 15);
+    TestSort::sort(param, 25);
     // TestSort::merge(sortingTestParamSmall, 15, 4);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
     // TestSort::tableSort(sortingTestParam1, 4, 0, 5, 5);

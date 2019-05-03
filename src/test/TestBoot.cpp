@@ -21,15 +21,89 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	BootHelper boothelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	complex<double>* mvec = EvaluatorUtils::randomComplexArray(n, 2);
+	complex<double>* r10 = EvaluatorUtils::randomComplexArray(n);
     // double* mvec = new double[n];
+    r10[0] = 1;
+    r10[1] = 18.9857;;
+    r10[2] = 1;
+    r10[3] = 4.6455;
+    r10[4] = 1;
+    r10[5] = 18.1163;
+    r10[6] = 1;
+    r10[7] = 10.2835;
+    r10[8] = 1;
+    r10[9] = 6.10418;
+    r10[10] = 1;
+    r10[11] = 5.30126;
+    r10[12] = 1;
+    r10[13] = 24.9799;
+    r10[14] = 1;
+    r10[15] = 42.2266;
+    r10[16] = 1;
+    r10[17] = 34.1281;
+    r10[18] = 1;
+    r10[19] = 6.49053;
+    r10[20] = 1;
+    r10[21] = 24.4108;
+    r10[22] = 1;
+    r10[23] = 17.5154;
+    r10[24] = 1;
+    r10[25] = 4.33479;
+    r10[26] = 1;
+    r10[27] = 37.6225;
+    r10[28] = 1;
+    r10[29] = 4.89687;
+    r10[30] = 1;
+    r10[31] = 38.4453;
+    r10[32] = 1;
+    r10[33] = 5.28638;
+    r10[34] = 1;
+    r10[35] = 8.56952;
+    r10[36] = 1;
+    r10[37] = 12.7157;
+    r10[38] = 1;
+    r10[39] = 3.04851;
+    r10[40] = 1;
+    r10[41] = 14.4908;
+    r10[42] = 1;
+    r10[43] = 5.90784;
+    r10[44] = 1;
+    r10[45] = 21.3166;
+    r10[46] = 1;
+    r10[47] = 4.66979;
+    r10[48] = 1;
+    r10[49] = 7.9521;
+    r10[50] = 1;
+    r10[51] = 11.4703;
+    r10[52] = 1;
+    r10[53] = 3.60489;
+    r10[54] = 1;
+    r10[55] = 15.8252;
+    r10[56] = 1;
+    r10[57] = 5.32735;
+    r10[58] = 1;
+    r10[59] = 36.6636;
+    r10[60] = 1;
+    r10[61] = 2.72867;
+    r10[62] = 1;
+    r10[63] = 5.42936;
 	
-	Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
+	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
 
 
+    long normalizeNum = 4;
 	timeutils.start("Improved bootstrapping");
-	// boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
-    boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 6);
+	boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+    // scheme.divByPo2AndEqual(cipher,  normalizeNum);
+    
+    // complex<double>* dvecn = scheme.decrypt(secretKey, cipher);
+    // cout << "cipher.logq = " << cipher.logq << endl;
+    // PrintUtils::printSingleArray("normalized", dvecn, n);
+
+    // boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 7, secretKey);
+    // scheme.multByConstAndEqual(cipher, (double) (1 << normalizeNum), parameter.logp);
+    // scheme.reScaleByAndEqual(cipher, parameter.logp);
+    
 	timeutils.stop("Improved bootstrapping");
 
 	cout << "* Before logQ = " << parameter.logq << endl;
@@ -37,12 +111,11 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
 	// Print Result and Difference //
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(mvec, dvec, n);
-    PrintUtils::averageDifference(mvec, dvec, n);
-	// cout << "log2(avg of error) = " << diff(mvec, dvec, n) << endl;
+    PrintUtils::printArrays(r10, dvec, n);
+    PrintUtils::averageDifference(r10, dvec, n);
 	
-	if(mvec != NULL) delete[] mvec;
-	if(dvec != NULL) delete[] dvec;
+	// if(mvec != NULL) delete[] mvec;
+	// if(dvec != NULL) delete[] dvec;
 	return;
 }
 
@@ -64,17 +137,52 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
 	BootHelper bootHelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	double* mvec = EvaluatorUtils::randomRealArray(n, 0.02);
-    // for(int i = 0; i < n; i++) {
-    //     mvec[i] = 0.01 * i;
-    // }
+	// double* mvec = EvaluatorUtils::randomRealArray(n, 0.00001);
+    double* mvec = new double[n];
+    mvec[0] = 0.0086326; // 0.00821181
+    mvec[1] = 0.1; // 0.0999609
+    mvec[2] = 0.00555455; // 0.0049605
+    mvec[3] = 0.1; // 0.0999609
+    mvec[4] = 0.0155735; // 0.015328
+    mvec[5] = 0.1; // 0.0999609
+    mvec[6] = 0.061951; // 0.061888
+    mvec[7] = 0.1; // 0.0999609
+    mvec[8] = 0.0482967; // 0.0482158
+    mvec[9] = 0.1; // 0.0999609
+    mvec[10] = 0.0374798; // 0.0373758
+    mvec[11] = 0.1; // 0.0999609
+    mvec[12] = 0.0775831; // 0.0775327
+    mvec[13] = 0.1; // 0.0999609
+    mvec[14] = 0.0109508; // 0.0106098
+    mvec[15] = 0.443224; // 0.443215
+    
+    for(int i = 0; i < n; i++) {
+        mvec[i] = mvec[i] * mvec[i];
+        // cout << "mvec[" << i << "] = " << mvec[i] << endl;
+    }
 	// Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     Ciphertext cipher2 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     Ciphertext cipher3 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
+    
+    // for (int i = 0; i < 3; i++) {
+    //     for(int j = 0; j < n; j++) {
+    //         mvec[j] = mvec[j] * mvec[j];
+    //     }   
+    //     scheme.squareAndEqual(cipher2);
+    //     scheme.reScaleByAndEqual(cipher2, parameter.logp);
+    // }
+    for (int i = 0; i < 10; i++) {
+        for(int j = 0; j < n; j++) {
+            mvec[j] = mvec[j] * 1.1;
+        }   
+        scheme.multByConstAndEqual(cipher2, 1.1, parameter.logp);
+        scheme.reScaleByAndEqual(cipher2, parameter.logp);
+    }
+    scheme.decryptAndPrint("cipher2", secretKey, cipher2);
 
     // scheme.modDownToAndEqual(cipher, parameter.logq);
-    scheme.modDownToAndEqual(cipher2, parameter.logq);
-    scheme.modDownToAndEqual(cipher3, parameter.logq);   
+    // scheme.modDownToAndEqual(cipher2, 192);
+    // scheme.modDownToAndEqual(cipher3, parameter.logq);   
     
     BootAlgo bootAlgo(parameter, iter);
     // timeutils.start("Sqrt");
@@ -83,9 +191,9 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     timeutils.start("Sqrt2");
     bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
     timeutils.stop("Sqrt2");
-    timeutils.start("Sqrt3");
-    bootAlgo.approxSqrt3(cipher3, scheme, bootHelper);
-    timeutils.stop("Sqrt3");
+    // timeutils.start("Sqrt3");
+    // bootAlgo.approxSqrt3(cipher3, scheme, bootHelper);
+    // timeutils.stop("Sqrt3");
     
 
     // Print Result and Difference //	
@@ -94,7 +202,7 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     // cout << "2 : comsumed logQ = " << parameter.logQ - cipher2.logq << endl;
     complex<double>* dvec2 = scheme.decrypt(secretKey, cipher2);
     // cout << "3 : comsumed logQ = " << parameter.logQ - cipher3.logq << endl;
-    complex<double>* dvec3 = scheme.decrypt(secretKey, cipher3);
+    // complex<double>* dvec3 = scheme.decrypt(secretKey, cipher3);
     for(int i = 0; i < n; i++) {
         mvec[i] = sqrt(mvec[i]);
     }
@@ -102,8 +210,8 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     // PrintUtils::averageDifference(mvec, dvec, n);
     PrintUtils::printArrays(mvec, dvec2, n);
     PrintUtils::averageDifference(mvec, dvec2, n);
-    PrintUtils::printArrays(mvec, dvec3, n);
-    PrintUtils::averageDifference(mvec, dvec3, n);
+    // PrintUtils::printArrays(mvec, dvec3, n);
+    // PrintUtils::averageDifference(mvec, dvec3, n);
 }
 
 void TestBoot::approxInverse(Parameter parameter, long iter) {
@@ -242,7 +350,8 @@ void TestBoot::minMax(Parameter param, long iter) {
     
 	timeutils.start("minMax");
     BootAlgo bootAlgo(param, iter);
-    bootAlgo.minMax(cipher1, cipher2, scheme, boothelper);
+    // bootAlgo.minMax(cipher1, cipher2, scheme, boothelper);
+    bootAlgo.minMaxDec(cipher1, cipher2, scheme, boothelper, secretKey);
     timeutils.stop("minMax");
 
 	complex<double>* dmax = scheme.decrypt(secretKey, cipher2);

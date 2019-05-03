@@ -27,6 +27,7 @@ public:
     void approxSqrt2(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
     void approxSqrt2Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     void approxSqrt3(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
+    void approxSqrt3Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     
     void approxInverse(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper); 
 
@@ -38,7 +39,7 @@ public:
     void comparison(Ciphertext& cipher1, Ciphertext& cipher2, BootScheme& scheme, BootHelper& bootHelper);
 
     void compAndSwap(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
-    void compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk);
+    void compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, long loc, SecretKey sk);
 
     void selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 

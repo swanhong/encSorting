@@ -235,16 +235,27 @@ void BootHelper::invV0(Ciphertext& cipher)
 		Ciphertext* bsrotFirst = new Ciphertext[bs];
 		Ciphertext* gsrotFirst = new Ciphertext[gs];		
 		bsrotFirst[0] = cipher;
-		for(long i = 0; i < bs-1; ++i) { // baby-step
+		
+		NTL_EXEC_RANGE(bs-1,first,last)
+
+		for(long i = first; i < last; ++i) { // baby-step
 			bsrotFirst[i+1] = scheme.leftRotateFast(cipher, (i+1)*gap);
 		}
-		for(long i = 0; i < gs; i++) {
+
+		NTL_EXEC_RANGE_END
+
+		NTL_EXEC_RANGE(gs,first,last)
+
+		for(long i = first; i < last; i++) {
 			gsrotFirst[i] = scheme.multByPoly(bsrotFirst[0], encodeinvV0poly[0][i*bs], logp);
 			for(long j = 1; j < bs; j++) {
 				Ciphertext tmp = scheme.multByPoly(bsrotFirst[j], encodeinvV0poly[0][i*bs+j], logp);
 				scheme.addAndEqual(gsrotFirst[i], tmp);
 			}
 		}
+
+		NTL_EXEC_RANGE_END
+
 		cipher = gsrotFirst[0];
 		for(long i = 0; i < gs-1; ++i) { // giant-step
 			scheme.leftRotateFastAndEqual(gsrotFirst[i+1], (i+1)*bs*gap);
@@ -277,10 +288,18 @@ void BootHelper::invV0(Ciphertext& cipher)
 			gap = slots / (radix * pow(radix, i));
 			tmpCipher = scheme.rightRotateFast(cipher, (radix - 1) * gap);
 			bsrot[0] = tmpCipher;
-			for(long j = 0; j < bs-1; j++) { // baby-step
+
+			NTL_EXEC_RANGE(bs-1,first,last)
+
+			for(long j = first; j < last; j++) { // baby-step
 				bsrot[j+1] = scheme.leftRotateFast(tmpCipher, (j+1) * gap);
 			}
-			for(long j = 0; j < gs; j++) {
+
+			NTL_EXEC_RANGE_END
+
+			NTL_EXEC_RANGE(gs,first,last)
+	
+			for(long j = first; j < last; j++) {
 				gsrot[j] = scheme.multByPoly(bsrot[0], encodeinvV0poly[i][j*bs], logp);
 				for(long k = 1; k < bs; k++) {
 					if((j * bs + k) < (2 * radix - 1)) {
@@ -289,10 +308,19 @@ void BootHelper::invV0(Ciphertext& cipher)
 					}
 				}
 			}
+
+			NTL_EXEC_RANGE_END
+
 			cipher = gsrot[0];
-			for(long j = 0; j < gs-1; ++j) { // giant-step
+			
+			NTL_EXEC_RANGE(gs-1,first,last)
+
+			for(long j = first; j < last; ++j) { // giant-step
 				scheme.leftRotateFastAndEqual(gsrot[j+1], (j+1)*bs*gap);
 			}
+
+			NTL_EXEC_RANGE_END
+
 			for(long j = 1; j < gs; j++) {
 				scheme.addAndEqual(cipher, gsrot[j]);
 			}
@@ -334,10 +362,18 @@ void BootHelper::V0(Ciphertext& cipher)
 			long gap = slots / (radix * pow(radix, logrSlots-i));
 			tmpCipher = scheme.rightRotateFast(cipher, (radix - 1) * gap);
 			bsrot[0] = tmpCipher;
-			for(long j = 1; j < bs; j++) { // baby-step
-				bsrot[j] = scheme.leftRotateFast(tmpCipher, j * gap);
+
+			NTL_EXEC_RANGE(bs-1,first,last)
+
+			for(long j = first; j < last; j++) { // baby-step
+				bsrot[j+1] = scheme.leftRotateFast(tmpCipher, (j+1) * gap);
 			}
-			for(long j = 0; j < gs; j++) {
+
+			NTL_EXEC_RANGE_END
+			
+			NTL_EXEC_RANGE(gs,first,last)
+
+			for(long j = first; j < last; j++) {
 				gsrot[j] = scheme.multByPoly(bsrot[0], encodeV0poly[logrSlots-i][j*bs], logp);
 				for(long k = 1; k < bs; k++) {
 					if((j*bs+k) < (2*radix-1)) {
@@ -346,6 +382,9 @@ void BootHelper::V0(Ciphertext& cipher)
 					}
 				}
 			}
+
+			NTL_EXEC_RANGE_END
+
 			cipher = gsrot[0];
 			for(long j = 1; j < gs; j++) { // giant-step
 				Ciphertext rot = scheme.leftRotateFast(gsrot[j], j*bs*gap);
@@ -378,11 +417,19 @@ void BootHelper::V0(Ciphertext& cipher)
 		Ciphertext* bsrotFirst = new Ciphertext[bs];
 		Ciphertext* gsrotFirst = new Ciphertext[gs];		
 		bsrotFirst[0] = cipher;
-		for(long i = 1; i < bs; ++i) { // baby-step
+
+		NTL_EXEC_RANGE(bs-1,first,last)
+
+		for(long i = first; i < last; ++i) { // baby-step
 			long gap = slots / radix;
-			bsrotFirst[i] = scheme.leftRotateFast(cipher, i * gap);
+			bsrotFirst[i+1] = scheme.leftRotateFast(cipher, (i+1) * gap);
 		}
-		for(long i = 0; i < gs; ++i) {
+
+		NTL_EXEC_RANGE_END
+
+		NTL_EXEC_RANGE(gs,first,last)
+
+		for(long i = first; i < last; ++i) {
 			long gap = slots / radix;
 			gsrotFirst[i] = scheme.multByPoly(bsrotFirst[0], encodeV0poly[0][i*bs], logp);
 			for(long j = 1; j < bs; ++j) {
@@ -390,6 +437,9 @@ void BootHelper::V0(Ciphertext& cipher)
 				scheme.addAndEqual(gsrotFirst[i], tmp);
 			}
 		}
+
+		NTL_EXEC_RANGE_END
+
 		cipher = gsrotFirst[0];
 		for(long i = 1; i < gs; ++i) { // giant-step
 			long gap = slots / radix;
@@ -528,7 +578,7 @@ void BootHelper::bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, lon
 	scheme.modDownToAndEqual(cipher, logq);
 	scheme.normalizeAndEqual(cipher);
 
-	TimeUtils time;
+	// TimeUtils time;
 
 	cipher.logq = logQ;
 	cipher.logp = logq;
@@ -557,6 +607,54 @@ void BootHelper::bootstrapping_cos(Ciphertext& cipher, long logq, long logQ, lon
 	cipher.logp = logp;
 }
 
+void BootHelper::bootstrapping_cosDec(Ciphertext& cipher, long logq, long logQ, long logK, SecretKey sk) {
+	long logSlots = log2(cipher.n);
+	long logp = cipher.logp;
+
+	scheme.modDownToAndEqual(cipher, logq);
+	scheme.normalizeAndEqual(cipher);
+
+	TimeUtils time;
+
+	cipher.logq = logQ;
+	cipher.logp = logq;
+
+	for (long i = logSlots; i < ring.logNh; ++i) {
+		Ciphertext rot = scheme.leftRotateFast(cipher, (1 << i));
+		scheme.addAndEqual(cipher, rot);
+	}
+	scheme.divByPo2AndEqual(cipher, ring.logNh - logSlots);
+	
+	Ciphertext part1, part2;
+
+	// time.start("CoeffToSlot");
+	coeffToSlot(part1, part2, cipher);
+	// time.stop("CoeffToSlot");
+
+	complex<double>* dvecPart1 = scheme.decrypt(sk, part1);
+	complex<double>* dvecPart2 = scheme.decrypt(sk, part2);
+
+	// time.start("Evaluate Sin * 2");
+	evalSin2piAndEqual(part1, logK, logq);
+	evalSin2piAndEqual(part2, logK, logq);
+	// time.stop("Evaluate Sin * 2");
+
+	complex<double>* dvecPart1a = scheme.decrypt(sk, part1);
+	complex<double>* dvecPart2a = scheme.decrypt(sk, part2);
+	
+	cout << "Part1" << endl;
+	PrintUtils::printArrays(dvecPart1, dvecPart1a, cipher.n);
+	
+	cout << "Part2" << endl;
+	PrintUtils::printArrays(dvecPart2, dvecPart2a, cipher.n);
+
+	// time.start("SlotToCoeff");
+	slotToCoeff(cipher, part1, part2);
+	// time.stop("SlotToCoeff");
+
+	cipher.logp = logp;
+}
+
 void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 	// cout << "logq = " << cipher.logq << endl;
 	
@@ -576,7 +674,8 @@ void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 	for(int i = 0; i < logK; i++) {
 		scheme.squareAndEqual(cipher);
 		scheme.reScaleByAndEqual(cipher, logq);
-		scheme.multByConstAndEqual(cipher, 2.0, 0);
+		scheme.normalizeAndEqual(cipher);
+		scheme.addAndEqual(cipher, cipher);
 		scheme.addConstAndEqual(cipher, -1.0, logq);
 	}
 	// cout << "logq = " << cipher.logq << endl;
