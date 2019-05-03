@@ -24,6 +24,7 @@ public:
     ~BootAlgo() {}
 
     void approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
+    void approxSqrtDec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     void approxSqrt2(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
     void approxSqrt2Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     void approxSqrt3(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);

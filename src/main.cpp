@@ -10,7 +10,7 @@ int main() {
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
     Parameter sortingTestParamSmall = {7, 1350, 40, 40, 4, 4, 50, 4};
-    Parameter sortingTestParam1 = {10, 1350, 50, 50, 6, 16, 60, 5};
+    Parameter sortingTestParam1 = {10, 1350, 40, 40, 6, 16, 50, 5};
     Parameter sortingTestParamBig = {15, 1350, 40, 40, 14, 128, 50, 5};
     Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
     Parameter sortingTestParamBig3 = {17, 1350, 40, 40, 16, 256, 50, 4};
@@ -41,7 +41,7 @@ int main() {
     // *** Test algorithms for encrypted data with Bootstrapping
     // ******************************
     // ******************************
-    // TestBoot::approxSqrt(sortingTestParamSmall, 20);
+    // TestBoot::approxSqrt(sortingTestParam1, 15);
     // TestBoot::approxInverse(sortingTestParamSmall, 5);
     // TestBoot::approxComp(sortingTestParamSmall, 5, 5);
     // TestBoot::minMax(sortingTestParamSmall, 15);
@@ -50,7 +50,7 @@ int main() {
     // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 4, 5);
 
 
-    Parameter param = sortingTestParamSmall;
+    Parameter param = sortingTestParam1;
     
     // ******************************
     // *** Check Parameters
@@ -61,7 +61,7 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(param, 25);
+    TestSort::sort(param, 10);
     // TestSort::merge(sortingTestParamSmall, 15, 4);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
     // TestSort::tableSort(sortingTestParam1, 4, 0, 5, 5);

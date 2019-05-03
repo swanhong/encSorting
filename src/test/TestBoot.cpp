@@ -137,40 +137,40 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
 	BootHelper bootHelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	// double* mvec = EvaluatorUtils::randomRealArray(n, 0.00001);
-    double* mvec = new double[n];
-    mvec[0] = 0.0086326; // 0.00821181
-    mvec[1] = 0.1; // 0.0999609
-    mvec[2] = 0.00555455; // 0.0049605
-    mvec[3] = 0.1; // 0.0999609
-    mvec[4] = 0.0155735; // 0.015328
-    mvec[5] = 0.1; // 0.0999609
-    mvec[6] = 0.061951; // 0.061888
-    mvec[7] = 0.1; // 0.0999609
-    mvec[8] = 0.0482967; // 0.0482158
-    mvec[9] = 0.1; // 0.0999609
-    mvec[10] = 0.0374798; // 0.0373758
-    mvec[11] = 0.1; // 0.0999609
-    mvec[12] = 0.0775831; // 0.0775327
-    mvec[13] = 0.1; // 0.0999609
-    mvec[14] = 0.0109508; // 0.0106098
-    mvec[15] = 0.443224; // 0.443215
+	double* mvec = EvaluatorUtils::randomRealArray(n, 1);
+    // double* mvec = new double[n];
+    // mvec[0] = 0.0086326; // 0.00821181
+    // mvec[1] = 0.1; // 0.0999609
+    // mvec[2] = 0.00555455; // 0.0049605
+    // mvec[3] = 0.1; // 0.0999609
+    // mvec[4] = 0.0155735; // 0.015328
+    // mvec[5] = 0.1; // 0.0999609
+    // mvec[6] = 0.061951; // 0.061888
+    // mvec[7] = 0.1; // 0.0999609
+    // mvec[8] = 0.0482967; // 0.0482158
+    // mvec[9] = 0.1; // 0.0999609
+    // mvec[10] = 0.0374798; // 0.0373758
+    // mvec[11] = 0.1; // 0.0999609
+    // mvec[12] = 0.0775831; // 0.0775327
+    // mvec[13] = 0.1; // 0.0999609
+    // mvec[14] = 0.0109508; // 0.0106098
+    // mvec[15] = 0.443224; // 0.443215
     
-    for(int i = 0; i < n; i++) {
-        mvec[i] = mvec[i] * mvec[i];
-        // cout << "mvec[" << i << "] = " << mvec[i] << endl;
-    }
+    // for(int i = 0; i < n; i++) {
+    //     mvec[i] = mvec[i] * mvec[i];
+    //     // cout << "mvec[" << i << "] = " << mvec[i] << endl;
+    // }
 	// Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     Ciphertext cipher2 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     Ciphertext cipher3 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     
-    // for (int i = 0; i < 3; i++) {
-    //     for(int j = 0; j < n; j++) {
-    //         mvec[j] = mvec[j] * mvec[j];
-    //     }   
-    //     scheme.squareAndEqual(cipher2);
-    //     scheme.reScaleByAndEqual(cipher2, parameter.logp);
-    // }
+    for (int i = 0; i < 3; i++) {
+        for(int j = 0; j < n; j++) {
+            mvec[j] = mvec[j] * mvec[j];
+        }   
+        scheme.squareAndEqual(cipher2);
+        scheme.reScaleByAndEqual(cipher2, parameter.logp);
+    }
     for (int i = 0; i < 10; i++) {
         for(int j = 0; j < n; j++) {
             mvec[j] = mvec[j] * 1.1;
@@ -186,10 +186,10 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     
     BootAlgo bootAlgo(parameter, iter);
     // timeutils.start("Sqrt");
-	// bootAlgo.approxSqrt(cipher, scheme, bootHelper);
+	bootAlgo.approxSqrt(cipher2, scheme, bootHelper);
     // timeutils.stop("Sqrt");
     timeutils.start("Sqrt2");
-    bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
+    // bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
     timeutils.stop("Sqrt2");
     // timeutils.start("Sqrt3");
     // bootAlgo.approxSqrt3(cipher3, scheme, bootHelper);

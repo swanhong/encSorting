@@ -19,9 +19,9 @@ void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bo
     if (condition) {
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- before : " + to_string(cipher.logq), WANT_TO_PRINT);
         countBoot();
-        // bootHelper.bootstrapping(cipher, param.logq, param.logQ, param.logT);
+        bootHelper.bootstrapping(cipher, param.logq, param.logQ, param.logT);
         cout << "bootstrapping...." << endl;
-        bootHelper.bootstrapping_cos(cipher, param.logq, param.logQ, 5);
+        // bootHelper.bootstrapping_cos(cipher, param.logq, param.logQ, 5);
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- after : " + to_string(cipher.logq), WANT_TO_PRINT);
     }
 }
