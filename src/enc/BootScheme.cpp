@@ -79,19 +79,6 @@ void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHe
     multByPolyAndEqual(cipher, poly, param.logp);
 }
 
-void BootScheme::nomalizeAndEuqal(Ciphertext& cipher) {
-    long dup = log2(cipher.N / cipher.n / 2);
-    // cout << "nomalize with dup = " << dup << endl;
-    for (int i = 0; i < dup; i++) {
-        // cout << "rot by " << cipher.n * (1 << i) << endl;
-        Ciphertext rot = leftRotateFast(cipher, cipher.n * (1 << i));
-        addAndEqual(cipher, rot);
-    }
-    // cout << "div by " << dup << endl;
-    divByPo2AndEqual(cipher, dup);
-    
-}
-
 void BootScheme::decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher) {
     complex<double>* dvec = decrypt(secretKey, cipher);
     PrintUtils::printSingleArray(str, dvec, cipher.n);

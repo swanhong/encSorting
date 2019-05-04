@@ -37,8 +37,6 @@ public:
     Ciphertext multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
     void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
 
-    void nomalizeAndEuqal(Ciphertext& cipher);
-
     void decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher);
 
     void showTotalCount();

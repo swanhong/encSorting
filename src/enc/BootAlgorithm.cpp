@@ -145,13 +145,6 @@ void BootAlgo::approxSqrt2(Ciphertext& cipher, BootScheme& scheme, BootHelper& b
     
 
     for(int i = 0; i < sqrtIter; i++) {
-        // long nomalizeNum = 4;
-        // if (i > 5 && r.logq - 2 * logp - 1 < param.logq) {
-        //     scheme.divByPo2AndEqual(r,  nomalizeNum);
-        //     bootHelper.bootstrapping_cos(r, param.logq, param.logQ, 5);
-        //     scheme.multByConstAndEqual(r, (double) (1 << nomalizeNum), 0);
-        // }
-
 	    scheme.checkAndBoot(r, r.logq - 2 * logp - 1 < param.logq, bootHelper, param);
         scheme.checkAndBoot(cipher, cipher.logq < r.logq, bootHelper, param); // once cipher has been bootstrpped, it never bootstrapp again while the iterations end.
         
@@ -197,17 +190,6 @@ void BootAlgo::approxSqrt2Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper
     scheme.decryptAndPrint("Start r", sk, r);
        
     for(int i = 0; i < sqrtIter; i++) {
-        // long nomalizeNum = 4;
-        // if (i > 5 && r.logq - 2 * logp - 1 < param.logq) {
-        //     // cout << "before Boot.. = " << r.logq << endl;
-        //     scheme.divByPo2AndEqual(r,  nomalizeNum);
-        //     cout << "bootstrapping for i > 5..." << endl;
-        //     // bootHelper.bootstrapping_cos(r, param.logq, param.logQ, 5);
-
-        //     scheme.multByConstAndEqual(r, (double) (1 << nomalizeNum), logp);
-        //     scheme.reScaleByAndEqual(r, logp);
-        //     // cout << "after Boot.. = " << r.logq << endl;
-        // }
 	    scheme.checkAndBoot(r, r.logq - 2 * logp - 1 < param.logq, bootHelper, param);
         scheme.checkAndBoot(cipher, cipher.logq < r.logq, bootHelper, param); // once cipher has been bootstrpped, it never bootstrapp again while the iterations end.
         
@@ -215,15 +197,12 @@ void BootAlgo::approxSqrt2Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper
         Ciphertext w = scheme.modDownTo(cipher, r.logq);
         scheme.multAndEqual(w, r);
         scheme.reScaleByAndEqual(w, logp);
-        scheme.nomalizeAndEuqal(w);
 
         Ciphertext rSquare = scheme.square(r);
         scheme.reScaleByAndEqual(rSquare, logp);
-        scheme.nomalizeAndEuqal(rSquare);
 
         scheme.multAndEqual(w, rSquare);
         scheme.reScaleByAndEqual(w, logp);
-        scheme.nomalizeAndEuqal(w);
 
         scheme.decryptAndPrint("w" + to_string(i), sk, w);
 
@@ -244,7 +223,6 @@ void BootAlgo::approxSqrt2Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper
     scheme.modDownToAndEqualModified(cipher, r, bootHelper, param); // a - 1
     scheme.multAndEqualWithBoot(cipher, r, bootHelper, param);
     scheme.reScaleByAndEqual(cipher, logp);
-    scheme.nomalizeAndEuqal(cipher);
 
     PrintUtils::nprint("end Sqrt, logq = " + to_string(cipher.logq), WANT_TO_PRINT);
 }
@@ -465,7 +443,6 @@ void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& 
     
     scheme.squareAndEuqalWithBoot(y, bootHelper, param);
     scheme.reScaleByAndEqual(y, param.logp); // y - logp + 1
-    scheme.nomalizeAndEuqal(y);
 
     scheme.addAndEqual(y, y);
     scheme.addAndEqual(y, y);
@@ -499,7 +476,6 @@ void BootAlgo::minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootSchem
     
     scheme.squareAndEuqalWithBoot(y, bootHelper, param);
     scheme.reScaleByAndEqual(y, param.logp); // y - logp + 1
-    scheme.nomalizeAndEuqal(y);
 
     scheme.addAndEqual(y, y);
     scheme.addAndEqual(y, y);
@@ -612,7 +588,6 @@ void BootAlgo::compAndSwap(Ciphertext& cipher, double** mask, long loc, long dis
     Ciphertext dummy = cipher;
     scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
     scheme.reScaleByAndEqual(dummy, param.logp);
-    scheme.nomalizeAndEuqal(dummy);
     scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param);
     scheme.subAndEqual(cipher, dummy);
     if(increase) {
@@ -625,8 +600,7 @@ void BootAlgo::compAndSwap(Ciphertext& cipher, double** mask, long loc, long dis
     double* dummyMask = new double[n];
     for(int i = 0; i < n; i++) {
         dummyMask[i] = mask[loc][i] / (double) (loc+1);
-        cout << dummyMask[i] << ", ";
-    }cout << endl;
+    }
     ring.encode(dummyPoly, dummyMask, cipher.n, param.logp);
 
     scheme.addByPolyAndEqual(cipher, dummyPoly, param.logp);
@@ -658,7 +632,6 @@ void BootAlgo::compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootS
     Ciphertext dummy = cipher;
     scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
     scheme.reScaleByAndEqual(dummy, param.logp);
-    scheme.nomalizeAndEuqal(dummy);
     scheme.modDownToAndEqualModified(cipher, dummy, bootHelper, param);
     scheme.subAndEqual(cipher, dummy);
     if(increase) {
