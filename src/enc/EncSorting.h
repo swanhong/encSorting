@@ -31,6 +31,7 @@ public:
                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);
 
+    void compAndSwapBothWithDec(Ciphertext& cipher, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
     void CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long dist,
                                     double* mask, double* maskRight, double* maskTable, double* maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);

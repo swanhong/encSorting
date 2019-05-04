@@ -14,7 +14,7 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
     PrintUtils::nprint("run encBatcherSort with loc = " + to_string(loc), WANT_TO_PRINT);
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        bootAlgo.compAndSwap(cipher, mask[loc], 1<< logJump, scheme, ring, bootHelper);
+        bootAlgo.compAndSwap(cipher, mask, loc, 1<< logJump, scheme, ring, bootHelper);
         scheme.showCurrentCount();
         scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");
@@ -25,7 +25,7 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
         loc = sortingRecursion(cipher, logNum - 1, logJump + 1, loc, mask, scheme, ring, bootHelper);
 
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        bootAlgo.compAndSwap(cipher, mask[loc], 1<< logJump, scheme, ring, bootHelper);
+        bootAlgo.compAndSwap(cipher, mask, loc, 1<< logJump, scheme, ring, bootHelper);
         scheme.showCurrentCount();
         scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");
@@ -48,21 +48,7 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
         
-        complex<double>* mvecCplx = scheme.decrypt(sk, cipher);
-        double* mvec = new double[cipher.n];
-        for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
-        CyclicArray ca(mvec, cipher.n);
-        ps.compAndSwap(ca, mask, loc, 1 << logJump, true);
-        mvec = ca.getArray();
-        
-        bootAlgo.compAndSwapDec(cipher, mask[loc], 1<< logJump, scheme, ring, bootHelper, loc, sk);
-        
-        complex<double>* dvec = scheme.decrypt(sk, cipher);
-        cout << loc << "th compAndSwap Result" << endl;
-        PrintUtils::printArrays(mvec, dvec, cipher.n);
-        cout << endl << "******************" << endl;
-        PrintUtils::averageDifference(mvec, dvec, cipher.n);
-        cout << "******************" << endl << endl;
+        compAndSwapBothWithDec(cipher, logJump, loc, mask, scheme, ring, bootHelper, sk, ps);
 
         scheme.showCurrentCount();
         scheme.resetCount();
@@ -75,27 +61,31 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
 
         timeutils.start(to_string(loc)+"th CompAndSwap");
 
-        complex<double>* mvecCplx = scheme.decrypt(sk, cipher);
-        double* mvec = new double[cipher.n];
-        for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
-        CyclicArray ca(mvec, cipher.n);
-        ps.compAndSwap(ca, mask, loc, 1 << logJump, true);
-        mvec = ca.getArray();
-
-        bootAlgo.compAndSwapDec(cipher, mask[loc], 1<< logJump, scheme, ring, bootHelper, loc, sk);
-
-        complex<double>* dvec = scheme.decrypt(sk, cipher);
-        cout << loc << "th compAndSwap Result" << endl;
-        PrintUtils::printArrays(mvec, dvec, cipher.n);
-        cout << endl << "******************" << endl;
-        PrintUtils::averageDifference(mvec, dvec, cipher.n);
-        cout << "******************" << endl << endl;
+        compAndSwapBothWithDec(cipher, logJump, loc, mask, scheme, ring, bootHelper, sk, ps);
 
         scheme.showCurrentCount();
         scheme.resetCount();
         timeutils.stop(to_string(loc)+"th CompAndSwap");
     }
     return loc + 1;
+}
+
+void EncSorting::compAndSwapBothWithDec(Ciphertext& cipher, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps) {
+    complex<double>* mvecCplx = scheme.decrypt(sk, cipher);
+    double* mvec = new double[cipher.n];
+    for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
+    CyclicArray ca(mvec, cipher.n);
+    
+    ps.compAndSwap(ca, mask, loc, 1 << logJump, true);
+    bootAlgo.compAndSwap(cipher, mask, loc, 1<< logJump, scheme, ring, bootHelper);
+
+    mvec = ca.getArray();
+    complex<double>* dvec = scheme.decrypt(sk, cipher);
+    cout << loc << "th compAndSwap Result" << endl;
+    PrintUtils::printArrays(mvec, dvec, cipher.n);
+    cout << endl << "******************" << endl;
+    PrintUtils::averageDifference(mvec, dvec, cipher.n);
+    cout << "******************" << endl << endl;
 }
 
 void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool increase) {
@@ -158,7 +148,6 @@ long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long
 void EncSorting::CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long dist,
                                     double* mask, double* maskRight, double* maskTable, double* maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps) {
-        cout << "run CompAndSwapTableBothWithDec with logDataNum = " << logDataNum << ", dist = " << dist << endl;
         complex<double>* mvecCplx = scheme.decrypt(secretKey, cipher);
         double* mvec = new double[cipher.n];
         for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
@@ -171,9 +160,9 @@ void EncSorting::CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum
 
         mvec = ca.getArray();
         complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-        cout << " compAndSwap Result" << endl;
-        cout << "cipher.logq, logp = " << logq << ", " << logp << " -> " << cipher.logq << ", " << cipher.logp << endl;
-        PrintUtils::printArrays(mvec, dvec, cipher.n);
+        // cout << " compAndSwap Result" << endl;
+        // cout << "cipher.logq, logp = " << logq << ", " << logp << " -> " << cipher.logq << ", " << cipher.logp << endl;
+        PrintUtils::printArraysWithDataNum(mvec, dvec, cipher.n, logDataNum);
         cout << endl << "******************" << endl;
         PrintUtils::averageDifference(mvec, dvec, cipher.n);
         cout << "******************" << endl << endl;

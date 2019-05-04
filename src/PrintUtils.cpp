@@ -57,9 +57,37 @@ void PrintUtils::printArrays(double* a1, std::complex<double>* a2, long n) {
     }
 }
 
+void PrintUtils::printArraysWithDataNum(double* a1, std::complex<double>* a2, long n, long logDataNum) {
+    long dataNum = 1 << logDataNum;
+    for(int i = 0; i < n; i++) {
+        if(i % dataNum == 0) {
+            std::cout << "<<";
+        }
+        std::cout << i << " : " << a1[i] << " // " << a2[i].real();
+        if(i % dataNum == 0) {
+            std::cout << ">>";
+        }
+        std:: cout << std::endl;
+    }
+}
+
 void PrintUtils::printArrays(std::complex<double>* a1, std::complex<double>* a2, long n) {
     for(int i = 0; i < n; i++) {
         std::cout << i << " : " << a1[i].real() << " // " << a2[i].real() << std::endl;
+    }
+}
+
+void PrintUtils::printArraysWithDataNum(std::complex<double>* a1, std::complex<double>* a2, long n, long logDataNum) {
+    long dataNum = 1 << logDataNum;
+    for(int i = 0; i < n; i++) {
+        if(i % dataNum == 0) {
+            std::cout << "<<";
+        }
+        std::cout << i << " : " << a1[i].real() << " // " << a2[i].real();
+        if(i % dataNum == 0) {
+            std::cout << ">>";
+        }
+        std:: cout << std::endl;
     }
 }
 

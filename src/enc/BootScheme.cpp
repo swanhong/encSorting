@@ -26,6 +26,11 @@ void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bo
     }
 }
 
+void BootScheme::checkLevelAndBoot(Ciphertext& cipher, long level, BootHelper& bootHelper, Parameter param) {
+    bool condition = cipher.logq - level * param.logp < param.logq;
+    checkAndBoot(cipher, condition, bootHelper, param);
+}
+
 Ciphertext BootScheme::multWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param) {
     Ciphertext res = cipher1;
     multAndEqualWithBoot(res, cipher2, bootHelper, param);

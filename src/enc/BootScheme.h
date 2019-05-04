@@ -24,6 +24,7 @@ public:
     void resetCount();
 
     void checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bootHelper, Parameter param);
+    void checkLevelAndBoot(Ciphertext& cipher, long level, BootHelper& bootHelper, Parameter param);
 
     Ciphertext multWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
     void multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);

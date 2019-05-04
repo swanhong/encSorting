@@ -11,6 +11,7 @@ int main() {
     // ******************************
     Parameter sortingTestParamSmall = {7, 1350, 40, 40, 4, 4, 50, 4};
     Parameter sortingTestParamSmall2 = {7, 1350, 40, 40, 6, 8, 50, 4};
+    Parameter paramLee = {12, 1350, 50, 50, 10, 32, 60, 5};
     Parameter sortingTestParam1 = {10, 1350, 40, 40, 6, 16, 50, 5};
     Parameter sortingTestParamBig = {15, 1350, 40, 40, 14, 128, 50, 5};
     Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
@@ -62,10 +63,10 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParamSmall2, 15);
+    TestSort::sort(sortingTestParamSmall, 13);
     // TestSort::merge(sortingTestParamSmall, 15, 4);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
-    // TestSort::tableSort(sortingTestParamSmall2, 0, 0, 5, 5);
+    // TestSort::tableSort(sortingTestParamSmall2, 3, 0, 5, 5);
 
     return 0;
 }

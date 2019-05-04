@@ -400,7 +400,7 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
     timeutils.start("CompAndSwap");
     BootAlgo bootAlgo(param, iter);
     // bootAlgo.compAndSwapDec(cipher, mask[0], 1, scheme, ring, bootHelper, secretKey);
-    bootAlgo.compAndSwap(cipher, mask[0], 1, scheme, ring, bootHelper);
+    bootAlgo.compAndSwap(cipher, mask, 0, 1, scheme, ring, bootHelper);
 	
     timeutils.stop("CompAndSwap");
 

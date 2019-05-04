@@ -43,10 +43,9 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+    PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
-    for(int i = 0; i < 1 << param.log2n; i++) {
-        cout << i << " : " << mvec[i] << " .. " << dvec[i].real() << endl;
-    }
+
 }
 
 void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long invIter, long compIter, bool increase) {
@@ -87,7 +86,7 @@ void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long inv
 
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(mvec, dvec, n);
+    PrintUtils::printArraysWithDataNum(mvec, dvec, n, logDataNum);
     PrintUtils::averageDifference(mvec, dvec, n);
     
 }

@@ -52,4 +52,5 @@ clean :
 	$(RM) $(OUTPUT) $(OBJS)
 
 run :
-	./$(OUTPUT) > $(OUTPUT).txt
+	./$(OUTPUT)
+	# ./$(OUTPUT) > $(OUTPUT).txt
