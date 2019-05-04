@@ -36,6 +36,10 @@ void BootScheme::multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, 
     checkAndBoot(cipher1, cipher1.logq - param.logp < param.logq,bootHelper,param);
     checkAndBoot(cipher2, cipher2.logq - param.logp < param.logq,bootHelper,param);
     countMult();
+    if (cipher1.logq != cipher2.logq) {
+        cout << " =========== error, mult for different logq in BootScheme::multAndEqualWithBoot ============" << endl;
+    }
+    
     multAndEqual(cipher1, cipher2);
 }
 

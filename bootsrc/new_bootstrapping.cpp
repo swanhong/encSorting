@@ -642,10 +642,10 @@ void BootHelper::bootstrapping_cosDec(Ciphertext& cipher, long logq, long logQ, 
 	complex<double>* dvecPart1a = scheme.decrypt(sk, part1);
 	complex<double>* dvecPart2a = scheme.decrypt(sk, part2);
 	
-	cout << "Part1" << endl;
+	cout << "Part1 : before // after" << endl;
 	PrintUtils::printArrays(dvecPart1, dvecPart1a, cipher.n);
 	
-	cout << "Part2" << endl;
+	cout << "Part2 : before // after" << endl;
 	PrintUtils::printArrays(dvecPart2, dvecPart2a, cipher.n);
 
 	// time.start("SlotToCoeff");

@@ -137,7 +137,7 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
 	BootHelper bootHelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	double* mvec = EvaluatorUtils::randomRealArray(n, 1);
+	double* mvec = EvaluatorUtils::randomRealArray(n);
     // double* mvec = new double[n];
     // mvec[0] = 0.0086326; // 0.00821181
     // mvec[1] = 0.1; // 0.0999609
@@ -152,7 +152,7 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     // mvec[10] = 0.0374798; // 0.0373758
     // mvec[11] = 0.1; // 0.0999609
     // mvec[12] = 0.0775831; // 0.0775327
-    // mvec[13] = 0.1; // 0.0999609
+    mvec[13] = 0.1; // 0.0999609
     // mvec[14] = 0.0109508; // 0.0106098
     // mvec[15] = 0.443224; // 0.443215
     
@@ -186,10 +186,10 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     
     BootAlgo bootAlgo(parameter, iter);
     // timeutils.start("Sqrt");
-	bootAlgo.approxSqrt(cipher2, scheme, bootHelper);
+	// bootAlgo.approxSqrt(cipher2, scheme, bootHelper);
     // timeutils.stop("Sqrt");
     timeutils.start("Sqrt2");
-    // bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
+    bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
     timeutils.stop("Sqrt2");
     // timeutils.start("Sqrt3");
     // bootAlgo.approxSqrt3(cipher3, scheme, bootHelper);
@@ -287,10 +287,6 @@ void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
 
 	double* mvec1 = EvaluatorUtils::randomRealArray(n);
     double* mvec2 = EvaluatorUtils::randomRealArray(n);
-    mvec1[0] = 0.568379;
-    mvec1[1] = 0.958254;
-    mvec2[0] = 0.403887;
-    mvec2[1] = 0.839273;
 
 	Ciphertext cipher1 = scheme.encrypt(mvec1, n, parameter.logp, parameter.logQ);
     Ciphertext cipher2 = scheme.encrypt(mvec2, n, parameter.logp, parameter.logQ);

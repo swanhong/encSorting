@@ -121,35 +121,63 @@ void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long co
     PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
 
     bootAlgo = BootAlgo(param, invIter, compIter);
-    sortingTableRecursion(cipher, logDataNum, param.log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, scheme, ring, bootHelper, secretKey);
+    PlainSort plainSort;
+    sortingTableRecursion(cipher, logDataNum, param.log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, scheme, ring, bootHelper, secretKey, plainSort);
     scheme.showTotalCount();
 }
 
 long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long logNum, long logJump, long loc,
                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
-                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey) {
+                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps) {
     
     std::cout << "(" << logNum << ", " << logJump << ", " << loc << ")" << std::endl;
     TimeUtils timeutils;
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        bootAlgo.compAndSwapTable(cipher, logDataNum, mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], 1 << (logJump + logDataNum), scheme, ring, bootHelper, secretKey);
+
+        CompAndSwapTableBothWithDec(cipher, logDataNum, 1 << (logJump + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
+
         scheme.showCurrentCount();
         scheme.resetCount();
-        timeutils.stop(to_string(loc)+"th CompAndSwap");
+        timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logJump));
     } else {
         if (logJump == 0) {
-            loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey);
+            loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
         }
-        loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump + 1, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey);
+        loc = sortingTableRecursion(cipher, logDataNum, logNum - 1, logJump + 1, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        bootAlgo.compAndSwapTable(cipher, logDataNum, mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], 1 << (logJump + logDataNum), scheme, ring, bootHelper, secretKey);
+
+        CompAndSwapTableBothWithDec(cipher, logDataNum, 1 << (logJump + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
         scheme.showCurrentCount();
         scheme.resetCount();
-        timeutils.stop(to_string(loc)+"th CompAndSwap");
+        timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logJump));
     }
     return loc + 1;
 }
+
+void EncSorting::CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long dist,
+                                    double* mask, double* maskRight, double* maskTable, double* maskTableRight,
+                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps) {
+        cout << "run CompAndSwapTableBothWithDec with logDataNum = " << logDataNum << ", dist = " << dist << endl;
+        complex<double>* mvecCplx = scheme.decrypt(secretKey, cipher);
+        double* mvec = new double[cipher.n];
+        for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
+        CyclicArray ca(mvec, cipher.n);
+        
+        long logq = cipher.logq;
+        long logp = cipher.logp;
+        bootAlgo.compAndSwapTable(cipher, logDataNum, mask, maskRight, maskTable, maskTableRight, dist, scheme, ring, bootHelper, secretKey);
+        ps.compAndSwapTable(ca, logDataNum, mask, maskRight, maskTable, maskTableRight, dist);
+
+        mvec = ca.getArray();
+        complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+        cout << " compAndSwap Result" << endl;
+        cout << "cipher.logq, logp = " << logq << ", " << logp << " -> " << cipher.logq << ", " << cipher.logp << endl;
+        PrintUtils::printArrays(mvec, dvec, cipher.n);
+        cout << endl << "******************" << endl;
+        PrintUtils::averageDifference(mvec, dvec, cipher.n);
+        cout << "******************" << endl << endl;
+    }
 
 void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     MaskingGenerator mg(param.log2n);
@@ -161,6 +189,7 @@ void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& schem
 
     scheme.showTotalCount();
 }
+
 
 void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
     if (logNum == 0) return;        
