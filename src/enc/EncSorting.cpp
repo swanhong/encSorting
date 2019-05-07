@@ -216,23 +216,62 @@ void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, do
 }
 
 void EncSorting::bitonicTableMerge(Ciphertext* cipher, long logNum, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk) {
-    MaskingGenerator mg(param.log2n);
-    double** maskIncrease = mg.getBitonicMergeMasking();
-    MaskingGenerator mg2(param.log2n, false);
-    double** maskDecrease = mg2.getBitonicMergeMasking();
+    MaskingGenerator mg(param.log2n, logDataNum, colNum, true);
+    double** maskCol = mg.getColNumMasking();
+    ZZ** maskminMaxTablePoly = new ZZ*[2];
+    maskminMaxTablePoly[0] = new ZZ[1 << param.logN];
+    maskminMaxTablePoly[1] = new ZZ[1 << param.logN];
+    ring.encode(maskminMaxTablePoly[0], maskCol[0], 1 << param.log2n, param.logp);
+    ring.encode(maskminMaxTablePoly[1], maskCol[1], 1 << param.log2n, param.logp);
 
-    bitonicTableMergeRec(cipher, 0, logNum, logDataNum, colNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, sk, true);
+    MaskingGenerator mg1(param.log2n, logDataNum, true);
+    double** mask = mg1.getBitonicMergeMasking();
+    MaskingGenerator mg12(param.log2n, logDataNum, true);
+    double** maskOther = mg12.getBitonicMergeMaskingOther();
+    MaskingGenerator mgTable(param.log2n, logDataNum, colNum, true);
+    double** maskTable = mgTable.getBitonicMergeMasking();
+    MaskingGenerator mgTable2(param.log2n, logDataNum, colNum, true);
+    double** maskTableOther = mgTable2.getBitonicMergeMaskingOther();
+
+    long maskNum = param.log2n - logDataNum;
+    double*** maskInc = new double**[4];
+    maskInc[0] = mask;
+    maskInc[1] = maskOther;
+    maskInc[2] = maskTable;
+    maskInc[3] = maskTableOther;
+    // for(int i = 0; i < 4; i++) {
+    //     mg.printMask(maskInc[i], maskNum);
+    // }
+
+    MaskingGenerator mg2(param.log2n, logDataNum, false);
+    double** maskDec1 = mg2.getBitonicMergeMasking();
+    MaskingGenerator mg22(param.log2n, logDataNum, false);
+    double** maskOtherDec = mg22.getBitonicMergeMaskingOther();
+    MaskingGenerator mgTable22(param.log2n, logDataNum, colNum, false);
+    double** maskTableDec = mgTable22.getBitonicMergeMasking();
+    MaskingGenerator mgTable222(param.log2n, logDataNum, colNum, false);
+    double** maskTableOtherDec = mgTable222.getBitonicMergeMaskingOther();
+    double*** maskDec = new double**[4];
+    maskDec[0] = maskDec1;
+    maskDec[1] = maskOtherDec;
+    maskDec[2] = maskTableDec;
+    maskDec[3] = maskTableOtherDec;
+    // for(int i = 0; i < 4; i++) {
+    //     mg.printMask(maskDec[i], maskNum);
+    // }
+
+    bitonicTableMergeRec(cipher, 0, logNum, logDataNum, colNum, maskminMaxTablePoly, maskInc, maskDec, scheme, ring, bootHelper, sk, true);
 
     scheme.showTotalCount();
 }
 
-void EncSorting::bitonicTableMergeRec(Ciphertext* cipher, long start, long logNum, long logDataNum, long colNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk, bool increase) {
+void EncSorting::bitonicTableMergeRec(Ciphertext* cipher, long start, long logNum, long logDataNum, long colNum, ZZ** maskminMaxTablePoly, double*** maskInc, double*** maskDec, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk, bool increase) {
+    cout << "TableMerge " << start << ", " << logNum << endl;
     if (logNum == 0) return;        
-    
-    bitonicMergeRec(cipher, start, logNum - 1, logDataNum, colNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, sk, true);
-    bitonicMergeRec(cipher, start + (1 << (logNum - 1)), logNum - 1, logDataNum, colNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, sk, false);
+    bitonicTableMergeRec(cipher, start, logNum - 1, logDataNum, colNum, maskminMaxTablePoly, maskInc, maskDec, scheme, ring, bootHelper, sk, true);
+    bitonicTableMergeRec(cipher, start + (1 << (logNum - 1)), logNum - 1, logDataNum, colNum, maskminMaxTablePoly, maskInc, maskDec, scheme, ring, bootHelper, sk, false);
 
-    BootAlgo bootAlgo(param, sqrtIter, increase);
+    bootAlgo = BootAlgo(param, invIter, compIter, increase);
 
     for(int i = 0; i < logNum; i++) {
         for(int j = 0; j < (1 << i); j++) {
@@ -245,22 +284,33 @@ void EncSorting::bitonicTableMergeRec(Ciphertext* cipher, long start, long logNu
                     right = x;
                 }
                 cout << "-- Run minMax (" << start + left << ", " << start + right << ")" << endl;
-                bootAlgo.comp(cipher[start + left], cipher[start + right], scheme ,bootHelper);
-                // bootAlgo.minMax(cipher[start + left], cipher[start + right], scheme ,bootHelper);
+                Ciphertext cipherLeftTable = scheme.multByPolyWithBoot(cipher[start + left], maskminMaxTablePoly[1], bootHelper, param);
+                Ciphertext cipherRightTable = scheme.multByPolyWithBoot(cipher[start + right], maskminMaxTablePoly[1], bootHelper, param);
+                scheme.reScaleByAndEqual(cipherLeftTable, param.logp);
+                scheme.reScaleByAndEqual(cipherRightTable, param.logp);
+                bootAlgo.minMaxTable(cipher[start + left], cipher[start + right], cipherLeftTable, cipherRightTable, logDataNum, colNum, maskminMaxTablePoly[0], maskminMaxTablePoly[1], scheme, ring, bootHelper, sk);
             }
         }
     }
     scheme.showCurrentCount();
     scheme.resetCount();
     
-    double** mask;
-    if (increase) mask = maskIncrease;
-    else          mask = maskDecrease;
+    double*** mask;   
+    if (increase) {
+        mask = maskInc;
+    }
+    else {
+        mask = maskDec;
+    }
 
     cout << "----- run selfTableMerge " << endl;
     for(int i = 0; i < (1 << logNum); i++) {        
         cout << "           -- ctxt " << start + i << endl;
-        bootAlgo.selfTableMerge(cipher[start + i], logDataNum, colNum, mask, scheme, ring, bootHelper);
+        scheme.decryptAndPrint("startCipher", sk, cipher[start + i]);
+        bootAlgo.selfTableMerge(cipher[start + i], logDataNum, colNum, mask, scheme, ring, bootHelper, sk);
+        scheme.decryptAndPrint("EndCipher", sk, cipher[start + i]);
+
+        cout << "           -- end selfTableMerge" << endl;
     } 
     scheme.showCurrentCount();
     scheme.resetCount();

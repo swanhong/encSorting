@@ -72,29 +72,28 @@ void BootScheme::squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelp
     squareAndEqual(cipher);
 }
 
-Ciphertext BootScheme::multByVectorWithBoot(Ciphertext& cipher, double* mask, long loga, Ring& ring, BootHelper& bootHelper, Parameter param) {
+Ciphertext BootScheme::multByVectorWithBoot(Ciphertext& cipher, double* mask, Ring& ring, BootHelper& bootHelper, Parameter param) {
     Ciphertext res = cipher;
-    multByVectorAndEqualWithBoot(res, mask, loga, ring, bootHelper, param);
+    multByVectorAndEqualWithBoot(res, mask, ring, bootHelper, param);
     return res;
 }
 
-void BootScheme::multByVectorAndEqualWithBoot(Ciphertext& cipher, double* mask, long loga, Ring& ring, BootHelper& bootHelper, Parameter param) {
+void BootScheme::multByVectorAndEqualWithBoot(Ciphertext& cipher, double* mask, Ring& ring, BootHelper& bootHelper, Parameter param) {
     ZZ* maskPoly = new ZZ[1 << param.logN];
     ring.encode(maskPoly, mask, cipher.n, param.logp);
-    multByPolyAndEqualWithBoot(cipher, maskPoly, loga, bootHelper, param);
+    multByPolyAndEqualWithBoot(cipher, maskPoly,bootHelper, param);
 }
 
-Ciphertext BootScheme::multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, long loga, BootHelper& bootHelper, Parameter param) {
+Ciphertext BootScheme::multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param) {
     Ciphertext res = cipher;
-    multByPolyAndEqualWithBoot(res, poly, loga, bootHelper, param);
+    multByPolyAndEqualWithBoot(res, poly, bootHelper, param);
     return res;
 }
 
-void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, long loga, BootHelper& bootHelper, Parameter param) {
+void BootScheme::multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param) {
     PrintUtils::nprint("in multByPolyAndEqualWithBoot : cipher.logq - param.logp = " + to_string(cipher.logq - param.logp) + " < param.logq = " + to_string(param.logq), WANT_TO_PRINT);
-    checkModulusAndBoot(cipher, loga, bootHelper, param);
-    // multByPolyAndEqual(cipher, poly, param.logp);
-    multByPolyAndEqual(cipher, poly, loga);
+    checkLevelAndBoot(cipher, 1, bootHelper, param);
+    multByPolyAndEqual(cipher, poly, param.logp);
 }
 
 Ciphertext BootScheme::leftRotateConditional(Ciphertext& cipher, long r, bool condition) {

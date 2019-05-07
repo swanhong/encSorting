@@ -104,15 +104,13 @@ void PlainSort::runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNu
     MaskingGenerator mgTable2(log2n, logDataNum, colNum, increase);
     double** maskTableOther = mgTable2.getMaskingOther();
 
-    long logn = log2n - logDataNum;
-    long n = 1 << log2n;
-    long maskNum = logn * (logn + 1) / 2;
-    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
-
-
+    // long logn = log2n - logDataNum;
+    // long n = 1 << log2n;
+    // long maskNum = logn * (logn + 1) / 2;
+    // PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    // PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
 
     plainSortingTableRecursion(ca, logDataNum, colNum, log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, increase);
 }
@@ -149,95 +147,159 @@ void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, long colNum, 
     ca.sub(ca1);
     ca.sub(ca1Right);
 
-    if(increase) caTable.rightRotate(dist);
-    else caTable.leftRotate(dist);
+    if(increase) {
+        ca1.rightRotate(dist);
+        caTable.rightRotate(dist);
+    } 
+    else {
+        ca1.leftRotate(dist);
+        caTable.leftRotate(dist);
+    }
 
-    cout << "before comp" << endl;
-    caTable.printAsVector();
-    caTableRight.printAsVector();
+    // cout << "before comp" << endl;
+    // caTable.printAsVector();
+    // caTableRight.printAsVector();
+    
+    minMaxTable(ca1, ca1Right, caTable, caTableRight, logDataNum, colNum, maskRight, maskTableRight);
 
+    if(increase) ca1.leftRotate(dist);
+    else ca1.rightRotate(dist);
+
+    ca.add(ca1);
+    ca.add(ca1Right);
+}
+
+void PlainSort::minMaxTable(CyclicArray& caLeft, CyclicArray& caRight, CyclicArray& caTableLeft, CyclicArray& caTableRight, long logDataNum, long colNum, double* maskRight, double* maskTableRight) {
+    long length = caLeft.length;
     for (int i = 0; i < length; i++) {
-        if(caTable.get(i) >= caTableRight.get(i)) {
-            caTable.set(i, 1);
+        if(caTableLeft.get(i) >= caTableRight.get(i)) {
+            caTableLeft.set(i, 1);
             caTableRight.set(i, 0);
         } else {
-            caTable.set(i, 0);
+            caTableLeft.set(i, 0);
             caTableRight.set(i, 1);
         }
     }
+    CyclicArray maskTablePoly(maskTableRight, length);
+    caTableLeft.mult(maskTablePoly);
+    caTableRight.mult(maskTablePoly);
 
-    cout << "after comp" << endl;
-    caTable.printAsVector();
-    caTableRight.printAsVector();
-    maskTableRightPoly.printAsVector();
-    
-    caTable.mult(maskTableRightPoly);
-    caTableRight.mult(maskTableRightPoly);
-    
-    if(increase) caTable.leftRotate(dist);
-    else caTable.rightRotate(dist);
-
-    cout << "mult mask and rot" << endl;
-    caTable.printAsVector();
-    caTableRight.printAsVector();
-
-    caTable.leftRotate(colNum);
+    caTableLeft.leftRotate(colNum);
     caTableRight.leftRotate(colNum);
 
     for (int i = 0; i < logDataNum; i++) {
-        CyclicArray tmpTable(caTable);
-        CyclicArray tmpTableRight(caTableRight);
-    
-        tmpTable.rightRotate(1 << i);
-        tmpTableRight.rightRotate(1 << i);
-    
-        caTable.add(tmpTable);
-        caTableRight.add(tmpTableRight);
+        CyclicArray tmpMinTable(caTableLeft);
+        tmpMinTable.rightRotate(1 << i);
+        CyclicArray tmpMaxTable(caTableRight);
+        tmpMaxTable.rightRotate(1 << i);
+        caTableLeft.add(tmpMinTable);
+        caTableRight.add(tmpMaxTable);
     }
 
-    cout << "copy" << endl;
-    caTable.printAsVector();
-    caTableRight.printAsVector();
-    
-    CyclicArray caTableFlip(caTable);
-    CyclicArray caTableFlipRight(caTableRight);
+    CyclicArray caTableLeftFlip(caTableLeft);
+    CyclicArray caTableRightFlip(caTableRight);
     for (int i = 0; i < length; i++) {
-        caTableFlip.data[i] *= -1;
-        caTableFlipRight.data[i] *= -1;
+        caTableLeftFlip.set(i, 1 - caTableLeftFlip.get(i));
+        caTableRightFlip.set(i, 1 - caTableRightFlip.get(i));
     }
-    caTableFlip.add(maskPoly);
-    caTableFlipRight.add(maskRightPoly);
-
-    cout << "flip" << endl;
-    caTableFlip.printAsVector();
-    caTableFlipRight.printAsVector();
-    cout << endl;
 
     CyclicArray caLeftSmall, caLeftBig, caRightSmall, caRightBig;
-    mult(caLeftSmall, ca1, caTableFlip);
-    mult(caLeftBig, ca1, caTable);
-    mult(caRightSmall, ca1Right, caTableFlipRight);
-    mult(caRightBig, ca1Right, caTableRight);
+    mult(caLeftSmall, caLeft, caTableLeftFlip);
+    mult(caLeftBig, caLeft, caTableLeft);
+    mult(caRightSmall, caRight, caTableRightFlip);
+    mult(caRightBig, caRight, caTableRight);
 
-    caLeftSmall.printAsVector();
-    caLeftBig.printAsVector();
-    caRightSmall.printAsVector();
-    caRightBig.printAsVector();
+    add(caLeft, caLeftSmall, caRightSmall);
+    add(caRight, caLeftBig, caRightBig);
+    
+}
 
-    if (increase) {
-        caLeftBig.rightRotate(dist);
-        caRightSmall.leftRotate(dist);
-    } else {
-        caLeftBig.leftRotate(dist);
-        caRightSmall.rightRotate(dist);
+void PlainSort::bitonicTableMerge(CyclicArray* ca, long log2n, long logNum, long logDataNum, long colNum) {
+     MaskingGenerator mg(log2n, logDataNum, colNum, true);
+    double** maskCol = mg.getColNumMasking();
+
+    MaskingGenerator mg1(log2n, logDataNum, true);
+    double** mask = mg1.getBitonicMergeMasking();
+    MaskingGenerator mg12(log2n, logDataNum, true);
+    double** maskOther = mg12.getBitonicMergeMaskingOther();
+    MaskingGenerator mgTable(log2n, logDataNum, colNum, true);
+    double** maskTable = mgTable.getBitonicMergeMasking();
+    MaskingGenerator mgTable2(log2n, logDataNum, colNum, true);
+    double** maskTableOther = mgTable2.getBitonicMergeMaskingOther();
+
+    long maskNum = log2n - logDataNum;
+    double*** maskInc = new double**[4];
+    maskInc[0] = mask;
+    maskInc[1] = maskOther;
+    maskInc[2] = maskTable;
+    maskInc[3] = maskTableOther;
+    for(int i = 0; i < 4; i++) {
+        mg.printMask(maskInc[i], maskNum);
+    }
+
+    MaskingGenerator mg2(log2n, logDataNum, false);
+    double** maskDec1 = mg2.getBitonicMergeMasking();
+    MaskingGenerator mg22(log2n, logDataNum, false);
+    double** maskOtherDec = mg22.getBitonicMergeMaskingOther();
+    MaskingGenerator mgTable22(log2n, logDataNum, colNum, false);
+    double** maskTableDec = mgTable22.getBitonicMergeMasking();
+    MaskingGenerator mgTable222(log2n, logDataNum, colNum, false);
+    double** maskTableOtherDec = mgTable222.getBitonicMergeMaskingOther();
+    double*** maskDec = new double**[4];
+    maskDec[0] = maskDec1;
+    maskDec[1] = maskOtherDec;
+    maskDec[2] = maskTableDec;
+    maskDec[3] = maskTableOtherDec;
+    for(int i = 0; i < 4; i++) {
+        mg.printMask(maskDec[i], maskNum);
+    }
+
+    bitonicTableMergeRec(ca, log2n, 0, logNum, logDataNum, colNum, maskCol, maskInc, maskDec, true);
+}
+
+void PlainSort::bitonicTableMergeRec(CyclicArray* ca, long log2n, long start, long logNum, long logDataNum, long colNum, double** maskCol, double*** maskInc, double*** maskDec, bool increase) {
+    if (logNum == 0) return;        
+    
+    // cout << "logNum = " << logNum << endl;
+
+    bitonicTableMergeRec(ca, log2n, start, logNum - 1, logDataNum, colNum, maskCol, maskInc, maskDec, true);
+    bitonicTableMergeRec(ca, log2n, start + (1 << (logNum - 1)), logNum - 1, logDataNum, colNum, maskCol, maskInc, maskDec, false);
+    
+    for(int i = 0; i < logNum; i++) {
+        for(int j = 0; j < (1 << i); j++) {
+            for(int k = 0; k < (1 << (logNum - 1 - i)); k++) {
+                long left = 2 * j * (1 << (logNum - i - 1)) + k;
+                long right = (2 * j + 1) * (1 << (logNum - i - 1)) + k;
+                if (!increase) {
+                    long x = left;
+                    left = right;
+                    right = x;
+                }
+                // cout << "minMax (" << start + left << ", " << start + right << "), " << increase << endl;
+                CyclicArray maskminMaxTablePoly(maskCol[1], ca[0].length);
+                CyclicArray caLeftTable(ca[start + left]);
+                CyclicArray caRightTable(ca[start + right]);
+                caLeftTable.mult(maskminMaxTablePoly);
+                caRightTable.mult(maskminMaxTablePoly);
+                
+                minMaxTable(ca[start + left], ca[start + right], caLeftTable, caRightTable, logDataNum, colNum, maskCol[0], maskCol[1]);
+            }
+        }
     }
     
-    ca.add(caLeftSmall);
-    ca.add(caLeftBig);
-    ca.add(caRightSmall);
-    ca.add(caRightBig);
+    for(int i = 0; i < (1 << logNum); i++) {
+        // cout << "self " << start + i << ", " << increase << endl;
+        double*** mask;
+        if (increase) mask = maskInc;
+        else          mask = maskDec;
+        
+        selfBitonicTableMerge(ca[start + i], log2n, logDataNum, colNum, mask, increase);
+    } 
+    // cout << " -- end " << logNum << " -- " << endl;
+}
 
-    // cout << " ===========================" << endl;
-    // double* mvec = ca.getArray();
-    // PrintUtils::printArraysWithDataNum(mvec, mvec, length, logDataNum, 0);
+void PlainSort::selfBitonicTableMerge(CyclicArray& ca, long log2n, long logDataNum, long colNum, double*** mask, bool increase) {
+    for(int i = 0; i <log2n - logDataNum; i++) {
+        compAndSwapTable(ca, logDataNum, colNum, mask[0][i], mask[1][i], mask[2][i], mask[3][i], 1 << (log2n - 1 - i), increase);
+    }
 }

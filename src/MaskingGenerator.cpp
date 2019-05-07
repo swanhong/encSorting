@@ -70,15 +70,32 @@ double** MaskingGenerator::getMaskingOther() {
 }
 
 double** MaskingGenerator::getBitonicMergeMasking() {
-    for(int i = 0; i < log2n; i++) {
+    for(int i = 0; i < log2n - logDataNum; i++) {
         generateBitonicMergeMasking(i);
     }
     return mask;
 }
 
-double** MaskingGenerator::getTableMergeMasking() {
+double** MaskingGenerator::getBitonicMergeMaskingOther() {
     for(int i = 0; i < log2n - logDataNum; i++) {
-        generateBitonicMergeMasking(i);
+        generateBitonicMergeMaskingOther(i);
+    }
+    return mask;
+}
+
+double** MaskingGenerator::getColNumMasking() {
+    mask = new double*[2];
+    mask[0] = new double[length];
+    for (int i = 0; i < length; i++) {
+        mask[0][i] = 1.;
+    }
+    mask[1] = new double[length];
+    for (int i = 0; i < length; i++) {
+        if (i % dataNum == colNum) {
+            mask[1][i] = 1.;
+        } else {
+            mask[1][i] = 0.;
+        }
     }
     return mask;
 }
@@ -88,7 +105,29 @@ void MaskingGenerator::generateBitonicMergeMasking(long num) {
         for(int k = 0; k < (1 << (log2n - 1 - num)); k++) {
             if (colNum == -1 || k % dataNum == colNum) {
                 long loc = j * (1 << (log2n - num)) + k;
-                if (!increase) loc = length - 1 - loc;
+                if (!increase) {
+                    loc = length - 1 - loc;
+                    if (colNum != -1) {
+                        loc = loc + 2 * colNum - dataNum + 1;
+                    }
+                }
+                mask[num][loc] = 1; 
+            }
+        }
+    }
+}
+
+void MaskingGenerator::generateBitonicMergeMaskingOther(long num) {
+    for(int j = 0; j < (1 << num); j++) {
+        for(int k = 0; k < (1 << (log2n - 1 - num)); k++) {
+            if (colNum == -1 || k % dataNum == colNum) {
+                long loc = j * (1 << (log2n - num)) + k + (1 << (log2n - 1 - num));
+                if (!increase) {
+                    loc = length - 1 - loc;
+                    if (colNum != -1) {
+                        loc = loc + 2 * colNum - dataNum + 1;
+                    }
+                }
                 mask[num][loc] = 1; 
             }
         }
@@ -105,7 +144,6 @@ void MaskingGenerator::generateMaskingComparison(long loc, long jump) {
                 long tmp = i * jump * 2 + j;
                 if(!increase) {
                     tmp = length - 1 - tmp;
-                    std::cout << "tmp = " << tmp << std::endl;
                     if (colNum != -1) {
                         tmp = tmp + 2 * colNum - dataNum + 1;
                     }

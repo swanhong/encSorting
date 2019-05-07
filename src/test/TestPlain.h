@@ -12,6 +12,8 @@ public:
 
     static void bitonicMerge(long log2n, long logNum);
 
+    static void bitonicTableMerge(long log2n, long logNum, long logDataNum, long colNum);
+
     static void plainTableSort(long logn, long logDataNum, long colNum, bool=true);
 };
 

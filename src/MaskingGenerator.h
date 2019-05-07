@@ -36,7 +36,8 @@ public:
     double **getMaskingOther();
     // double **getTableMasking();
     double **getBitonicMergeMasking();
-    double **getTableMergeMasking();
+    double **getBitonicMergeMaskingOther();
+    double **getColNumMasking();
     // double **getTableMaskingBy(long = 0);
 
     // ********************
@@ -54,7 +55,7 @@ public:
     // *** Bitonic Maskings
     // ********************
     void generateBitonicMergeMasking(long num);
-    void generateTableMergeMasking(long num);
+    void generateBitonicMergeMaskingOther(long num);
 };
 
 #endif // !MASKINGGENERATOR_H_

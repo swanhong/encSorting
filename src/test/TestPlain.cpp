@@ -44,6 +44,24 @@ void TestPlain::plainTableSort(long logn, long logDataNum, long colNum, bool inc
     double* dvec = ca.getArray();
     
     PrintUtils::printArraysWithDataNum(mvec, dvec, 1 << logn, logDataNum, colNum);
+}
+
+void TestPlain::bitonicTableMerge(long log2n, long logNum, long logDataNum, long colNum) {
+    PlainSort plainSort;
     
+    CyclicArray* ca = new CyclicArray[1 << logNum];
+    for(int i = 0; i < (1 << logNum); i++) {
+        double* mvec = EvaluatorUtils::randomRealArray(1 << log2n);
+        ca[i] = CyclicArray(mvec, 1 << log2n);
+        plainSort.runPlainSorting(ca[i], log2n, (i % 2 == 0));
+        ca[i].printAsVector();
+        cout << "==" << endl;
+    }
+
+    plainSort.bitonicMerge(ca, log2n, logNum);
+    for(int i = 0; i < (1 << logNum); i++) {
+        ca[i].printAsVector();
+        cout << "===" << endl;
+    }
     
 }

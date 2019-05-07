@@ -46,6 +46,13 @@ void TestMask::showTableMaskingOther(long log2n, long logDataNum, long colNum, b
     mg.printMask(mask, maskNum);    
 }
 
+void TestMask::showColNumMasking(long log2n, long logDataNum, long colNum, bool increase) {
+    MaskingGenerator mg(log2n, logDataNum, colNum, increase);
+    double** mask = mg.getColNumMasking();
+    
+    mg.printMask(mask, 2);    
+}
+
 void TestMask::showBitonicMergeMasking(long log2n, bool increase) {
     MaskingGenerator mg(log2n, increase);
     double** mask = mg.getBitonicMergeMasking();
@@ -55,6 +62,12 @@ void TestMask::showBitonicMergeMasking(long log2n, bool increase) {
 
 void TestMask::showTableMergeMasking(long log2n, long logDataNum, long colNum, bool increase) {
     MaskingGenerator mg(log2n, logDataNum, colNum, increase);
-    double** mask = mg.getTableMergeMasking(); 
+    double** mask = mg.getBitonicMergeMasking(); 
+    mg.printMask(mask, log2n - logDataNum);
+}
+
+void TestMask::showTableMergeMaskingOther(long log2n, long logDataNum, long colNum, bool increase) {
+    MaskingGenerator mg(log2n, logDataNum, colNum, increase);
+    double** mask = mg.getBitonicMergeMaskingOther(); 
     mg.printMask(mask, log2n - logDataNum);
 }

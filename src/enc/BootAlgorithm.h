@@ -42,11 +42,12 @@ public:
     void compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, long loc, SecretKey sk);
 
     void selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
-    void selfTableMerge(Ciphertext& cipher, long logDataNum, long colNum, double** mask, double** maskRight, double** maskTable, double** maskTableRight, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk);
+    void selfTableMerge(Ciphertext& cipher, long logDataNum, long colNum, double*** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk);
 
     void reverse(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
     void compAndSwapTable(Ciphertext& cipher, long logDataNum, long colNum, double* mask, double* maskOther, double* maskTable, double* maskTableOther, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey);
+    void minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& minCipherTable, Ciphertext& maxCipherTable, long logDataNum, long colNum, ZZ* maskPoly, ZZ* maskTablePoly, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey);
 
     
 };

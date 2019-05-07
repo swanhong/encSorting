@@ -22,15 +22,19 @@ int main() {
     // ******************************
     // *** Test Maskings
     // ******************************
-    // long logn = 5;
-    // long logDataNum = 2;
+    long logn = 4;
+    long logDataNum = 2;
+    long colNum = 1;
     // TestMask::showMasking(logn, true);
     // TestMask::showMasking(logn, false);
     // TestMask::showMaskingOther(logn, true);
     // TestMask::showBitonicMergeMasking(logn, true);
     // TestMask::showBitonicMergeMasking(logn, false);
-    // TestMask::showTableMergeMasking(logn, logDataNum, 0, true);
-    // TestMask::showTableMergeMasking(logn, logDataNum, 0, false);
+    // TestMask::showColNumMasking(logn, logDataNum, colNum, true);
+    // TestMask::showTableMergeMasking(logn, logDataNum, colNum, true);
+    // TestMask::showTableMergeMaskingOther(logn, logDataNum, colNum, true);
+    // TestMask::showTableMergeMasking(logn, logDataNum, colNum, false);
+    // TestMask::showTableMergeMaskingOther(logn, logDataNum, colNum, false);
     // TestMask::showTableMasking(logn + logDataNum, logDataNum, true);
     // TestMask::showTableMaskingBy(logn + logDataNum, logDataNum, 0, true);
     // TestMask::showTableMaskingOther(logn + logDataNum, logDataNum, 0, true);
@@ -68,7 +72,9 @@ int main() {
     // TestSort::sort(sortingTestParamSmall, 13);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
-    TestSort::tableSort(sortingTestParamSmall, 2, 2, 5, 5, false);
+
+    // TestSort::tableSort(sortingTestParamSmall, 2, 0, 5, 5, true);
+    TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 6, 6);
 
     return 0;
 }
