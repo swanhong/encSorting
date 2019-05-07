@@ -205,5 +205,6 @@ void CyclicArray::randomGen(long length_) {
     for(int i = 0; i < length; i++) {
         data[i] = 0;
         data[i] = (double) rand() / RAND_MAX;
+		data[i] = (double) rand() / RAND_MAX;
     }
 }

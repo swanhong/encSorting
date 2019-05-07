@@ -9,6 +9,7 @@ public:
     static void sort(Parameter param, long iter, bool=true);
     static void tableSort(Parameter param, long logDataNum, long colNum, long invIter, long compIter, bool=true);
     static void merge(Parameter param, long iter, long logNum);
+    static void tableMerge(Parameter param, long logNum, long logDataNum, long colNum, long invIter, long compIter);
     static void sortAndMerge(Parameter param, long iter, long logNum);
 };
 

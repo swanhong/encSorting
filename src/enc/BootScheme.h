@@ -25,6 +25,7 @@ public:
 
     void checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bootHelper, Parameter param);
     void checkLevelAndBoot(Ciphertext& cipher, long level, BootHelper& bootHelper, Parameter param);
+    void checkModulusAndBoot(Ciphertext& cipher, long mod, BootHelper& bootHelper, Parameter param);
 
     Ciphertext multWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
     void multAndEqualWithBoot(Ciphertext& cipher1, Ciphertext& cipher2, BootHelper& bootHelper, Parameter param);
@@ -34,8 +35,17 @@ public:
     Ciphertext squareWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
     void squareAndEuqalWithBoot(Ciphertext& cipher, BootHelper& bootHelper, Parameter param);
 
-    Ciphertext multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
-    void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, BootHelper& bootHelper, Parameter param);
+    Ciphertext multByVectorWithBoot(Ciphertext& cipher, double* mask, long loga, Ring& ring, BootHelper& bootHelper, Parameter param);    
+    void multByVectorAndEqualWithBoot(Ciphertext& cipher, double* mask, long loga, Ring& ring, BootHelper& bootHelper, Parameter param);
+    
+    Ciphertext multByPolyWithBoot(Ciphertext& cipher, ZZ* poly, long loga, BootHelper& bootHelper, Parameter param);
+    void multByPolyAndEqualWithBoot(Ciphertext& cipher, ZZ* poly, long loga, BootHelper& bootHelper, Parameter param);
+
+    Ciphertext leftRotateConditional(Ciphertext& cipher, long r, bool condition);
+    Ciphertext rightRotateConditional(Ciphertext& cipher, long r, bool condition);
+    void leftRotateAndEqualConditional(Ciphertext& cipher, long r, bool condition);
+    void rightRotateAndEqualConditional(Ciphertext& cipher, long r, bool condition);
+
 
     void decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher);
 

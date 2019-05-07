@@ -9,13 +9,12 @@
 
 
 class BootAlgo {
-private:
+public:
     Parameter param;
     long sqrtIter;
     long invIter;
     long compIter;
     bool increase;
-public:
     
     BootAlgo() {}
     BootAlgo(Parameter _param, long _sqrtiter, bool=true);
@@ -43,10 +42,13 @@ public:
     void compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, long loc, SecretKey sk);
 
     void selfBitonicMerge(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    void selfTableMerge(Ciphertext& cipher, long logDataNum, long colNum, double** mask, double** maskRight, double** maskTable, double** maskTableRight, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk);
 
     void reverse(Ciphertext& cipher, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 
-    void compAndSwapTable(Ciphertext& cipher, long logDataNum, double* mask, double* maskOther, double* maskTable, double* maskTableOther, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey);
+    void compAndSwapTable(Ciphertext& cipher, long logDataNum, long colNum, double* mask, double* maskOther, double* maskTable, double* maskTableOther, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey);
+
+    
 };
 
 #endif // !BootAlgorithm_H_

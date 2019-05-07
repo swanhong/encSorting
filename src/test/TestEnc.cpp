@@ -3,7 +3,7 @@
 
 void TestEnc::approxSqrt(Parameter param, long iter) {
     srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
     
     TimeUtils timeutils;
     timeutils.start("TestEnc KeyGen");
@@ -40,7 +40,7 @@ void TestEnc::approxSqrt(Parameter param, long iter) {
 void TestEnc::minMax(Parameter param, long iter) {
 
     srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
 
     PrintUtils::parameter(param, "TestEnc::minMax");
 
@@ -90,7 +90,7 @@ void TestEnc::minMax(Parameter param, long iter) {
 
 void TestEnc::compAndSwap(Parameter param, long iter) {
     srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
     
     long n = 1 << param.log2n;
 	

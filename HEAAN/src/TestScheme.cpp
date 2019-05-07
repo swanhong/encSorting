@@ -85,7 +85,7 @@ void TestScheme::testBasic(long logN, long logQ, long logp, long logn) {
 	cout << "!!! START TEST BASIC !!!" << endl;
 
 	srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -142,7 +142,7 @@ void TestScheme::testimult(long logN, long logQ, long logp, long logn) {
 	cout << "!!! START TEST i MULTIPLICATION !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -179,7 +179,7 @@ void TestScheme::testRotateFast(long logN, long logQ, long logp, long logn, long
 	cout << "!!! START TEST ROTATE FAST !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -206,7 +206,7 @@ void TestScheme::testRotate(long logN, long logQ, long logp, long logn, long r) 
 	cout << "!!! START TEST ROTATE !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -233,7 +233,7 @@ void TestScheme::testConjugate(long logN, long logQ, long logp, long logn) {
 	cout << "!!! START TEST CONJUGATE !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -270,7 +270,7 @@ void TestScheme::testPowerOf2(long logN, long logQ, long logp, long logn, long l
 	cout << "!!! START TEST POWER OF 2 !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -304,7 +304,7 @@ void TestScheme::testPower(long logN, long logQ, long logp, long logn, long degr
 	cout << "!!! START TEST POWER !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -336,7 +336,7 @@ void TestScheme::testProdOfPo2(long logN, long logQ, long logp, long logn, long 
 	cout << "!!! START TEST PROD OF POWER OF 2 !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -377,7 +377,7 @@ void TestScheme::testProd(long logN, long logQ, long logp, long logn, long degre
 	cout << "!!! START TEST PROD !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -421,7 +421,7 @@ void TestScheme::testInverse(long logN, long logQ, long logp, long logn, long st
 	cout << "!!! START TEST INVERSE !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -451,7 +451,7 @@ void TestScheme::testLogarithm(long logN, long logQ, long logp, long logn, long 
 	cout << "!!! START TEST LOGARITHM !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -481,7 +481,7 @@ void TestScheme::testExponent(long logN, long logQ, long logp, long logn, long d
 	cout << "!!! START TEST EXPONENT !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -511,7 +511,7 @@ void TestScheme::testExponentLazy(long logN, long logQ, long logp, long logn, lo
 	cout << "!!! START TEST EXPONENT LAZY !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -542,7 +542,7 @@ void TestScheme::testSigmoid(long logN, long logQ, long logp, long logn, long de
 	cout << "!!! START TEST SIGMOID !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -573,7 +573,7 @@ void TestScheme::testSigmoidLazy(long logN, long logQ, long logp, long logn, lon
 	cout << "!!! START TEST SIGMOID LAZY !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -609,7 +609,7 @@ void TestScheme::testDFTBatch(long logN, long logQ, long logp, long logn, long l
 	cout << "!!! START TEST DFT BATCH !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -684,7 +684,7 @@ void TestScheme::testDFTLazyBatch(long logN, long logQ, long logp, long logn, lo
 	cout << "!!! START TEST DFT BATCH LAZY !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -759,7 +759,7 @@ void TestScheme::testDFTLazyBatchMultipleHadamard(long logN, long logQ, long log
 	cout << "!!! START TEST DFT BATCH LAZY MULTIPLE HADAMARD !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -857,7 +857,7 @@ void TestScheme::testBootstrap(long logN, long logp, long logq, long logQ, long 
 	cout << "!!! START TEST BOOTSTRAP !!!" << endl;
 
 	srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);
@@ -913,7 +913,7 @@ void TestScheme::testBootstrapSingleReal(long logN, long logp, long logq, long l
 	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
 
 	srand(time(NULL));
-//	SetNumThreads(8);
+//	SetNumThreads(16);
 	TimeUtils timeutils;
 	Ring ring(logN, logQ);
 	SecretKey secretKey(ring);

@@ -5,6 +5,7 @@
 #include "vector"
 #include "iostream"
 #include "../MaskingGenerator.h"
+#include "../PrintUtils.h"
 
 
 class PlainSort {
@@ -23,11 +24,11 @@ public:
 
     void bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, double** mask, double** mask2, bool increase);
 
-    void compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist);
+    void compAndSwapTable(CyclicArray& ca, long logDataNum, long colNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist, bool increase);
     
     void runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNum, long colNum, bool=true);
 
-    long plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther);
+    long plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long colNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther, bool increase);
 
 };
 

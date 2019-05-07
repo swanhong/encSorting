@@ -95,32 +95,42 @@ void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long lo
 }
 
 void PlainSort::runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNum, long colNum, bool increase) {
-    MaskingGenerator mg(log2n, logDataNum);
+    MaskingGenerator mg(log2n, logDataNum, increase);
     double** mask = mg.getMasking();
-    MaskingGenerator mg2(log2n, logDataNum);
+    MaskingGenerator mg2(log2n, logDataNum, increase);
     double** maskOther = mg2.getMaskingOther();
-    MaskingGenerator mgTable(log2n, logDataNum, colNum, true);
+    MaskingGenerator mgTable(log2n, logDataNum, colNum, increase);
     double** maskTable = mgTable.getMasking();
-    MaskingGenerator mgTable2(log2n, logDataNum, colNum, true);
+    MaskingGenerator mgTable2(log2n, logDataNum, colNum, increase);
     double** maskTableOther = mgTable2.getMaskingOther();
 
-    plainSortingTableRecursion(ca, logDataNum, log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther);
+    long logn = log2n - logDataNum;
+    long n = 1 << log2n;
+    long maskNum = logn * (logn + 1) / 2;
+    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+
+
+
+    plainSortingTableRecursion(ca, logDataNum, colNum, log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, increase);
 }
 
-long PlainSort::plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther) {
+long PlainSort::plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long colNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther, bool increase) {
     if (logNum == 1) {
-        compAndSwapTable(ca, logDataNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum));
+        compAndSwapTable(ca, logDataNum, colNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum), increase);
     } else {
         if (logJump == 0) {
-            loc = plainSortingTableRecursion(ca, logDataNum, logNum - 1, logJump, loc, mask, maskOther, maskTable, maskTableOther);
+            loc = plainSortingTableRecursion(ca, logDataNum, colNum, logNum - 1, logJump, loc, mask, maskOther, maskTable, maskTableOther, increase);
         }
-        loc = plainSortingTableRecursion(ca, logDataNum, logNum - 1, logJump + 1, loc, mask, maskOther, maskTable, maskTableOther);
-        compAndSwapTable(ca, logDataNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum));
+        loc = plainSortingTableRecursion(ca, logDataNum, colNum, logNum - 1, logJump + 1, loc, mask, maskOther, maskTable, maskTableOther, increase);
+        compAndSwapTable(ca, logDataNum, colNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum), increase);
     }
     return loc + 1;
 }
 
-void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist) {
+void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, long colNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist, bool increase) {
     long length = ca.length;
     CyclicArray maskPoly(mask, length);
     CyclicArray maskRightPoly(maskRight, length);
@@ -139,14 +149,14 @@ void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask,
     ca.sub(ca1);
     ca.sub(ca1Right);
 
-    caTable.rightRotate(dist);
+    if(increase) caTable.rightRotate(dist);
+    else caTable.leftRotate(dist);
 
-    // cout << "before comp" << endl;
-    // caTable.printAsVector();
-    // caTableRight.printAsVector();
+    cout << "before comp" << endl;
+    caTable.printAsVector();
+    caTableRight.printAsVector();
 
-    for (int i = 0; i < length; i++)
-    {
+    for (int i = 0; i < length; i++) {
         if(caTable.get(i) >= caTableRight.get(i)) {
             caTable.set(i, 1);
             caTableRight.set(i, 0);
@@ -156,33 +166,38 @@ void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask,
         }
     }
 
-    // cout << "after comp" << endl;
-    // caTable.printAsVector();
-    // caTableRight.printAsVector();
-    // maskTableRightPoly.printAsVector();
+    cout << "after comp" << endl;
+    caTable.printAsVector();
+    caTableRight.printAsVector();
+    maskTableRightPoly.printAsVector();
     
     caTable.mult(maskTableRightPoly);
     caTableRight.mult(maskTableRightPoly);
     
-    caTable.leftRotate(dist);
+    if(increase) caTable.leftRotate(dist);
+    else caTable.rightRotate(dist);
 
-    // cout << "muly mask and rot" << endl;
-    // caTable.printAsVector();
-    // caTableRight.printAsVector();
+    cout << "mult mask and rot" << endl;
+    caTable.printAsVector();
+    caTableRight.printAsVector();
+
+    caTable.leftRotate(colNum);
+    caTableRight.leftRotate(colNum);
 
     for (int i = 0; i < logDataNum; i++) {
         CyclicArray tmpTable(caTable);
-        tmpTable.rightRotate(1 << i);
-        caTable.add(tmpTable);
-        
         CyclicArray tmpTableRight(caTableRight);
+    
+        tmpTable.rightRotate(1 << i);
         tmpTableRight.rightRotate(1 << i);
+    
+        caTable.add(tmpTable);
         caTableRight.add(tmpTableRight);
     }
 
-    // cout << "copy" << endl;
-    // caTable.printAsVector();
-    // caTableRight.printAsVector();
+    cout << "copy" << endl;
+    caTable.printAsVector();
+    caTableRight.printAsVector();
     
     CyclicArray caTableFlip(caTable);
     CyclicArray caTableFlipRight(caTableRight);
@@ -193,10 +208,10 @@ void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask,
     caTableFlip.add(maskPoly);
     caTableFlipRight.add(maskRightPoly);
 
-    // cout << "flip" << endl;
-    // caTableFlip.printAsVector();
-    // caTableFlipRight.printAsVector();
-    // cout << endl;
+    cout << "flip" << endl;
+    caTableFlip.printAsVector();
+    caTableFlipRight.printAsVector();
+    cout << endl;
 
     CyclicArray caLeftSmall, caLeftBig, caRightSmall, caRightBig;
     mult(caLeftSmall, ca1, caTableFlip);
@@ -204,19 +219,25 @@ void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, double* mask,
     mult(caRightSmall, ca1Right, caTableFlipRight);
     mult(caRightBig, ca1Right, caTableRight);
 
-    // caLeftSmall.printAsVector();
-    // caLeftBig.printAsVector();
-    // caRightSmall.printAsVector();
-    // caRightBig.printAsVector();
+    caLeftSmall.printAsVector();
+    caLeftBig.printAsVector();
+    caRightSmall.printAsVector();
+    caRightBig.printAsVector();
 
-
-    caLeftBig.rightRotate(dist);
-    caRightSmall.leftRotate(dist);
-
+    if (increase) {
+        caLeftBig.rightRotate(dist);
+        caRightSmall.leftRotate(dist);
+    } else {
+        caLeftBig.leftRotate(dist);
+        caRightSmall.rightRotate(dist);
+    }
+    
     ca.add(caLeftSmall);
     ca.add(caLeftBig);
     ca.add(caRightSmall);
     ca.add(caRightBig);
 
-    // cout << "End compAndSwapTable" << endl;
+    // cout << " ===========================" << endl;
+    // double* mvec = ca.getArray();
+    // PrintUtils::printArraysWithDataNum(mvec, mvec, length, logDataNum, 0);
 }

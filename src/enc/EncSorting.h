@@ -27,18 +27,20 @@ public:
     long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
     long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
     
-    long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long logNum, long logJump, long loc,
+    long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logJump, long loc,
                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);
 
     void compAndSwapBothWithDec(Ciphertext& cipher, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
-    void CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long dist,
+    void CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long colNum, long dist,
                                     double* mask, double* maskRight, double* maskTable, double* maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);
 
     void bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
-
     void bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** mask, double** mask2, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase);
+
+    void bitonicTableMerge(Ciphertext* cipher, long logNum, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk);
+    void bitonicMergeRec(Ciphertext* cipher, long start, long logNum, long logDataNum, long colNum, double** mask, double** mask2, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk, bool increase);
     
     void reverseHalf(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
 };

@@ -4,6 +4,7 @@
 #include "../plain/CyclicArray.h"
 #include "../plain/PlainSorting.h"
 #include "../HEAAN/src/EvaluatorUtils.h"
+#include "../PrintUtils.h"
 
 class TestPlain {
 public:
@@ -11,7 +12,7 @@ public:
 
     static void bitonicMerge(long log2n, long logNum);
 
-    static void plainTableSort(long logn, long logDataNum, bool=true);
+    static void plainTableSort(long logn, long logDataNum, long colNum, bool=true);
 };
 
 

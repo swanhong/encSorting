@@ -15,7 +15,9 @@ public:
 
     static void showTableMaskingOther(long log2n, long logDataNum, long colNum, bool increase);
 
-    static void showBitonicMergeMasking(long log2n);
+    static void showBitonicMergeMasking(long log2n, bool increase);
+
+    static void showTableMergeMasking(long log2n, long logDataNum, long colNum, bool increase);
 
     
 };

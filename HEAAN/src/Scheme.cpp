@@ -1012,6 +1012,8 @@ Ciphertext Scheme::leftRotateFast(Ciphertext& cipher, long r) {
 }
 
 void Scheme::leftRotateFastAndEqual(Ciphertext& cipher, long r) {
+	if (r == 0 || r == ring.Nh) return;
+
 	ZZ q = ring.qpows[cipher.logq];
 	ZZ qQ = ring.qpows[cipher.logq + ring.logQ];
 

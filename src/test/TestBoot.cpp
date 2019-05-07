@@ -14,7 +14,7 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	scheme.addLeftRotKeys(secretKey);
 	
 	srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
 	timeutils.stop("KeyGen");
 
 	timeutils.start("Bootstrapping Helper construct");
@@ -152,7 +152,7 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     // mvec[10] = 0.0374798; // 0.0373758
     // mvec[11] = 0.1; // 0.0999609
     // mvec[12] = 0.0775831; // 0.0775327
-    mvec[13] = 0.1; // 0.0999609
+    // mvec[13] = 0.000242687; // 0.0999609
     // mvec[14] = 0.0109508; // 0.0106098
     // mvec[15] = 0.443224; // 0.443215
     
@@ -189,7 +189,8 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
 	// bootAlgo.approxSqrt(cipher2, scheme, bootHelper);
     // timeutils.stop("Sqrt");
     timeutils.start("Sqrt2");
-    bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
+    bootAlgo.approxSqrt(cipher2, scheme, bootHelper);
+    // bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
     timeutils.stop("Sqrt2");
     // timeutils.start("Sqrt3");
     // bootAlgo.approxSqrt3(cipher3, scheme, bootHelper);
@@ -328,7 +329,7 @@ void TestBoot::minMax(Parameter param, long iter) {
     scheme.addConjKey(secretKey);
     scheme.addLeftRotKeys(secretKey);
 	srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
     timeutils.stop("KeyGen");
 
 	timeutils.start("Bootstrapping Helper construct");
@@ -366,7 +367,7 @@ void TestBoot::minMax(Parameter param, long iter) {
 
 void TestBoot::compAndSwap(Parameter param, long iter) {
     srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
     
     long n = 1 << param.log2n;
 	
@@ -399,7 +400,7 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
 
     timeutils.start("CompAndSwap");
     BootAlgo bootAlgo(param, iter);
-    // bootAlgo.compAndSwapDec(cipher, mask[0], 1, scheme, ring, bootHelper, secretKey);
+    // bootAlgo.compAndSwapDec(cipher, mask[0], 1, scheme, ring, bootHelper, 1, secretKey);
     bootAlgo.compAndSwap(cipher, mask, 0, 1, scheme, ring, bootHelper);
 	
     timeutils.stop("CompAndSwap");
@@ -432,7 +433,7 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
 
 void TestBoot::reverse(Parameter param) {
     srand(time(NULL));
-	SetNumThreads(8);
+	SetNumThreads(16);
     
     long n = 1 << param.log2n;
 	
@@ -516,15 +517,15 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     timeutils.start("compAndSwapTable");
     BootAlgo bootAlgo(parameter, invIter, compIter);
     // bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
-	bootAlgo.compAndSwapTable(cipher, logDataNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper, secretKey);
+	bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper, secretKey);
     dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
-    bootAlgo.compAndSwapTable(cipher, logDataNum, mask[1], maskOther[1], maskTable[1], maskTableOther[1], 1 << (logDataNum + 1), scheme, ring, bootHelper, secretKey);
+    bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask[1], maskOther[1], maskTable[1], maskTableOther[1], 1 << (logDataNum + 1), scheme, ring, bootHelper, secretKey);
     dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
-    bootAlgo.compAndSwapTable(cipher, logDataNum, mask[2], maskOther[2], maskTable[2], maskTableOther[2], 1 << (logDataNum), scheme, ring, bootHelper, secretKey);
+    bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask[2], maskOther[2], maskTable[2], maskTableOther[2], 1 << (logDataNum), scheme, ring, bootHelper, secretKey);
     dvec = scheme.decrypt(secretKey, cipher);
     PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);

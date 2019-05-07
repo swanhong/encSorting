@@ -36,6 +36,7 @@ public:
     double **getMaskingOther();
     // double **getTableMasking();
     double **getBitonicMergeMasking();
+    double **getTableMergeMasking();
     // double **getTableMaskingBy(long = 0);
 
     // ********************
@@ -53,20 +54,7 @@ public:
     // *** Bitonic Maskings
     // ********************
     void generateBitonicMergeMasking(long num);
-    
-    // // ********************
-    // // *** Table Odd-Even Maskings
-    // // ********************
-    // long generateMaskingTableRec(long logNum, long logJump, long loc);
-    // void generateMaskingTableComp(long loc, long jump);
-    // void generateMaskingTableMerge(long loc, long num, long jump);
-
-    // // ********************
-    // // *** Table Odd-Even Maskings By colNum
-    // // ********************
-    // long generateMaskingTableByRec(long colNum, long logNum, long logJump, long loc);
-    // void generateMaskingTableCompBy(long colNum, long loc, long jump);
-    // void generateMaskingTableMergeBy(long colNum, long loc, long num, long jump);
+    void generateTableMergeMasking(long num);
 };
 
 #endif // !MASKINGGENERATOR_H_

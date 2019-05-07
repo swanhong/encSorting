@@ -76,29 +76,21 @@ double** MaskingGenerator::getBitonicMergeMasking() {
     return mask;
 }
 
-// double** MaskingGenerator::getTableMasking() {
-//     long logNum =  log2n - logDataNum;
-//     long maskNum = logNum * (logNum + 1) / 2;
-//     setMaskNum(maskNum);
-//     generateMaskingTableRec(logNum, 0, 0);
-//     return mask;
-// }
-
-// double** MaskingGenerator::getTableMaskingBy(long colNum) {
-//     long logNum =  log2n - logDataNum;
-//     long maskNum = logNum * (logNum + 1) / 2;
-//     setMaskNum(maskNum);
-    
-//     generateMaskingTableByRec(colNum, logNum, 0, 0);
-//     return mask;
-// }
+double** MaskingGenerator::getTableMergeMasking() {
+    for(int i = 0; i < log2n - logDataNum; i++) {
+        generateBitonicMergeMasking(i);
+    }
+    return mask;
+}
 
 void MaskingGenerator::generateBitonicMergeMasking(long num) {
     for(int j = 0; j < (1 << num); j++) {
         for(int k = 0; k < (1 << (log2n - 1 - num)); k++) {
-            long loc = j * (1 << (log2n - num)) + k;
-            if (!increase) loc = length - 1 - loc;
-            mask[num][loc] = 1; 
+            if (colNum == -1 || k % dataNum == colNum) {
+                long loc = j * (1 << (log2n - num)) + k;
+                if (!increase) loc = length - 1 - loc;
+                mask[num][loc] = 1; 
+            }
         }
     }
 }
@@ -113,6 +105,10 @@ void MaskingGenerator::generateMaskingComparison(long loc, long jump) {
                 long tmp = i * jump * 2 + j;
                 if(!increase) {
                     tmp = length - 1 - tmp;
+                    std::cout << "tmp = " << tmp << std::endl;
+                    if (colNum != -1) {
+                        tmp = tmp + 2 * colNum - dataNum + 1;
+                    }
                 }
                 mask[loc][tmp] = 1;
             }            
@@ -131,6 +127,9 @@ void MaskingGenerator::generateMaskingMerge(long loc, long num, long jump) {
                     long tmp = i * jump * num + (2 * k + 1) * jump + j;
                     if(!increase) {
                         tmp = length - 1 - tmp;
+                        if (colNum != -1) {
+                            tmp = tmp + 2 * colNum - dataNum + 1;
+                        }
                     } 
                     mask[loc][tmp] = 1;    
                 }            
@@ -176,6 +175,9 @@ void MaskingGenerator::generateMaskingComparisonOther(long loc, long jump) {
                 long tmp = i * jump * 2 + j + jump;
                 if(!increase) {
                     tmp = length - 1 - tmp;
+                    if (colNum != -1) {
+                        tmp = tmp + 2 * colNum - dataNum + 1;
+                    }
                 }
                 mask[loc][tmp] = 1;
             }            
@@ -194,6 +196,9 @@ void MaskingGenerator::generateMaskingMergeOther(long loc, long num, long jump) 
                     long tmp = i * jump * num + (2 * k + 1) * jump + j + jump;
                     if(!increase) {
                         tmp = length - 1 - tmp;
+                        if (colNum != -1) {
+                            tmp = tmp + 2 * colNum - dataNum + 1;
+                        }
                     } 
                     mask[loc][tmp] = 1;    
                 }            
@@ -202,75 +207,3 @@ void MaskingGenerator::generateMaskingMergeOther(long loc, long num, long jump) 
         }        
     }
 }
-
-// void MaskingGenerator::generateMaskingTableComp(long loc, long jump) {
-//     generateMaskingComparison(loc, jump * (1 << logDataNum));
-// }
-
-// void MaskingGenerator::generateMaskingTableMerge(long loc, long num, long jump) {
-//     generateMaskingMerge(loc, num, jump * (1 << logDataNum));
-// }
-
-// long MaskingGenerator::generateMaskingTableRec(long logNum, long logJump, long loc) {
-//     if (logNum == 1) {
-//         generateMaskingTableComp(loc, 1 << logJump);
-//     } else {
-//         if (logJump == 0) {
-//             loc = generateMaskingTableRec(logNum - 1, logJump, loc);
-//         }
-//         loc = generateMaskingTableRec(logNum - 1, logJump + 1, loc);
-//         generateMaskingTableMerge(loc, 1 << logNum, 1 << logJump);
-//     }
-//     return loc + 1;
-// }
-
-// long MaskingGenerator::generateMaskingTableByRec(long colNum, long logNum, long logJump, long loc) {
-//     if (logNum == 1) {
-//         generateMaskingTableCompBy(colNum, loc, 1 << logJump);
-//     } else {
-//         if (logJump == 0) {
-//             loc = generateMaskingTableByRec(colNum, logNum - 1, logJump, loc);
-//         }
-//         loc = generateMaskingTableByRec(colNum, logNum - 1, logJump + 1, loc);
-//         generateMaskingTableMergeBy(colNum, loc, 1 << logNum, 1 << logJump);
-//     }
-//     return loc + 1;
-// }
-
-// void MaskingGenerator::generateMaskingTableCompBy(long colNum, long loc, long jump) {
-//     long dataNum = 1 << logDataNum;
-//     jump *= dataNum;
-
-//     long repeat = length / (jump * 2);
-//     for(int i = 0; i < repeat; i++) {
-//         for(int j = 0; j < jump; j++) {
-//             if (j % dataNum == colNum) {
-//                 long tmp = i * jump * 2 + j;
-//                 if(!increase) {
-//                     tmp = length - 1 - tmp;
-//                 }
-//                 mask[loc][tmp] = 1;
-//             }
-//         }
-//     }
-// }
-
-// void MaskingGenerator::generateMaskingTableMergeBy(long colNum, long loc, long num, long jump) {
-//     long dataNum = (1 << logDataNum);
-//     jump *= dataNum;
-
-//     long repeat = length / (jump * num);
-//     for(int i = 0; i < repeat; i++) {
-//         for(int j = 0; j < jump; j++) {
-//             if (j % dataNum == colNum) {
-//                 for(int k = 0; k < num / 2 - 1; k++) {
-//                     long tmp = i * jump * num + (2 * k + 1) * jump + j;
-//                     if(!increase) {
-//                         tmp = length - 1 - tmp;
-//                     } 
-//                     mask[loc][tmp] = 1;    
-//                 }  
-//             }          
-//         }        
-//     }
-// }
