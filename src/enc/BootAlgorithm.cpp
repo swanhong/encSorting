@@ -756,7 +756,7 @@ void BootAlgo::reverse(Ciphertext& cipher, double** mask, BootScheme& scheme, Ri
 }
 
 void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, long colNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey) {
-    cout << "start compAndSwapTable with dist = " << dist << endl; 
+    // cout << "start compAndSwapTable with dist = " << dist << endl; 
     scheme.checkLevelAndBoot(cipher, 3, bootHelper, param);
 
     ZZ* maskPoly = new ZZ[1 << param.logN];
@@ -802,9 +802,9 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
             minCipherTable : (a, 0, 0, 0), ( ... )
             maxCipherTable : (b, 0, 0, 0), ( ... )
     */
-    cout << "start minMaxTable with" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "start minMaxTable with" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
     comparison(minCipherTable, maxCipherTable, scheme, bootHelper);
     /*
@@ -813,9 +813,9 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
             maxCipherTable : (comp(b,a), *, *, *), ( ... )
     */
 
-    cout << "after comp" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "after comp" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
     scheme.checkLevelAndBoot(minCipherTable, 2, bootHelper, param);
     scheme.checkLevelAndBoot(maxCipherTable, 2, bootHelper, param);
@@ -834,9 +834,9 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
             maxCipherTable : (comp(b,a), 0, 0, 0), ( ... )
     */
 
-    cout << "after masking" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "after masking" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
 
     /*
@@ -855,9 +855,9 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
         scheme.addAndEqual(maxCipherTable, tmpMaxTable);
     }
 
-    cout << "after rot" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "after rot" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
     // Flip <- 1 - Table
     Ciphertext minCipherTableFlip = scheme.negate(minCipherTable);
@@ -870,8 +870,8 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
     // scheme.addByPolyAndEqual(cipherTableFlipRight, maskRightPoly, param.logp);
 
 
-    scheme.decryptAndPrint("tableFlip", secretKey, minCipherTableFlip);
-    scheme.decryptAndPrint("tableFlipRight", secretKey, maxCipherTableFlip);
+    // scheme.decryptAndPrint("tableFlip", secretKey, minCipherTableFlip);
+    // scheme.decryptAndPrint("tableFlipRight", secretKey, maxCipherTableFlip);
 
     if (minCipher.logq < minCipherTable.logq) {
         scheme.modDownToAndEqual(minCipherTable, minCipher.logq);
@@ -892,16 +892,16 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
     scheme.reScaleByAndEqual(maxCipherSmall, param.logp);
     scheme.reScaleByAndEqual(maxCipherBig, param.logp);
 
-    cout << "check" << endl;
-    scheme.decryptAndPrint("minSmall", secretKey, minCipherSmall);
-    scheme.decryptAndPrint("minBig", secretKey, minCipherBig);
-    scheme.decryptAndPrint("maxSmall", secretKey, maxCipherSmall);
-    scheme.decryptAndPrint("maxBig", secretKey, maxCipherBig);
+    // cout << "check" << endl;
+    // scheme.decryptAndPrint("minSmall", secretKey, minCipherSmall);
+    // scheme.decryptAndPrint("minBig", secretKey, minCipherBig);
+    // scheme.decryptAndPrint("maxSmall", secretKey, maxCipherSmall);
+    // scheme.decryptAndPrint("maxBig", secretKey, maxCipherBig);
 
     minCipher = scheme.add(minCipherSmall, maxCipherSmall);
     maxCipher = scheme.add(minCipherBig, maxCipherBig);
 
-    cout << "result" << endl;
-    scheme.decryptAndPrint("minCipher", secretKey, minCipher);
-    scheme.decryptAndPrint("maxCipher", secretKey, maxCipher);
+    // cout << "result" << endl;
+    // scheme.decryptAndPrint("minCipher", secretKey, minCipher);
+    // scheme.decryptAndPrint("maxCipher", secretKey, maxCipher);
 }

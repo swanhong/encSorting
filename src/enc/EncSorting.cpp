@@ -100,13 +100,13 @@ void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long co
     double** maskTableOther = mgTable2.getMaskingOther();
 
     
-    long logn = param.log2n - logDataNum;
-    long n = 1 << param.log2n;
-    long maskNum = logn * (logn + 1) / 2;
-    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+    // long logn = param.log2n - logDataNum;
+    // long n = 1 << param.log2n;
+    // long maskNum = logn * (logn + 1) / 2;
+    // PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    // PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
 
     bootAlgo = BootAlgo(param, invIter, compIter, increase);
     PlainSort plainSort;
