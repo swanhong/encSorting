@@ -9,7 +9,7 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	timeutils.start("KeyGen");
 	Ring ring(parameter.logN, parameter.logQ);
 	SecretKey secretKey(ring);
-	Scheme scheme(secretKey, ring);
+	BootScheme scheme(secretKey, ring);
 	scheme.addConjKey(secretKey);
 	scheme.addLeftRotKeys(secretKey);
 	
@@ -22,87 +22,57 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	timeutils.stop("Bootstrapping Helper construct");
 
 	complex<double>* r10 = EvaluatorUtils::randomComplexArray(n);
-    // double* mvec = new double[n];
-    r10[0] = 1;
-    r10[1] = 18.9857;;
-    r10[2] = 1;
-    r10[3] = 4.6455;
-    r10[4] = 1;
-    r10[5] = 18.1163;
-    r10[6] = 1;
-    r10[7] = 10.2835;
-    r10[8] = 1;
-    r10[9] = 6.10418;
-    r10[10] = 1;
-    r10[11] = 5.30126;
-    r10[12] = 1;
-    r10[13] = 24.9799;
-    r10[14] = 1;
-    r10[15] = 42.2266;
-    r10[16] = 1;
-    r10[17] = 34.1281;
-    r10[18] = 1;
-    r10[19] = 6.49053;
-    r10[20] = 1;
-    r10[21] = 24.4108;
-    r10[22] = 1;
-    r10[23] = 17.5154;
-    r10[24] = 1;
-    r10[25] = 4.33479;
-    r10[26] = 1;
-    r10[27] = 37.6225;
-    r10[28] = 1;
-    r10[29] = 4.89687;
-    r10[30] = 1;
-    r10[31] = 38.4453;
-    r10[32] = 1;
-    r10[33] = 5.28638;
-    r10[34] = 1;
-    r10[35] = 8.56952;
-    r10[36] = 1;
-    r10[37] = 12.7157;
-    r10[38] = 1;
-    r10[39] = 3.04851;
-    r10[40] = 1;
-    r10[41] = 14.4908;
-    r10[42] = 1;
-    r10[43] = 5.90784;
-    r10[44] = 1;
-    r10[45] = 21.3166;
-    r10[46] = 1;
-    r10[47] = 4.66979;
-    r10[48] = 1;
-    r10[49] = 7.9521;
-    r10[50] = 1;
-    r10[51] = 11.4703;
-    r10[52] = 1;
-    r10[53] = 3.60489;
-    r10[54] = 1;
-    r10[55] = 15.8252;
-    r10[56] = 1;
-    r10[57] = 5.32735;
-    r10[58] = 1;
-    r10[59] = 36.6636;
-    r10[60] = 1;
-    r10[61] = 2.72867;
-    r10[62] = 1;
-    r10[63] = 5.42936;
-	
+    // for (int i = 0; i < n; i++) {
+    //     r10[i] *= 128.;
+    // }
+
 	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
-
-
-    long normalizeNum = 4;
-	timeutils.start("Improved bootstrapping");
-	boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
-    // scheme.divByPo2AndEqual(cipher,  normalizeNum);
     
-    // complex<double>* dvecn = scheme.decrypt(secretKey, cipher);
-    // cout << "cipher.logq = " << cipher.logq << endl;
-    // PrintUtils::printSingleArray("normalized", dvecn, n);
+    double* mask = new double[n];
+    for(int i = 0; i < n; i++) {
+        mask[i] = 1.;
+    }
 
-    // boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 7, secretKey);
-    // scheme.multByConstAndEqual(cipher, (double) (1 << normalizeNum), parameter.logp);
-    // scheme.reScaleByAndEqual(cipher, parameter.logp);
+	Ciphertext cipher2 = scheme.encrypt(mask, n, parameter.logp, parameter.logQ);
+
+    
+    // while(cipher.logq > parameter.logp + parameter.logq) {
+    //     cout << "before mult, " << cipher.logq << endl;
+    //     // scheme.multByPolyAndEqual(cipher, poly, parameter.logp);
+    //     scheme.multAndEqual(cipher, cipher2);
+    //     scheme.reScaleByAndEqual(cipher, parameter.logp);
+    //     scheme.modDownByAndEqual(cipher2, parameter.logp);
+    // }
+    
+	timeutils.start("Improved bootstrapping");
+	// boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+    for(int i = 0; i < 8000; i++) {
+        // boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 5);
+        if(cipher.logq - parameter.logp < parameter.logq) {
+            complex<double>* dvecBef = scheme.decrypt(secretKey, cipher);
+            boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 5);
+            boothelper.bootstrapping_cos(cipher2, parameter.logq, parameter.logQ, 5);
+            complex<double>* dvecAft = scheme.decrypt(secretKey, cipher);
+            cout << "bootstrapping.." << endl;
+            cout << "   before : ";
+            PrintUtils::averageDifference(r10, dvecBef, n);
+            cout << "   after : ";
+            PrintUtils::averageDifference(r10, dvecAft, n);
+        }
+        scheme.multAndEqual(cipher, cipher2);
+        scheme.reScaleByAndEqual(cipher, parameter.logp);
+        scheme.modDownByAndEqual(cipher2, parameter.logp);
+        complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+        cout << "iter " << i << " : ";
+        PrintUtils::averageDifference(r10, dvec, n);
+    }
+	
+	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
+	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
+	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
+	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
+	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
+    
     
 	timeutils.stop("Improved bootstrapping");
 
@@ -235,10 +205,7 @@ void TestBoot::approxInverse(Parameter parameter, long iter) {
 
 	double* mvec = EvaluatorUtils::randomRealArray(n);
     for (int i = 0; i < n; i++) {
-        if (mvec[i] < 1 / (double) (1 << iter)) {
-            mvec[i] = 1 / (double) (1 << iter);
-        }
-        
+        mvec[i] += 0.5;
     }
     
     
@@ -247,11 +214,13 @@ void TestBoot::approxInverse(Parameter parameter, long iter) {
     
     timeutils.start("approxInverse");
     BootAlgo bootAlgo(parameter, iter);
-    bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
-	// bootAlgo.approxInverse(cipher, scheme, bootHelper);
-    bootAlgo.approxInverseWithDec(cipher, scheme, bootHelper, secretKey);
+    long start = cipher.logq;
+    // bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+    bootHelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 5);
+	bootAlgo.approxInverse(cipher, scheme, bootHelper);
+    // bootAlgo.approxInverseWithDec(cipher, scheme, bootHelper, secretKey);
     timeutils.stop("approxInverse");
-
+    cout << "consumed logq = " << start - cipher.logq << endl;
     // Print Result and Difference //	
 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     double* invvec = new double[n];

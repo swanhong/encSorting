@@ -338,51 +338,76 @@ void BootAlgo::approxSqrt3Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper
 
 void BootAlgo::approxInverse(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper) {
     // cout << "** Start approxInverse **" << endl;
-    scheme.checkLevelAndBoot(cipher, 2, bootHelper, param);
+    scheme.checkLevelAndBoot(cipher, invIter + 1, bootHelper, param);
+    
     scheme.negateAndEqual(cipher);
     
     Ciphertext a = scheme.addConst(cipher, 2.0, param.logp);
     Ciphertext b = scheme.addConst(cipher, 1.0, param.logp);
 
-    // cout << "follow a.logq, b.logq" << endl;
-    // consumes 2 * logp bits for each iteration
-    for (int _ = 0; _ < invIter; _++) {       
-        // cout << "iter " << _ << endl;
+
+    Ciphertext tmp;
+    for (int i = 0; i < invIter; i++) {
         /*
-            The original algorithm is
+             current : 
+                a <- a * (1 + b^2) * (1 + b^4) *... * (1 + b^{2^{i}})
+                b <- b^{2^{i}}
+                and a.logq = b.logq - logp
+            do :
                 b <- b^2
                 a <- a * (1 + b)
-            Modify as
-                b <- b^2 + 1
-                a <- a * b
-                b <- b - 1
+            this consumes 1 depth
         */
-
-        // b <- b^2 + 1 
-        scheme.squareAndEuqalWithBoot(b, bootHelper, param);
+        scheme.squareAndEqual(b);
         scheme.reScaleByAndEqual(b, param.logp);
-        scheme.addConstAndEqual(b, 1.0, param.logp);
-        // cout << a.logq << ", " << b.logq << endl;
-        
-        // a <- a * b
-        scheme.checkAndBoot(a, a.logq < b.logq, bootHelper, param);
-        scheme.modDownToAndEqual(a, b.logq);
-        // cout << a.logq << ", " << b.logq << endl;
-        
-        scheme.multAndEqualWithBoot(a, b, bootHelper, param);
-        scheme.reScaleByAndEqual(a, param.logp);
-        // cout << a.logq << ", " << b.logq << endl;
 
-        // b <- b - 1
-        scheme.addConstAndEqual(b, -1.0, param.logp);
-        
-        if(_ < invIter - 1) {
-            // At the last iteration, we don't need to bootstrapp b
-            scheme.checkAndBoot(b, b.logq < a.logq, bootHelper, param);
-            scheme.modDownToAndEqual(b, a.logq);
-            // cout << a.logq << ", " << b.logq << endl;
+        tmp = scheme.addConst(b, 1.0, param.logp);
+        if (i == 0) {
+            scheme.modDownByAndEqual(a, param.logp);
         }
+        scheme.multAndEqual(a, tmp);
+        scheme.reScaleByAndEqual(a, param.logp);
     }
+
+    // cout << "follow a.logq, b.logq" << endl;
+    // consumes 2 * logp bits for each iteration
+    // for (int _ = 0; _ < invIter; _++) {       
+    //     // cout << "iter " << _ << endl;
+    //     /*
+    //         The original algorithm is
+    //             b <- b^2
+    //             a <- a * (1 + b)
+    //         Modify as
+    //             b <- b^2 + 1
+    //             a <- a * b
+    //             b <- b - 1
+    //     */
+
+    //     // b <- b^2 + 1 
+    //     scheme.squareAndEuqalWithBoot(b, bootHelper, param);
+    //     scheme.reScaleByAndEqual(b, param.logp);
+    //     scheme.addConstAndEqual(b, 1.0, param.logp);
+    //     // cout << a.logq << ", " << b.logq << endl;
+        
+    //     // a <- a * b
+    //     scheme.checkAndBoot(a, a.logq < b.logq, bootHelper, param);
+    //     scheme.modDownToAndEqual(a, b.logq);
+    //     // cout << a.logq << ", " << b.logq << endl;
+        
+    //     scheme.multAndEqualWithBoot(a, b, bootHelper, param);
+    //     scheme.reScaleByAndEqual(a, param.logp);
+    //     // cout << a.logq << ", " << b.logq << endl;
+
+    //     // b <- b - 1
+    //     scheme.addConstAndEqual(b, -1.0, param.logp);
+        
+    //     if(_ < invIter - 1) {
+    //         // At the last iteration, we don't need to bootstrapp b
+    //         scheme.checkAndBoot(b, b.logq < a.logq, bootHelper, param);
+    //         scheme.modDownToAndEqual(b, a.logq);
+    //         // cout << a.logq << ", " << b.logq << endl;
+    //     }
+    // }
     cipher = a;
     // cout << "** End approxInverse **" << endl;
 }
@@ -510,6 +535,9 @@ void BootAlgo::minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootSchem
 }
 
 void BootAlgo::comparison(Ciphertext& a, Ciphertext& b, BootScheme& scheme, BootHelper& bootHelper) {
+    /*
+        uses approxInv * (compIter + 1) times
+    */
     // cout << "** srart Comparison **" << endl;
     // cout << a.logq << ", " << b.logq << endl;    
     
@@ -521,50 +549,49 @@ void BootAlgo::comparison(Ciphertext& a, Ciphertext& b, BootScheme& scheme, Boot
     scheme.checkAndBoot(a, a.logq - 1 < param.logq, bootHelper, param);
     scheme.checkAndBoot(b, b.logq < a.logq, bootHelper, param);
     
-    // cout << a.logq << ", " << b.logq << endl;    
-
+    // sum <- 2/(a+b) = Inv((a+b)/2)
     Ciphertext sum = scheme.add(a, b);
     scheme.divByPo2AndEqual(sum, 1);
     
     approxInverse(sum, scheme, bootHelper);
     
     // cout << "a = " << a.logq << ", inv(sum) = " << sum.logq << endl;
+
+    // to compute a <- (a/2) * sum = a/(a+b)
     scheme.checkAndBoot(a, a.logq - param.logp - 1 < param.logq, bootHelper, param);
     scheme.checkAndBoot(sum, sum.logq - param.logp - 1 < param.logq, bootHelper, param);
+    
     scheme.divByPo2AndEqual(a, 1);
     scheme.modDownToAndEqualModified(a, sum, bootHelper, param);
-
-    // cout << "a = " << a.logq << ", sum = " << sum.logq << endl;
     scheme.multAndEqualWithBoot(a, sum, bootHelper, param);
     scheme.reScaleByAndEqual(a, param.logp);
 
     for (int _ = 0; _ < compIter; _++) {
-        // cout << "compIter " << _ << endl;
-
+        // check level for a^m
         scheme.checkLevelAndBoot(a, 2, bootHelper, param);
+
+        // update b <- 1 - a
         b = scheme.negate(a);
         scheme.addConstAndEqual(b, 1.0, param.logp);
 
-        // cout << a.logq << ", " << b.logq << endl;    
-
         // Fix m = 4
-        for (int i = 0; i < 2; i++) { // consumes 2 * logp
-            // cout << "square a" << endl;
+        for (int i = 0; i < 2; i++) { // consumes 2 levels
             scheme.squareAndEuqalWithBoot(a, bootHelper, param);
             scheme.reScaleByAndEqual(a, param.logp);
-            // cout << "square b" << endl;
+            
             scheme.squareAndEuqalWithBoot(b, bootHelper, param);
             scheme.reScaleByAndEqual(b, param.logp);
         }
-        // cout << a.logq << ", " << b.logq << endl;    
         
         Ciphertext inv = scheme.add(a, b);
-        approxInverse(inv, scheme, bootHelper); // consumses invIter * (2 * logp)
+        approxInverse(inv, scheme, bootHelper); // consumses invIter + 1 levels
 
         // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
-    
-        scheme.checkLevelAndBoot(a, 1, bootHelper, param);
-        scheme.checkLevelAndBoot(inv, 1, bootHelper, param);
+
+        if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
+            scheme.checkAndBoot(a, true, bootHelper, param);
+            scheme.checkAndBoot(inv, true, bootHelper, param);
+        }
         scheme.modDownToAndEqualModified(a, inv, bootHelper, param);
 
         // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
@@ -730,7 +757,7 @@ void BootAlgo::reverse(Ciphertext& cipher, double** mask, BootScheme& scheme, Ri
 
 void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, long colNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey) {
     cout << "start compAndSwapTable with dist = " << dist << endl; 
-    scheme.checkModulusAndBoot(cipher, param.logp + param.logp, bootHelper, param);
+    scheme.checkLevelAndBoot(cipher, 3, bootHelper, param);
 
     ZZ* maskPoly = new ZZ[1 << param.logN];
     ZZ* maskRightPoly = new ZZ[1 << param.logN];
@@ -761,7 +788,6 @@ void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, long colNum
 
     scheme.leftRotateAndEqualConditional(cipher1, dist, increase);
 
-    scheme.checkAndBoot(cipher, cipher.logq < cipher1.logq, bootHelper, param);
     scheme.modDownToAndEqual(cipher, cipher1.logq);
 
     scheme.addAndEqual(cipher, cipher1);
@@ -769,28 +795,56 @@ void BootAlgo::compAndSwapTable(Ciphertext& cipher, long logDataNum, long colNum
 }
 
 void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& minCipherTable, Ciphertext& maxCipherTable, long logDataNum, long colNum, ZZ* maskPoly, ZZ* maskTablePoly, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey) {
+    /*
+        Inputs:
+            minCipher : (a, a1, a2, a3), ( ... )
+            minCipher : (a, a1, a2, a3), ( ... )
+            minCipherTable : (a, 0, 0, 0), ( ... )
+            maxCipherTable : (b, 0, 0, 0), ( ... )
+    */
     cout << "start minMaxTable with" << endl;
     scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
     scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
     comparison(minCipherTable, maxCipherTable, scheme, bootHelper);
+    /*
+        after comp :
+            minCipherTable : (comp(a,b), *, *, *), ( ... )
+            maxCipherTable : (comp(b,a), *, *, *), ( ... )
+    */
 
     cout << "after comp" << endl;
     scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
     scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
+    scheme.checkLevelAndBoot(minCipherTable, 2, bootHelper, param);
+    scheme.checkLevelAndBoot(maxCipherTable, 2, bootHelper, param);
+    scheme.checkLevelAndBoot(minCipher, 1, bootHelper, param);
+    scheme.checkLevelAndBoot(maxCipher, 1, bootHelper, param);
+
+    // mult maskTablePoly = (1, 0, 0, 0) to remove * parts
     scheme.multByPolyAndEqualWithBoot(minCipherTable, maskTablePoly, bootHelper, param);
     scheme.multByPolyAndEqualWithBoot(maxCipherTable, maskTablePoly, bootHelper, param);
     scheme.reScaleByAndEqual(minCipherTable, param.logp);
     scheme.reScaleByAndEqual(maxCipherTable, param.logp);
+
+    /*
+        after comp :
+            minCipherTable : (comp(a,b), 0, 0, 0), ( ... )
+            maxCipherTable : (comp(b,a), 0, 0, 0), ( ... )
+    */
 
     cout << "after masking" << endl;
     scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
     scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
 
+    /*
+        copy :
+            minCipherTable : (comp(a,b), comp(a,b), comp(a,b), comp(a,b)), ( ... )
+            maxCipherTable : (comp(b,a), comp(b,a), comp(b,a), comp(b,a)), ( ... )
+    */
     scheme.leftRotateFastAndEqual(minCipherTable, colNum);
-
     scheme.leftRotateFastAndEqual(maxCipherTable, colNum);
 
     
@@ -805,12 +859,7 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
     scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
     scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
-    // scheme.leftRotateFastAndEqual(minCipherTable, colNum);
-    // scheme.leftRotateFastAndEqual(maxCipherTable, colNum);
-
-    scheme.checkLevelAndBoot(minCipherTable, 1, bootHelper, param);
-    scheme.checkLevelAndBoot(maxCipherTable, 1, bootHelper, param);
-
+    // Flip <- 1 - Table
     Ciphertext minCipherTableFlip = scheme.negate(minCipherTable);
     Ciphertext maxCipherTableFlip = scheme.negate(maxCipherTable);
 

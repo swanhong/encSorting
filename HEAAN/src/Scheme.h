@@ -262,7 +262,10 @@ public:
 	void bootstrapAndEqual(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
 
 	Ciphertext bootstrap(Ciphertext& cipher, long logq, long logQ, long logT, long logI = 4);
+	
 	void cos2piAndEqual(Ciphertext& cipher, long logp);
+
+	void cos2piChebyAndEqual(Ciphertext& cipher, long logp);
 
 	void evalPolyAndEqual(Ciphertext& cipher, long logp, double* coeff, long start, long end);
 

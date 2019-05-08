@@ -667,6 +667,7 @@ void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 
 	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
 	scheme.cos2piAndEqual(cipher, logq);
+	// scheme.cos2piChebyAndEqual(cipher, logq);
 	
 	// cout << "logq = " << cipher.logq << endl;
 
@@ -674,7 +675,6 @@ void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 	for(int i = 0; i < logK; i++) {
 		scheme.squareAndEqual(cipher);
 		scheme.reScaleByAndEqual(cipher, logq);
-		scheme.normalizeAndEqual(cipher);
 		scheme.addAndEqual(cipher, cipher);
 		scheme.addConstAndEqual(cipher, -1.0, logq);
 	}

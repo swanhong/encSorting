@@ -53,4 +53,3 @@ clean :
 
 run :
 	./$(OUTPUT)
-	# ./$(OUTPUT) > $(OUTPUT).txt

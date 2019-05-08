@@ -22,9 +22,14 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 	timeutils.stop("Bootstrapping Helper construct");
 
     double* mvec = EvaluatorUtils::randomRealArray(n);
-    // for (int i = 0; i < n; i++) {
-    //     mvec[i] += 1.;
-    // }
+    for (int i = 0; i < n; i++) {
+        double ran = (double) rand() / (RAND_MAX);
+        if(ran < 0.25) {
+             mvec[i] = 0.;
+        } else {
+            mvec[i] = 1.;
+        }
+    }
     
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
