@@ -17,9 +17,9 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	SetNumThreads(16);
 	timeutils.stop("KeyGen");
 
-	// timeutils.start("Bootstrapping Helper construct");
-	// BootHelper boothelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
-	// timeutils.stop("Bootstrapping Helper construct");
+	timeutils.start("Bootstrapping Helper construct");
+	BootHelper boothelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
+	timeutils.stop("Bootstrapping Helper construct");
 
 	complex<double>* r10 = EvaluatorUtils::randomComplexArray(n);
     // for (int i = 0; i < n; i++) {
@@ -28,16 +28,11 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
 	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
     
-    double* mask = new double[n];
-    for(int i = 0; i < n; i++) {
-        mask[i] = 1.;
-    }
-
-	Ciphertext cipher2 = scheme.encrypt(mask, n, parameter.logp, parameter.logQ);
-    timeutils.start("mult");
-    scheme.multAndEqual(cipher, cipher2);
-    scheme.reScaleByAndEqual(cipher, parameter.logp);
-    timeutils.stop("mult");
+    // double* mask = new double[n];
+    // for(int i = 0; i < n; i++) {
+    //     mask[i] = 1.;
+    // }
+	// Ciphertext cipher2 = scheme.encrypt(mask, n, parameter.logp, parameter.logQ);
     
     // while(cipher.logq > parameter.logp + parameter.logq) {
     //     cout << "before mult, " << cipher.logq << endl;
@@ -46,9 +41,9 @@ void TestBoot::bootstrapping(Parameter parameter) {
     //     scheme.reScaleByAndEqual(cipher, parameter.logp);
     //     scheme.modDownByAndEqual(cipher2, parameter.logp);
     // // }
-    
-	// timeutils.start("Improved bootstrapping");
-	// // boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
+
+	timeutils.start("Improved bootstrapping");
+	// boothelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
     // for(int i = 0; i < 8000; i++) {
     //     // boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 5);
     //     if(cipher.logq - parameter.logp < parameter.logq) {
@@ -70,7 +65,7 @@ void TestBoot::bootstrapping(Parameter parameter) {
     //     PrintUtils::averageDifference(r10, dvec, n);
     // }
 	
-	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
+	boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
 	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
 	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
 	// boothelper.bootstrapping_cosDec(cipher, parameter.logq, parameter.logQ, 5, secretKey);
@@ -84,7 +79,7 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
 	// Print Result and Difference //
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    // PrintUtils::printArrays(r10, dvec, n);
+    PrintUtils::printArrays(r10, dvec, n);
     PrintUtils::averageDifference(r10, dvec, n);
 	
 	// if(mvec != NULL) delete[] mvec;

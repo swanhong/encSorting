@@ -1401,27 +1401,14 @@ void Scheme::cos2piAndEqual(Ciphertext& cipher, long logp) {
 }
 
 void Scheme::cos2piChebyAndEqual(Ciphertext& cipher, long logp) {
-	// this is chebyshev approximation of cos(2pi(2x-1)) for degree 14 (even coeffs only)
-	// double coeff[8] = {-1, 4.9348, -4.05871, 1.33526, -0.235323, 0.0257903, -0.00190759, 0.0000896205};
-	// double coeff[8] = {1, -19.739, 64.9328, -85.3879, 59.9189, -25.62, 6.80584, -0.910636};
-	// double coeff[16] = {1, -19.7392, 64.9395, -85.4569, 60.2446, -26.4262, 7.90352, -1.71439, 0.282015, -0.0364016, 0.0038086, -0.000354203, 0.0000466349, -0.0000131287, 0.00000354426, -0.000000465428};
-	double coeff[4] = {0.999998, -0.308425, 0.0158512, -0.000319762};
-
-	cout << "coeff = ";
-	for (int i = 0; i < 16; i++) {
-		cout << coeff[i] << ", ";
-	}
-	cout << endl;
+	// this is chebyshev approximation of cos(2pix) for degree 14 (even coeffs only)
+	double coeff[7] = {1.70326, 0, -0.146437, 0, 0.00192145, 0, -0.00000999255};
 	
 	// addAndEqual(cipher, cipher);
 	// addConstAndEqual(cipher, -1, logp);
 	multByConstAndEqual(cipher, 8, logp);
 	reScaleByAndEqual(cipher, logp);
-	squareAndEqual(cipher);
-	reScaleByAndEqual(cipher, logp);
-	evalPoly4AndEqual(cipher, logp, coeff);
-	// evalPoly8AndEqual(cipher, logp, coeff);
-	// evalPolyAndEqual(cipher, logp, coeff, 0, 16);
+	evalCheb6AndEqual(cipher, logp, coeff);
 }
 
 void Scheme::evalPoly4AndEqual(Ciphertext& cipher, long logp, double* coeff) {
@@ -1508,4 +1495,40 @@ void Scheme::evalPolyAndEqual(Ciphertext& cipher, long logp, double* coeff, long
 		modDownByAndEqual(left, logp);
 		cipher = add(left, right);
 	}
+}
+
+void Scheme::evalCheb6AndEqual(Ciphertext& cipher, long logp, double* coeff) {
+	// multByConstAndEqual(cipher, 8.0, logp);
+	// reScaleByAndEqual(cipher, logp);
+
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+	addAndEqual(cipher2, cipher2);
+	addConstAndEqual(cipher2, -1.0, logp);
+
+	Ciphertext cipher4 = square(cipher2);
+	reScaleByAndEqual(cipher4, logp);
+	addAndEqual(cipher4, cipher4);
+	addConstAndEqual(cipher4, -1.0, logp);
+
+	modDownByAndEqual(cipher2, logp);
+	Ciphertext cipher6 = mult(cipher4, cipher2);
+	reScaleByAndEqual(cipher6, logp);
+	addAndEqual(cipher6, cipher6);
+	modDownByAndEqual(cipher2, logp);
+	subAndEqual(cipher6, cipher2);
+
+	modDownByAndEqual(cipher, 3*logp);
+	modDownByAndEqual(cipher4, logp);
+
+	multByConstAndEqual(cipher2, coeff[2], logp);
+	multByConstAndEqual(cipher4, coeff[4], logp);
+	multByConstAndEqual(cipher6, coeff[6], logp);
+	reScaleByAndEqual(cipher2, logp);
+	reScaleByAndEqual(cipher4, logp);
+	reScaleByAndEqual(cipher6, logp);
+
+	cipher = add(cipher2, cipher4);
+	addAndEqual(cipher, cipher6);
+	addConstAndEqual(cipher, coeff[0] / 2, logp);
 }

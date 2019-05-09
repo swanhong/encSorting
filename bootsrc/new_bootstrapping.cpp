@@ -635,18 +635,22 @@ void BootHelper::bootstrapping_cosDec(Ciphertext& cipher, long logq, long logQ, 
 	complex<double>* dvecPart2 = scheme.decrypt(sk, part2);
 
 	// time.start("Evaluate Sin * 2");
-	evalSin2piAndEqual(part1, logK, logq);
-	evalSin2piAndEqual(part2, logK, logq);
+	evalSin2piAndEqualDec(part1, logK, logq, sk);
+	evalSin2piAndEqualDec(part2, logK, logq, sk);
 	// time.stop("Evaluate Sin * 2");
 
 	complex<double>* dvecPart1a = scheme.decrypt(sk, part1);
 	complex<double>* dvecPart2a = scheme.decrypt(sk, part2);
 	
 	cout << "Part1 : before // after" << endl;
-	PrintUtils::printArrays(dvecPart1, dvecPart1a, cipher.n);
+	for(int i = 0; i < cipher.n; i++) {
+        std::cout << i << " : " << dvecPart1[i].real() << " // " << dvecPart1a[i].real() << " -- " << dvecPart1[i].real() - dvecPart1a[i].real() << std::endl;
+    }
 	
 	cout << "Part2 : before // after" << endl;
-	PrintUtils::printArrays(dvecPart2, dvecPart2a, cipher.n);
+	for(int i = 0; i < cipher.n; i++) {
+        std::cout << i << " : " << dvecPart2[i].real() << " // " << dvecPart2a[i].real() << " -- " << dvecPart2[i].real() - dvecPart2a[i].real() << std::endl;
+    }
 
 	// time.start("SlotToCoeff");
 	slotToCoeff(cipher, part1, part2);
@@ -661,13 +665,14 @@ void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 	scheme.addConstAndEqual(cipher, -0.25, logq); // x -> x - 1/4
 	// cipher.logp += logI;
 	//cout << " ======== cipher.logp = " << cipher.logp << endl;
+	
 	scheme.divByPo2AndEqual(cipher, logK); // x - 1/4 -> (x - 1/4) / K
 
 	// cout << "logq = " << cipher.logq << endl;
 
 	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
-	scheme.cos2piAndEqual(cipher, logq);
-	// scheme.cos2piChebyAndEqual(cipher, logq);
+	// scheme.cos2piAndEqual(cipher, logq);
+	scheme.cos2piChebyAndEqual(cipher, logq);
 	
 	// cout << "logq = " << cipher.logq << endl;
 
@@ -683,6 +688,69 @@ void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 	RR c = 0.5 / to_RR(M_PI);
 	scheme.multByConstAndEqual(cipher, c, logq); // 1/2pi * (sin(2pi * x))
 	scheme.reScaleByAndEqual(cipher, logq);
+
+	// cout << "logq = " << cipher.logq << endl;
+}
+
+
+void BootHelper::evalSin2piAndEqualDec(Ciphertext& cipher, long logK, long logq, SecretKey sk) {
+	// cout << "logq = " << cipher.logq << endl;
+	
+	scheme.addConstAndEqual(cipher, -0.25, logq); // x -> x - 1/4
+	// cipher.logp += logI;
+	//cout << " ======== cipher.logp = " << cipher.logp << endl;
+	
+	scheme.divByPo2AndEqual(cipher, logK); // x - 1/4 -> (x - 1/4) / K
+
+	// cout << "logq = " << cipher.logq << endl;
+
+	cout << "before cos" << endl;
+	complex<double>* dvecB = scheme.decrypt(sk, cipher);
+	for (int i = 0; i < cipher.n; i++)
+	{
+		cout << i << " : " << dvecB[i].real() << endl;
+	}
+	
+	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
+	// scheme.cos2piAndEqual(cipher, logq);
+	scheme.cos2piChebyAndEqual(cipher, logq);
+
+	cout << "after cos" << endl;
+	complex<double>* dvecA = scheme.decrypt(sk, cipher);
+	for (int i = 0; i < cipher.n; i++)
+	{
+		cout << i << " : " << dvecA[i].real() << endl;
+	}
+	
+	// cout << "logq = " << cipher.logq << endl;
+
+	//* cos( (2pi * x - pi/2) / K) -> cos(2pi * x - pi/2) = sin(2pi * x)
+	for(int i = 0; i < logK; i++) {
+		scheme.squareAndEqual(cipher);
+		scheme.reScaleByAndEqual(cipher, logq);
+		scheme.addAndEqual(cipher, cipher);
+		scheme.addConstAndEqual(cipher, -1.0, logq);
+	}
+
+	cout << "square" << endl;
+	complex<double>* dvecS = scheme.decrypt(sk, cipher);
+	for (int i = 0; i < cipher.n; i++)
+	{
+		cout << i << " : " << dvecS[i].real() << endl;
+	}
+	
+	// cout << "logq = " << cipher.logq << endl;
+
+	RR c = 0.5 / to_RR(M_PI);
+	scheme.multByConstAndEqual(cipher, c, logq); // 1/2pi * (sin(2pi * x))
+	scheme.reScaleByAndEqual(cipher, logq);
+
+	cout << "div 2pi" << endl;
+	complex<double>* dvecP = scheme.decrypt(sk, cipher);
+	for (int i = 0; i < cipher.n; i++)
+	{
+		cout << i << " : " << dvecP[i].real() << endl;
+	}
 
 	// cout << "logq = " << cipher.logq << endl;
 }

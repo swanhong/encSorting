@@ -59,6 +59,8 @@ public:
 	void bootstrapping_cosDec(Ciphertext& cipher, long logq, long logQ, long logK, SecretKey sk);
 
 	void evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq);
+
+	void evalSin2piAndEqualDec(Ciphertext& cipher, long logK, long logq, SecretKey sk);
 };
 
 

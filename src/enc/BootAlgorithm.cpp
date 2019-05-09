@@ -673,7 +673,7 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
 
         scheme.decryptAndPrint("after inv, inv", sk, inv);
 
-        // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
+        cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
 
         if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
             scheme.checkAndBoot(a, true, bootHelper, param);
@@ -681,9 +681,12 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
         }
         scheme.modDownToAndEqualModified(a, inv, bootHelper, param);
 
-        // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
+        cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
+
         scheme.multAndEqualWithBoot(a, inv, bootHelper, param);
         scheme.reScaleByAndEqual(a, param.logp);
+
+        scheme.decryptAndPrint("Iteration : final a", sk, a);
     }
     b = scheme.negate(a);
     scheme.addConstAndEqual(b, 1.0, param.logp);
