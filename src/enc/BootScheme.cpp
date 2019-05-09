@@ -20,6 +20,9 @@ void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bo
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- before : " + to_string(cipher.logq), WANT_TO_PRINT);
         countBoot();
         // bootHelper.bootstrapping(cipher, param.logq, param.logQ, param.logT);
+        // Ciphertext cipherConj = conjugate(cipher);
+        // addAndEqual(cipher, cipherConj);
+        // divByPo2AndEqual(cipher, 1);
         cout << "bootstrapping...." << endl;
         bootHelper.bootstrapping_cos(cipher, param.logq, param.logQ, 5);
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- after : " + to_string(cipher.logq), WANT_TO_PRINT);
@@ -116,6 +119,12 @@ void BootScheme::leftRotateAndEqualConditional(Ciphertext& cipher, long r, bool 
 void BootScheme::rightRotateAndEqualConditional(Ciphertext& cipher, long r, bool condition) {
     if (condition) rightRotateFastAndEqual(cipher, r);
     else leftRotateFastAndEqual(cipher, r);
+}
+
+void BootScheme::resetImagErrorAndEqual(Ciphertext& cipher) {
+    Ciphertext cipherConj = conjugate(cipher);
+    addAndEqual(cipher, cipherConj);
+    divByPo2AndEqual(cipher, 1);
 }
 
 void BootScheme::decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher) {

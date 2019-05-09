@@ -46,6 +46,7 @@ public:
     void leftRotateAndEqualConditional(Ciphertext& cipher, long r, bool condition);
     void rightRotateAndEqualConditional(Ciphertext& cipher, long r, bool condition);
 
+    void resetImagErrorAndEqual(Ciphertext& cipher);
 
     void decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher);
     void decryptAndPrintAll(std::string str, SecretKey& secretKey, Ciphertext& cipher);

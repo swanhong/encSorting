@@ -37,7 +37,7 @@ void PrintUtils::printSingleArray(std::string str, double* array, long n) {
 
 void PrintUtils::printSingleArray(std::string str, complex<double>* array, long n) {
     for (int i = 0; i < n; i++) {
-        std::cout << str << "[" << i << "] = " << array[i].real() << std::endl;
+        std::cout << str << "[" << i << "] = " << array[i] << std::endl;
     }
 }
 
@@ -59,7 +59,7 @@ void PrintUtils::printSingleArraySmall(std::string str, complex<double>* array, 
     } else {
         for(int i = 0; i < n; i++) {
             if(i % 1000 == 0) {
-                std::cout << str << "[" << i << "] = " << array[i].real() << std::endl;
+                std::cout << str << "[" << i << "] = " << array[i] << std::endl;
             }
         }
     }

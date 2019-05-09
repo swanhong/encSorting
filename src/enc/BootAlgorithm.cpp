@@ -32,7 +32,7 @@ void BootAlgo::approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bo
     scheme.addConstAndEqual(b, -1.0, logp);
 
     // one sqrtIteration : 2logp 
-    // total = 2 * d * logp
+    // total = 2 * iter * logp
     Ciphertext dummy;
     for(int i = 0; i < sqrtIter; i++) {
         PrintUtils::nprint(to_string(i) + "/" + to_string(sqrtIter - 1) + "th sqrtIteration", WANT_TO_PRINT);
@@ -72,6 +72,8 @@ void BootAlgo::approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bo
 void BootAlgo::approxSqrtDec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk) {
     PrintUtils::nprint("start BootAlgo::sqrt", WANT_TO_PRINT);
 
+    scheme.resetImagErrorAndEqual(cipher);
+
     Ciphertext b = cipher;
     long logp = param.logp;    
     scheme.addConstAndEqual(b, -1.0, logp);
@@ -89,8 +91,11 @@ void BootAlgo::approxSqrtDec(Ciphertext& cipher, BootScheme& scheme, BootHelper&
             // bootHelper.bootstrapping_cosDec(b, param.logq, param.logQ, 5, sk);
         // }
         
-        scheme.checkLevelAndBoot(cipher, 1, bootHelper, param);
-        scheme.checkLevelAndBoot(b, 1, bootHelper, param);
+        // scheme.checkLevelAndBoot(cipher, 1, bootHelper, param);
+        // scheme.checkLevelAndBoot(b, 1, bootHelper, param);
+        scheme.checkModulusAndBoot(cipher, param.logp + 2, bootHelper, param);
+        scheme.checkModulusAndBoot(b, param.logp + 2, bootHelper, param);
+
 
         // make dummy = 1 - b / 2
         dummy = scheme.divByPo2(b, 1); // b - 1
@@ -114,6 +119,12 @@ void BootAlgo::approxSqrtDec(Ciphertext& cipher, BootScheme& scheme, BootHelper&
         scheme.modDownToAndEqualModified(dummy, b, bootHelper, param);
         scheme.multAndEqualWithBoot(b, dummy, bootHelper, param);
         scheme.reScaleByAndEqual(b, logp); // b - 2logp
+
+        if(i < sqrtIter - 1){
+            scheme.resetImagErrorAndEqual(b);
+            scheme.resetImagErrorAndEqual(cipher);
+        }
+
         scheme.modDownToAndEqualModified(cipher, b, bootHelper, param);
 
         cout << "cipher.logq = " << cipher.logq << endl;
@@ -488,7 +499,7 @@ void BootAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& 
 void BootAlgo::minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk) {
     PrintUtils::nprint("start minMax with logq = " + to_string(minCipher.logq) + ", " + to_string(maxCipher.logq), WANT_TO_PRINT);
 
-    scheme.checkAndBoot(minCipher, minCipher.logq - param.logp - 1 < param.logq, bootHelper, param);
+    scheme.checkAndBoot(minCipher, minCipher.logq - param.logp - 2 < param.logq, bootHelper, param);
     scheme.checkAndBoot(maxCipher, maxCipher.logq < minCipher.logq, bootHelper, param);
     scheme.modDownToAndEqualModified(minCipher, maxCipher, bootHelper, param);
 
@@ -496,15 +507,22 @@ void BootAlgo::minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootSchem
     Ciphertext y = scheme.sub(minCipher, maxCipher);
 
     scheme.divByPo2AndEqual(x, 1); // x - logp + 1
-    scheme.divByPo2AndEqual(y, 1); // y - logp + 1
+    // scheme.divByPo2AndEqual(y, 1); // y - logp + 1
 
     Ciphertext yBefore = y;    
+
+    scheme.decryptAndPrint("before square, y", sk, y);
+
+    scheme.resetImagErrorAndEqual(y);
     
     scheme.squareAndEuqalWithBoot(y, bootHelper, param);
     scheme.reScaleByAndEqual(y, param.logp); // y - logp + 1
 
-    scheme.addAndEqual(y, y);
-    scheme.addAndEqual(y, y);
+    scheme.decryptAndPrint("after square, y", sk, y);
+
+
+    // scheme.addAndEqual(y, y);
+    // scheme.addAndEqual(y, y);
 
     // sqrtCipher - (2 * sqrtIter + 1) * logp + 1
     // approxSqrt(y, scheme, bootHelper);
@@ -512,14 +530,14 @@ void BootAlgo::minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootSchem
     // approxSqrt2Dec(y, scheme, bootHelper, sk);
     // approxSqrt3Dec(y, scheme, bootHelper, sk);
 
-    scheme.divByPo2AndEqual(y, 1);
-
     complex<double>* yBefDec = scheme.decrypt(sk, yBefore);    
     complex<double>* yAftDec = scheme.decrypt(sk, y);
     complex<double>* yBefAbs = new complex<double>[y.n];
     for (int i = 0; i < y.n; i++) {
         yBefAbs[i] = abs(yBefDec[i]);
     }
+
+    scheme.divByPo2AndEqual(y, 1);
 
     cout << "after approxSqrt" << endl;
     cout << "sqrt(y) (logQ = " << yBefore.logq << ") // approxsqrt(y) (logQ = " << y.logq << ")" << endl;
@@ -568,7 +586,10 @@ void BootAlgo::comparison(Ciphertext& a, Ciphertext& b, BootScheme& scheme, Boot
 
     for (int _ = 0; _ < compIter; _++) {
         // check level for a^m
-        scheme.checkLevelAndBoot(a, 2, bootHelper, param);
+        scheme.checkModulusAndBoot(a, 3 * param.logp + 1, bootHelper, param);
+        
+        // Remove Im(a)
+        scheme.resetImagErrorAndEqual(a);
 
         // update b <- 1 - a
         b = scheme.negate(a);
@@ -588,10 +609,7 @@ void BootAlgo::comparison(Ciphertext& a, Ciphertext& b, BootScheme& scheme, Boot
 
         // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
 
-        if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
-            scheme.checkAndBoot(a, true, bootHelper, param);
-            scheme.checkAndBoot(inv, true, bootHelper, param);
-        }
+        scheme.checkLevelAndBoot(inv, 1, bootHelper, param);
         scheme.modDownToAndEqualModified(a, inv, bootHelper, param);
 
         // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
@@ -682,11 +700,11 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
 
         cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
 
-        scheme.checkLevelAndBoot(a, 1, bootHelper, param);
-
-        // if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
-        //     scheme.checkAndBoot(inv, true, bootHelper, param);
-        // }
+        
+        if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
+            scheme.checkAndBoot(a, true, bootHelper, param);
+            scheme.checkAndBoot(inv, true, bootHelper, param);
+        }
 
         scheme.modDownToAndEqualModified(a, inv, bootHelper, param);
 
@@ -753,8 +771,12 @@ void BootAlgo::compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootS
     ring.encode(maskPoly, mask, cipher.n, param.logp);
     // ring.encode(maskPoly, mask, cipher.n, param.logp);
 
-    scheme.checkLevelAndBoot(cipher, 1, bootHelper, param);
+    scheme.checkModulusAndBoot(cipher, param.logp + 1, bootHelper, param);
+    // scheme.checkLevelAndBoot(cipher, 1, bootHelper, param);
 
+    scheme.decryptAndPrint("before reset imag, cipher", sk, cipher);
+
+    
     Ciphertext dummy = cipher;
     scheme.multByPolyAndEqualWithBoot(dummy, maskPoly, bootHelper, param);
     scheme.reScaleByAndEqual(dummy, param.logp);
@@ -764,25 +786,22 @@ void BootAlgo::compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootS
 
     scheme.rightRotateAndEqualConditional(dummy, dist, increase);
 
-    ZZ* dummyPoly = new ZZ[1 << param.logN];
-    double* dummyMask = new double[n];
-    cout << "loc = " << loc << ", dummyMask = ";
-    for(int i = 0; i < n; i++) {
-        dummyMask[i] = mask[i] / (double) (loc+1);
-        cout << dummyMask[i] << ", ";
-    }cout << endl;
-    ring.encode(dummyPoly, dummyMask, cipher.n, param.logp);
+    // ZZ* dummyPoly = new ZZ[1 << param.logN];
+    // double* dummyMask = new double[n];
+    // // cout << "loc = " << loc << ", dummyMask = ";
+    // for(int i = 0; i < n; i++) {
+    //     dummyMask[i] = mask[i] / (double) (loc+1);
+    //     // cout << dummyMask[i] << ", ";
+    // }cout << endl;
     // ring.encode(dummyPoly, dummyMask, cipher.n, param.logp);
-
-    // scheme.addByPolyAndEqual(dummy, dummyPoly, param.logp);
-    // scheme.addByPolyAndEqual(dummy, dummyPoly, param.logp);
     // scheme.addByPolyAndEqual(cipher, dummyPoly, param.logp);
-    scheme.addByPolyAndEqual(cipher, dummyPoly, param.logp);
 
     // scheme.decryptAndPrint("cipher", sk, cipher);
     // scheme.decryptAndPrint("dummy", sk, dummy);    
-    complex<double>* dvecCipher = scheme.decrypt(sk, cipher);
-    complex<double>* dvecDummy = scheme.decrypt(sk, dummy);
+    
+    // complex<double>* dvecCipher = scheme.decrypt(sk, cipher);
+    // complex<double>* dvecDummy = scheme.decrypt(sk, dummy);
+    
     // for (int i = 0; i < cipher.n; i++) {
     //     if (dvecCipher[i].real() < dvecDummy[i].real()) {
     //         complex<double> x = dvecCipher[i];
@@ -790,27 +809,28 @@ void BootAlgo::compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootS
     //         dvecDummy[i] = x;
     //     }
     // }
-    
+    scheme.decryptAndPrint("before minmax, cipher", sk, cipher);
+    scheme.decryptAndPrint("before minmax, dummy", sk, dummy);
 
     minMaxDec(dummy, cipher, scheme, bootHelper, sk);
 
-    complex<double>* dvecCipherAfter = scheme.decrypt(sk, cipher);
-    complex<double>* dvecDummyAfter = scheme.decrypt(sk, dummy);
+    scheme.decryptAndPrint("after minmax, cipher", sk, cipher);
+    scheme.decryptAndPrint("after minmax, dummy", sk, dummy);
 
-    cout << "after minMax" << endl;
-    cout << "cipher before // cipher after" << endl;
-    PrintUtils::printArrays(dvecCipher, dvecCipherAfter, cipher.n);
-    cout << "Dummy before // Dummy after" << endl;   
-    PrintUtils::printArrays(dvecDummy, dvecDummyAfter, cipher.n);
-    PrintUtils::averageDifference(dvecCipher, dvecCipherAfter, cipher.n);
-    PrintUtils::averageDifference(dvecDummy, dvecDummyAfter, cipher.n);
+    // complex<double>* dvecCipherAfter = scheme.decrypt(sk, cipher);
+    // complex<double>* dvecDummyAfter = scheme.decrypt(sk, dummy);
+
+    // cout << "after minMax" << endl;
+    // cout << "cipher before // cipher after" << endl;
+    // PrintUtils::printArrays(dvecCipher, dvecCipherAfter, cipher.n);
+    // cout << "Dummy before // Dummy after" << endl;   
+    // PrintUtils::printArrays(dvecDummy, dvecDummyAfter, cipher.n);
+    // PrintUtils::averageDifference(dvecCipher, dvecCipherAfter, cipher.n);
+    // PrintUtils::averageDifference(dvecDummy, dvecDummyAfter, cipher.n);
 
     // scheme.decryptAndPrint("cipher", sk, cipher);
     // scheme.decryptAndPrint("dummy", sk, dummy);
 
-
-    // scheme.subByPolyAndEqual(cipher, dummyPoly, param.logp);
-    scheme.subByPolyAndEqual(cipher, dummyPoly, param.logp);
     // scheme.subByPolyAndEqual(cipher, dummyPoly, param.logp);
     
     
@@ -901,20 +921,21 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
             minCipherTable : (a, 0, 0, 0), ( ... )
             maxCipherTable : (b, 0, 0, 0), ( ... )
     */
-    cout << "start minMaxTable with" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "start minMaxTable with" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
-    comparisonDec(minCipherTable, maxCipherTable, scheme, bootHelper, secretKey);
+    // comparisonDec(minCipherTable, maxCipherTable, scheme, bootHelper, secretKey);
+    comparison(minCipherTable, maxCipherTable, scheme, bootHelper);
     /*
         after comp :
             minCipherTable : (comp(a,b), *, *, *), ( ... )
             maxCipherTable : (comp(b,a), *, *, *), ( ... )
     */
 
-    cout << "after comp" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "after comp" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
     scheme.checkLevelAndBoot(minCipherTable, 2, bootHelper, param);
     scheme.checkLevelAndBoot(maxCipherTable, 2, bootHelper, param);
@@ -933,9 +954,9 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
             maxCipherTable : (comp(b,a), 0, 0, 0), ( ... )
     */
 
-    cout << "after masking" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "after masking" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
 
     /*
@@ -954,9 +975,9 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
         scheme.addAndEqual(maxCipherTable, tmpMaxTable);
     }
 
-    cout << "after rot" << endl;
-    scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
-    scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
+    // cout << "after rot" << endl;
+    // scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
+    // scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
     // Flip <- 1 - Table
     Ciphertext minCipherTableFlip = scheme.negate(minCipherTable);
@@ -969,8 +990,8 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
     // scheme.addByPolyAndEqual(cipherTableFlipRight, maskRightPoly, param.logp);
 
 
-    scheme.decryptAndPrint("tableFlip", secretKey, minCipherTableFlip);
-    scheme.decryptAndPrint("tableFlipRight", secretKey, maxCipherTableFlip);
+    // scheme.decryptAndPrint("tableFlip", secretKey, minCipherTableFlip);
+    // scheme.decryptAndPrint("tableFlipRight", secretKey, maxCipherTableFlip);
 
     if (minCipher.logq < minCipherTable.logq) {
         scheme.modDownToAndEqual(minCipherTable, minCipher.logq);
@@ -991,16 +1012,16 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
     scheme.reScaleByAndEqual(maxCipherSmall, param.logp);
     scheme.reScaleByAndEqual(maxCipherBig, param.logp);
 
-    cout << "check" << endl;
-    scheme.decryptAndPrint("minSmall", secretKey, minCipherSmall);
-    scheme.decryptAndPrint("minBig", secretKey, minCipherBig);
-    scheme.decryptAndPrint("maxSmall", secretKey, maxCipherSmall);
-    scheme.decryptAndPrint("maxBig", secretKey, maxCipherBig);
+    // cout << "check" << endl;
+    // scheme.decryptAndPrint("minSmall", secretKey, minCipherSmall);
+    // scheme.decryptAndPrint("minBig", secretKey, minCipherBig);
+    // scheme.decryptAndPrint("maxSmall", secretKey, maxCipherSmall);
+    // scheme.decryptAndPrint("maxBig", secretKey, maxCipherBig);
 
     minCipher = scheme.add(minCipherSmall, maxCipherSmall);
     maxCipher = scheme.add(minCipherBig, maxCipherBig);
 
-    cout << "result" << endl;
-    scheme.decryptAndPrint("minCipher", secretKey, minCipher);
-    scheme.decryptAndPrint("maxCipher", secretKey, maxCipher);
+    // cout << "result" << endl;
+    // scheme.decryptAndPrint("minCipher", secretKey, minCipher);
+    // scheme.decryptAndPrint("maxCipher", secretKey, maxCipher);
 }
