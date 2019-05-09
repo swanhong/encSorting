@@ -158,7 +158,7 @@ void EncSorting::CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum
         complex<double>* dvec = scheme.decrypt(secretKey, cipher);
         // cout << " compAndSwap Result" << endl;
         // cout << "cipher.logq, logp = " << logq << ", " << logp << " -> " << cipher.logq << ", " << cipher.logp << endl;
-        PrintUtils::printArraysWithDataNum(mvec, dvec, cipher.n, logDataNum, colNum);
+        // PrintUtils::printArraysWithDataNum(mvec, dvec, cipher.n, logDataNum, colNum);
         cout << endl << "******************" << endl;
         PrintUtils::averageDifference(mvec, dvec, cipher.n);
         cout << "******************" << endl << endl;

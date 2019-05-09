@@ -604,6 +604,93 @@ void BootAlgo::comparison(Ciphertext& a, Ciphertext& b, BootScheme& scheme, Boot
     // cout << "** End Comparison ** " << endl;
 }
 
+void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, BootHelper& bootHelper, SecretKey& sk) {
+    /*
+        uses approxInv * (compIter + 1) times
+    */
+    // cout << "** srart Comparison **" << endl;
+    // cout << a.logq << ", " << b.logq << endl;    
+    
+    // Input messages are in (0, 1)
+    scheme.addConstAndEqual(a, 0.5, param.logp);
+    scheme.addConstAndEqual(b, 0.5, param.logp); // now in (1/2, 3/2)
+
+    // normalize cipher1, cipher2
+    scheme.checkAndBoot(a, a.logq - 1 < param.logq, bootHelper, param);
+    scheme.checkAndBoot(b, b.logq < a.logq, bootHelper, param);
+    
+    // sum <- 2/(a+b) = Inv((a+b)/2)
+    Ciphertext sum = scheme.add(a, b);
+    scheme.divByPo2AndEqual(sum, 1);
+
+    scheme.decryptAndPrint("bofore inverse : sum", sk, sum);
+    
+    approxInverse(sum, scheme, bootHelper);
+
+    scheme.decryptAndPrint("after inverse : sum", sk, sum);
+
+    
+    // cout << "a = " << a.logq << ", inv(sum) = " << sum.logq << endl;
+
+    // to compute a <- (a/2) * sum = a/(a+b)
+    scheme.checkAndBoot(a, a.logq - param.logp - 1 < param.logq, bootHelper, param);
+    scheme.checkAndBoot(sum, sum.logq - param.logp - 1 < param.logq, bootHelper, param);
+    
+    scheme.divByPo2AndEqual(a, 1);
+    scheme.modDownToAndEqualModified(a, sum, bootHelper, param);
+    scheme.multAndEqualWithBoot(a, sum, bootHelper, param);
+    scheme.reScaleByAndEqual(a, param.logp);
+
+    scheme.decryptAndPrint("mult by sum, a", sk, a);
+
+
+    for (int _ = 0; _ < compIter; _++) {
+        // check level for a^m
+        scheme.checkLevelAndBoot(a, 2, bootHelper, param);
+
+        // update b <- 1 - a
+        b = scheme.negate(a);
+        scheme.addConstAndEqual(b, 1.0, param.logp);
+
+        scheme.decryptAndPrint("befor esquaring, a", sk, a);
+        scheme.decryptAndPrint("before squaring, b", sk, b);
+
+        // Fix m = 4
+        for (int i = 0; i < 2; i++) { // consumes 2 levels
+            scheme.squareAndEuqalWithBoot(a, bootHelper, param);
+            scheme.reScaleByAndEqual(a, param.logp);
+            
+            scheme.squareAndEuqalWithBoot(b, bootHelper, param);
+            scheme.reScaleByAndEqual(b, param.logp);
+        }
+        scheme.decryptAndPrint("after squaring, a", sk, a);
+        scheme.decryptAndPrint("after squaring, b", sk, b);
+        
+        Ciphertext inv = scheme.add(a, b);
+
+        scheme.decryptAndPrint("before inv, inv", sk, inv);
+        approxInverse(inv, scheme, bootHelper); // consumses invIter + 1 levels
+
+        scheme.decryptAndPrint("after inv, inv", sk, inv);
+
+        // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
+
+        if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
+            scheme.checkAndBoot(a, true, bootHelper, param);
+            scheme.checkAndBoot(inv, true, bootHelper, param);
+        }
+        scheme.modDownToAndEqualModified(a, inv, bootHelper, param);
+
+        // cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
+        scheme.multAndEqualWithBoot(a, inv, bootHelper, param);
+        scheme.reScaleByAndEqual(a, param.logp);
+    }
+    b = scheme.negate(a);
+    scheme.addConstAndEqual(b, 1.0, param.logp);
+    // cout << a.logq << ", " << b.logq << endl;    
+    // cout << "** End Comparison ** " << endl;
+}
+
 void BootAlgo::compAndSwap(Ciphertext& cipher, double** mask, long loc, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
     PrintUtils::nprint("start compAndSwap with logq = " + to_string(cipher.logq), WANT_TO_PRINT);
 
@@ -806,7 +893,7 @@ void BootAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphert
     scheme.decryptAndPrint("minTable", secretKey, minCipherTable);
     scheme.decryptAndPrint("maxTable", secretKey, maxCipherTable);
 
-    comparison(minCipherTable, maxCipherTable, scheme, bootHelper);
+    comparisonDec(minCipherTable, maxCipherTable, scheme, bootHelper, secretKey);
     /*
         after comp :
             minCipherTable : (comp(a,b), *, *, *), ( ... )

@@ -37,7 +37,8 @@ public:
     void minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     
     void comparison(Ciphertext& cipher1, Ciphertext& cipher2, BootScheme& scheme, BootHelper& bootHelper);
-
+    void comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, BootHelper& bootHelper, SecretKey& sk);
+    
     void compAndSwap(Ciphertext& cipher, double** mask, long loc, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
     void compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, long loc, SecretKey sk);
 

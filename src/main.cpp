@@ -63,7 +63,7 @@ int main() {
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParamSmall2);
+    // TestBoot::bootstrapping(sortingTestParamBig2);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
@@ -73,7 +73,7 @@ int main() {
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 
-    TestSort::tableSort(sortingTestParamBig2, 2, 0, 5, 5, true);
+    TestSort::tableSort(sortingTestParamSmall, 2, 0, 5, 5, true);
     // TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 5, 5);    
 
     return 0;
