@@ -274,5 +274,7 @@ public:
 	void evalPoly8AndEqual(Ciphertext& cipher, long logp, double* coeff);
 
 	void evalCheb6AndEqual(Ciphertext& cipher, long logp, double* coeff);
+
+	void evalCheb4AndEqual(Ciphertext& cipher, long logp, double* coeff);
 };
 #endif

@@ -22,9 +22,22 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	timeutils.stop("Bootstrapping Helper construct");
 
 	complex<double>* r10 = EvaluatorUtils::randomComplexArray(n);
-    // for (int i = 0; i < n; i++) {
-    //     r10[i] *= 128.;
-    // }
+    r10[0] = 0.125;
+r10[1] = 0.125;
+r10[2] = 0.125;
+r10[3] = 0.125;
+r10[4] = 0.725069;
+r10[5] = 0.125;
+r10[6] = 0.125;
+r10[7] = 0.125;
+r10[8] = 0.125;
+r10[9] = 0.125;
+r10[10] = 0.125;
+r10[11] = 0.125;
+r10[12] = 0.126525;
+r10[13] = 0.125;
+r10[14] = 0.125;
+r10[15] = 0.125;
 
 	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
     

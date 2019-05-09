@@ -671,8 +671,8 @@ void BootHelper::evalSin2piAndEqual(Ciphertext& cipher, long logK, long logq) {
 	// cout << "logq = " << cipher.logq << endl;
 
 	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
-	// scheme.cos2piAndEqual(cipher, logq);
-	scheme.cos2piChebyAndEqual(cipher, logq);
+	scheme.cos2piAndEqual(cipher, logq);
+	// scheme.cos2piChebyAndEqual(cipher, logq);
 	
 	// cout << "logq = " << cipher.logq << endl;
 
@@ -712,8 +712,8 @@ void BootHelper::evalSin2piAndEqualDec(Ciphertext& cipher, long logK, long logq,
 	}
 	
 	//* evaluate (x - 1/4) / K -> cos( (2pi * x - pi/2) / K)
-	// scheme.cos2piAndEqual(cipher, logq);
-	scheme.cos2piChebyAndEqual(cipher, logq);
+	scheme.cos2piAndEqual(cipher, logq);
+	// scheme.cos2piChebyAndEqual(cipher, logq);
 
 	cout << "after cos" << endl;
 	complex<double>* dvecA = scheme.decrypt(sk, cipher);

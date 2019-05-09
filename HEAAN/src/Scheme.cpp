@@ -1402,13 +1402,22 @@ void Scheme::cos2piAndEqual(Ciphertext& cipher, long logp) {
 
 void Scheme::cos2piChebyAndEqual(Ciphertext& cipher, long logp) {
 	// this is chebyshev approximation of cos(2pix) for degree 14 (even coeffs only)
-	double coeff[7] = {1.70326, 0, -0.146437, 0, 0.00192145, 0, -0.00000999255};
+	// double coeff[7] = {1.70326, 0, -0.146437, 0, 0.00192145, 0, -0.00000999255};
+	// evalCheb6AndEqual(cipher, logp, coeff);
+
+	double coeff[5] = { 1.70326, -0.146437, 0.00192145, -0.00000996497, 0.000000027624};
 	
 	// addAndEqual(cipher, cipher);
 	// addConstAndEqual(cipher, -1, logp);
 	multByConstAndEqual(cipher, 8, logp);
 	reScaleByAndEqual(cipher, logp);
-	evalCheb6AndEqual(cipher, logp, coeff);
+	
+	squareAndEqual(cipher);
+	reScaleByAndEqual(cipher, logp);
+	addAndEqual(cipher, cipher);
+	addConstAndEqual(cipher, -1.0, logp);
+	
+	evalCheb4AndEqual(cipher, logp, coeff);
 }
 
 void Scheme::evalPoly4AndEqual(Ciphertext& cipher, long logp, double* coeff) {
@@ -1530,5 +1539,43 @@ void Scheme::evalCheb6AndEqual(Ciphertext& cipher, long logp, double* coeff) {
 
 	cipher = add(cipher2, cipher4);
 	addAndEqual(cipher, cipher6);
+	addConstAndEqual(cipher, coeff[0] / 2, logp);
+}
+
+void Scheme::evalCheb4AndEqual(Ciphertext& cipher, long logp, double* coeff) {
+	// multByConstAndEqual(cipher, 8.0, logp);
+	// reScaleByAndEqual(cipher, logp);
+
+	Ciphertext cipher2 = square(cipher);
+	reScaleByAndEqual(cipher2, logp);
+	addAndEqual(cipher2, cipher2);
+	addConstAndEqual(cipher2, -1.0, logp);
+
+	Ciphertext cipher4 = square(cipher2);
+	reScaleByAndEqual(cipher4, logp);
+	addAndEqual(cipher4, cipher4);
+	addConstAndEqual(cipher4, -1.0, logp);
+
+	modDownByAndEqual(cipher, logp);
+	Ciphertext cipher3 = mult(cipher2, cipher);
+	reScaleByAndEqual(cipher3, logp);
+	addAndEqual(cipher3, cipher3);
+	modDownByAndEqual(cipher, logp);
+	subAndEqual(cipher3, cipher);
+
+	modDownByAndEqual(cipher2, logp);
+
+	multByConstAndEqual(cipher, coeff[1], logp);
+	multByConstAndEqual(cipher2, coeff[2], logp);
+	multByConstAndEqual(cipher3, coeff[3], logp);
+	multByConstAndEqual(cipher4, coeff[4], logp);
+	reScaleByAndEqual(cipher, logp);
+	reScaleByAndEqual(cipher2, logp);
+	reScaleByAndEqual(cipher3, logp);
+	reScaleByAndEqual(cipher4, logp);
+
+	addAndEqual(cipher, cipher2);
+	addAndEqual(cipher, cipher3);
+	addAndEqual(cipher, cipher4);
 	addConstAndEqual(cipher, coeff[0] / 2, logp);
 }

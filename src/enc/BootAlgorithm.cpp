@@ -669,16 +669,25 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
         Ciphertext inv = scheme.add(a, b);
 
         scheme.decryptAndPrint("before inv, inv", sk, inv);
+        cout << "inv.logq = " << inv.logq << endl;
+        if(inv.logq - (invIter + 2) * param.logp < param.logq) {
+            scheme.checkAndBoot(inv, true, bootHelper,param);
+            scheme.decryptAndPrint("Bootstrap inv, inv", sk, inv);
+            cout << "inv.logq = " << inv.logq << endl;
+        }
         approxInverse(inv, scheme, bootHelper); // consumses invIter + 1 levels
 
         scheme.decryptAndPrint("after inv, inv", sk, inv);
+        cout << "inv.logq = " << inv.logq << endl;
 
         cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
 
-        if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
-            scheme.checkAndBoot(a, true, bootHelper, param);
-            scheme.checkAndBoot(inv, true, bootHelper, param);
-        }
+        scheme.checkLevelAndBoot(a, 1, bootHelper, param);
+
+        // if(a.logq - param.logp < param.logq || inv.logq - param.logp < param.logq) {
+        //     scheme.checkAndBoot(inv, true, bootHelper, param);
+        // }
+
         scheme.modDownToAndEqualModified(a, inv, bootHelper, param);
 
         cout << "a = " << a.logq << ", inv = " << inv.logq << endl;    
