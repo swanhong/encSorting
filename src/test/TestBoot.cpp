@@ -22,22 +22,38 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	timeutils.stop("Bootstrapping Helper construct");
 
 	complex<double>* r10 = EvaluatorUtils::randomComplexArray(n);
-    r10[0] = 0.125;
-r10[1] = 0.125;
-r10[2] = 0.125;
-r10[3] = 0.125;
-r10[4] = 0.725069;
-r10[5] = 0.125;
-r10[6] = 0.125;
-r10[7] = 0.125;
-r10[8] = 0.125;
-r10[9] = 0.125;
-r10[10] = 0.125;
-r10[11] = 0.125;
-r10[12] = 0.126525;
-r10[13] = 0.125;
-r10[14] = 0.125;
-r10[15] = 0.125;
+    r10[0] = complex<double>(0.0378753,-0.0287025);
+r10[1] = complex<double>(0.999993,-0.00142117);
+r10[2] = complex<double>(0.368886,0.476614);
+r10[3] = complex<double>(0.087041,0.213362);
+r10[4] = complex<double>(0.0172516,-0.00525361);
+r10[5] = complex<double>(1.00015,-0.00236899);
+r10[6] = complex<double>(-0.0840772,0.520249);
+r10[7] = complex<double>(0.000154197,0.000226189);
+r10[8] = complex<double>(-0.0225049,0.0838327);
+r10[9] = complex<double>(0.999555,-0.00245699);
+r10[10] = complex<double>(-0.28112,0.110017);
+r10[11] = complex<double>(1.00041,-0.00239433);
+r10[12] = complex<double>(-0.358951,0.0125771);
+r10[13] = complex<double>(1.01901,-0.00259099);
+r10[14] = complex<double>(0.00240581,-0.0109825);
+r10[15] = complex<double>(6.54651e-05,-0.000205028);
+//     r10[0] = 0.125;
+// r10[1] = 1.;
+// r10[2] = 0.125;
+// r10[3] = -0.0000001;
+// r10[4] = 0.725069;
+// r10[5] = -0.05;
+// r10[6] = 1.;
+// r10[7] = -0.125;
+// r10[8] = 0.125;
+// r10[9] = 0.125;
+// r10[10] = -0.125;
+// r10[11] = 1.;
+// r10[12] = 0.126525;
+// r10[13] = -0.00001;
+// r10[14] = 1.;
+// r10[15] = -0.125;
 
 	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
     
@@ -92,7 +108,10 @@ r10[15] = 0.125;
 
 	// Print Result and Difference //
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(r10, dvec, n);
+    // PrintUtils::printArrays(r10, dvec, n);
+    for(int i = 0; i < n; i++) {
+        cout << i << " : " << r10[i] << " // " << dvec[i] << endl;
+    }
     PrintUtils::averageDifference(r10, dvec, n);
 	
 	// if(mvec != NULL) delete[] mvec;

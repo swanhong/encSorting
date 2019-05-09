@@ -120,15 +120,12 @@ void BootScheme::rightRotateAndEqualConditional(Ciphertext& cipher, long r, bool
 
 void BootScheme::decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher) {
     complex<double>* dvec = decrypt(secretKey, cipher);
-    if(cipher.n < 1024) {
-        PrintUtils::printSingleArray(str, dvec, cipher.n);
-    } else {
-        for(int i = 0; i < cipher.n; i++) {
-            if(i % 1000 == 0) {
-                cout << str << "[" << i << "] = " << dvec[i] << endl;
-            }
-        }
-    }
+    PrintUtils::printSingleArraySmall(str, dvec, cipher.n);
+}
+
+void BootScheme::decryptAndPrintAll(std::string str, SecretKey& secretKey, Ciphertext& cipher) {
+    complex<double>* dvec = decrypt(secretKey, cipher);
+    PrintUtils::printSingleArray(str, dvec, cipher.n);
 }
 
 void BootScheme::showTotalCount() {

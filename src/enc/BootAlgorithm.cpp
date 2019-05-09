@@ -652,7 +652,7 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
         b = scheme.negate(a);
         scheme.addConstAndEqual(b, 1.0, param.logp);
 
-        scheme.decryptAndPrint("befor esquaring, a", sk, a);
+        scheme.decryptAndPrint("before squaring, a", sk, a);
         scheme.decryptAndPrint("before squaring, b", sk, b);
 
         // Fix m = 4
@@ -663,7 +663,7 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
             scheme.squareAndEuqalWithBoot(b, bootHelper, param);
             scheme.reScaleByAndEqual(b, param.logp);
         }
-        scheme.decryptAndPrint("after squaring, a", sk, a);
+        scheme.decryptAndPrintAll("after squaring, a", sk, a);
         scheme.decryptAndPrint("after squaring, b", sk, b);
         
         Ciphertext inv = scheme.add(a, b);
@@ -695,7 +695,7 @@ void BootAlgo::comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, B
         scheme.multAndEqualWithBoot(a, inv, bootHelper, param);
         scheme.reScaleByAndEqual(a, param.logp);
 
-        scheme.decryptAndPrint("Iteration : final a", sk, a);
+        scheme.decryptAndPrintAll("Iteration : final a", sk, a);
     }
     b = scheme.negate(a);
     scheme.addConstAndEqual(b, 1.0, param.logp);

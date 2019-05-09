@@ -41,6 +41,30 @@ void PrintUtils::printSingleArray(std::string str, complex<double>* array, long 
     }
 }
 
+void PrintUtils::printSingleArraySmall(std::string str, double* array, long n) {
+    if(n <= 1024) {
+        PrintUtils::printSingleArray(str, array, n);
+    } else {
+        for(int i = 0; i < n; i++) {
+            if(i % 1000 == 0) {
+                std::cout << str << "[" << i << "] = " << array[i] << std::endl;
+            }
+        }
+    }
+}
+
+void PrintUtils::printSingleArraySmall(std::string str, complex<double>* array, long n) {
+    if(n <= 1024) {
+        PrintUtils::printSingleArray(str, array, n);
+    } else {
+        for(int i = 0; i < n; i++) {
+            if(i % 1000 == 0) {
+                std::cout << str << "[" << i << "] = " << array[i].real() << std::endl;
+            }
+        }
+    }
+}
+
 void PrintUtils::printSingleMatrix(std::string str, double** matrix, long row, long col) {
     for(int i = 0; i < row; i++) {
         std::cout << str << "[" << i << "] = [";
