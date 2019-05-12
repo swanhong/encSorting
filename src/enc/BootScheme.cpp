@@ -23,8 +23,9 @@ void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bo
         // Ciphertext cipherConj = conjugate(cipher);
         // addAndEqual(cipher, cipherConj);
         // divByPo2AndEqual(cipher, 1);
-        cout << "bootstrapping...." << endl;
+        // cout << "bootstrapping.... when logq = " << cipher.logq << endl;
         bootHelper.bootstrapping_cos(cipher, param.logq, param.logQ, 5);
+        // cout << "after boot... logq = " << cipher.logq << endl;
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- after : " + to_string(cipher.logq), WANT_TO_PRINT);
     }
 }
