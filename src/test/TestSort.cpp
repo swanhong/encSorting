@@ -21,16 +21,13 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-    double* mvec = EvaluatorUtils::randomRealArray(n);
-    // for (int i = 0; i < n; i++) {
-    //     double ran = (double) rand() / (RAND_MAX);
-    //     if(ran < 0.25) {
-    //          mvec[i] = 0.;
-    //     } else {
-    //         mvec[i] = 1.;
-    //     }
-    // }
-    
+    // double* mvec = EvaluatorUtils::randomRealArray(n);
+    double* mvec = new double[n];
+    for (int i = 0; i < n; i++) {
+        mvec[i] = 1. / n * (double) i;
+    }
+    random_shuffle(&mvec[0], &mvec[n]);
+       
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 
     timeutils.start("EncSort");
@@ -75,13 +72,6 @@ void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long inv
 	timeutils.stop("Bootstrapping Helper construct");
 
     double* mvec = EvaluatorUtils::randomRealArray(n);
-    long dataNum = 1 << logDataNum;
-    for(int i = 0; i < n; i++) {
-        if(i % dataNum == colNum) {
-            mvec[i] = floor(mvec[i] * 10.) / 10.;
-            mvec[i] += (double) i / 1000.;
-        }
-    }
     
 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
 

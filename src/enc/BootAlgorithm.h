@@ -28,6 +28,8 @@ public:
     void approxSqrt2Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     void approxSqrt3(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
     void approxSqrt3Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
+
+    void approxSqrt4Dec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     
     void approxInverse(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper); 
 
@@ -38,7 +40,7 @@ public:
     
     void comparison(Ciphertext& cipher1, Ciphertext& cipher2, BootScheme& scheme, BootHelper& bootHelper);
     void comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, BootHelper& bootHelper, SecretKey& sk);
-    
+
     void compAndSwap(Ciphertext& cipher, double** mask, long loc, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
     void compAndSwapDec(Ciphertext& cipher, double* mask, long dist, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, long loc, SecretKey sk);
 

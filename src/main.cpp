@@ -10,7 +10,7 @@ int main() {
     // Parameters (long)
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
-    Parameter sortingTestParamSmall = {7, 1350, 50, 50, 4, 4, 60, 4};
+    Parameter sortingTestParamSmall = {7, 1350, 40, 40, 4, 4, 50, 4};
     Parameter sortingTestParamSmall2 = {7, 1350, 50, 50, 6, 8, 65, 4};
     Parameter paramLee = {12, 1350, 50, 50, 10, 32, 60, 5};
     Parameter sortingTestParam1 = {10, 1350, 40, 40, 6, 8, 50, 5};
@@ -63,17 +63,17 @@ int main() {
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParamBig2);
+    // TestBoot::bootstrapping(sortingTestParamSmall);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParamBig2, 15);
+    TestSort::sort(sortingTestParamSmall, 13);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 
-    TestSort::tableSort(sortingTestParamBig2, 2, 0, 4, 6, true);
+    // TestSort::tableSort(sortingTestParam1, 0, 0, 4, 4, true);
     // TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 5, 5);    
 
     return 0;

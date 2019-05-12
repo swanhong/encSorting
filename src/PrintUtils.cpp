@@ -77,7 +77,7 @@ void PrintUtils::printSingleMatrix(std::string str, double** matrix, long row, l
 
 void PrintUtils::printArrays(double* a1, std::complex<double>* a2, long n) {
     for(int i = 0; i < n; i++) {
-        std::cout << i << " : " << a1[i] << " // " << a2[i].real() << std::endl;
+        std::cout << i << " : " << a1[i] << " // " << a2[i] << std::endl;
     }
 }
 
@@ -117,7 +117,7 @@ void PrintUtils::printArraysWithDataNum(double* a1, std::complex<double>* a2, lo
 
 void PrintUtils::printArrays(std::complex<double>* a1, std::complex<double>* a2, long n) {
     for(int i = 0; i < n; i++) {
-        std::cout << i << " : " << a1[i].real() << " // " << a2[i].real() << std::endl;
+        std::cout << i << " : " << a1[i] << " // " << a2[i] << std::endl;
     }
 }
 

@@ -127,6 +127,29 @@ void BootScheme::resetImagErrorAndEqual(Ciphertext& cipher) {
     divByPo2AndEqual(cipher, 1);
 }
 
+Ciphertext BootScheme::squareByConjugate(Ciphertext& cipher, long logp) {
+	addConstAndEqual(cipher, 0.5, logp);
+    Ciphertext res = conjugate(cipher);
+    multAndEqual(res, cipher);
+    reScaleByAndEqual(res, logp);
+    Ciphertext tmp = modDownTo(cipher, res.logq);
+    subAndEqual(res, tmp);
+    addConstAndEqual(res, 0.25, logp);
+    resetImagErrorAndEqual(res);
+}
+
+void BootScheme::squareByConjugateAndEqual(Ciphertext& cipher, long logp) {
+	addConstAndEqual(cipher, 0.5, logp);
+    Ciphertext conj = conjugate(cipher);
+    multAndEqual(conj, cipher);
+    reScaleByAndEqual(conj, logp);
+    modDownToAndEqual(cipher, conj.logq);
+    subAndEqual(conj, cipher);
+    addConstAndEqual(conj, 0.25, logp);
+    cipher = conj;
+    resetImagErrorAndEqual(cipher);
+}
+
 void BootScheme::decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher) {
     complex<double>* dvec = decrypt(secretKey, cipher);
     PrintUtils::printSingleArraySmall(str, dvec, cipher.n);

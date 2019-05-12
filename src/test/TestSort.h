@@ -3,6 +3,7 @@
 
 #include "../enc/EncSorting.h"
 #include "../plain/PlainSorting.h"
+#include <algorithm>
 
 class TestSort {
 public:
