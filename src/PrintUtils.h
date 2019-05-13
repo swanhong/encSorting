@@ -25,6 +25,8 @@ public:
     static void printSingleMatrix(std::string str, double** matrix, long row, long col);
     static void printArrays(double* a1, std::complex<double>* a2, long n);
     static void printArrays(std::complex<double>* a1, std::complex<double>* a2, long n);
+    static void printFewArrays(double* a1, std::complex<double>* a2, long n);
+    static void printFewArrays(std::complex<double>* a1, std::complex<double>* a2, long n);
     static void printArraysWithDataNum(double* a1, double* a2, long n, long logDataNum, long colNum);
     static void printArraysWithDataNum(double* a1, std::complex<double>* a2, long n, long logDataNum, long colNum);
     static void printArraysWithDataNum(std::complex<double>* a1, std::complex<double>* a2, long n, long logDataNum);

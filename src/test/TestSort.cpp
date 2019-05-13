@@ -32,8 +32,8 @@ void TestSort::sort(Parameter param, long iter, bool increase) {
 
     timeutils.start("EncSort");
     EncSorting encSorting(param, iter);
-    encSorting.runEncSorting(cipher, scheme, ring, bootHelper, increase);
-    // encSorting.runEncSortingDec(cipher, scheme, ring, bootHelper, increase, secretKey);
+    // encSorting.runEncSorting(cipher, scheme, ring, bootHelper, increase);
+    encSorting.runEncSortingDec(cipher, scheme, ring, bootHelper, increase, secretKey);
     timeutils.stop("EncSort"); 
 
     // run PlainSort

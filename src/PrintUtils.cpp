@@ -81,6 +81,22 @@ void PrintUtils::printArrays(double* a1, std::complex<double>* a2, long n) {
     }
 }
 
+void PrintUtils::printFewArrays(double* a1, std::complex<double>* a2, long n) {
+    for(int i = 0; i < n; i++) {
+        if(n < 1000 || i % 1000 == 0) {
+            std::cout << i << " : " << a1[i] << " // " << a2[i] << std::endl;
+        }       
+    }
+}
+
+void PrintUtils::printFewArrays(std::complex<double>* a1, std::complex<double>* a2, long n) {
+    for(int i = 0; i < n; i++) {
+        if(n < 1000 || i % 1000 == 0) {
+            std::cout << i << " : " << a1[i] << " // " << a2[i] << std::endl;
+        }       
+    }
+}
+
 void PrintUtils::printArraysWithDataNum(double* a1, double* a2, long n, long logDataNum, long colNum) {
     long dataNum = 1 << logDataNum;
     for(int i = 0; i < n; i++) {

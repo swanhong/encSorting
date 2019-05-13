@@ -493,7 +493,7 @@ void BootAlgo::minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootSchem
 
     cout << "after approxSqrt" << endl;
     cout << "sqrt(y) (logQ = " << yBefore.logq << ") // approxsqrt(y) (logQ = " << y.logq << ")" << endl;
-    PrintUtils::printArrays(yBefDec, yAftDec, y.n);
+    PrintUtils::printFewArrays(yBefDec, yAftDec, y.n);
     PrintUtils::averageDifference(yBefAbs, yAftDec, y.n);
 
     // scheme.modDownToAndEqual(x, sqrtCipher.logq);

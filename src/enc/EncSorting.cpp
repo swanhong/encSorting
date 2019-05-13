@@ -83,7 +83,7 @@ void EncSorting::compAndSwapBothWithDec(Ciphertext& cipher, long logJump, long l
     mvec = ca.getArray();
     complex<double>* dvec = scheme.decrypt(sk, cipher);
     cout << loc << "th compAndSwap Result" << endl;
-    // PrintUtils::printArrays(mvec, dvec, cipher.n);
+    PrintUtils::printFewArrays(mvec, dvec, cipher.n);
     cout << endl << "******************" << endl;
     PrintUtils::averageDifference(mvec, dvec, cipher.n);
     cout << "******************" << endl << endl;
