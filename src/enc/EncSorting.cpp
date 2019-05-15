@@ -379,7 +379,6 @@ void EncSorting::runBitonicSortDec(Ciphertext& cipher, BootScheme& scheme, Ring&
         
         if (i < param.log2n - 1) {
         timeutils.start(to_string(i) + "th Reverse");
-        scheme.resetImagErrorAndEqual(cipher);
         bootAlgo.reverse(cipher, maskReverse[i], maskReverseRight[i], i+1, scheme, ring, bootHelper);
         timeutils.stop(to_string(i) + "th Reverse");
         scheme.showCurrentCount();

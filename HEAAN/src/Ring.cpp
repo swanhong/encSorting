@@ -538,14 +538,18 @@ void Ring::doubleAndEqual(ZZ* p, ZZ& mod) {
 }
 
 void Ring::rightShift(ZZ* res, ZZ* p, long bits) {
+	ZZ tmp = to_ZZ(1) << (bits - 1);
 	for (long i = 0; i < N; ++i) {
-		res[i] = p[i] >> bits;
+		res[i] = (p[i] + tmp) >> bits;
+		//res[i] = p[i] >> bits;
 	}
 }
 
 void Ring::rightShiftAndEqual(ZZ* p, long bits) {
+	ZZ tmp = to_ZZ(1) << (bits - 1);
 	for (long i = 0; i < N; ++i) {
-		p[i] >>= bits;
+		p[i] = (p[i] + tmp) >> bits;
+		//p[i] >>= bits;
 	}
 }
 

@@ -69,19 +69,19 @@ int main() {
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParamBig22);
+    // TestBoot::bootstrapping(sortingTestParamSmall);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParam1, 13);
+    // TestSort::sort(sortingTestParam1, 13);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 
     // TestSort::tableSort(sortingTestParam1, 0, 0, 4, 4, true);
     // TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 5, 5);    
-    TestSort::bitonicSort(sortingTestParam1, 13);
+    TestSort::bitonicSort(sortingTestParamSmall, 13);
 
     return 0;
 }

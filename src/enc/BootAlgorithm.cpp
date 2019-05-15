@@ -809,7 +809,8 @@ void BootAlgo::reverse(Ciphertext& cipher, double** mask, double** maskRight, lo
         ring.encode(maskLeftPoly, mask[i-1], cipher.n, param.logp);
         ring.encode(maskRightPoly, maskRight[i-1], cipher.n, param.logp);
         
-        scheme.checkLevelAndBoot(cipher, 1, bootHelper, param);
+        scheme.checkModulusAndBoot(cipher, param.logp + 1, bootHelper, param);
+        scheme.resetImagErrorAndEqual(cipher);
 
         Ciphertext left = scheme.multByPoly(cipher, maskLeftPoly, param.logp);
         Ciphertext right = scheme.multByPoly(cipher, maskRightPoly, param.logp);
@@ -989,10 +990,12 @@ void BootAlgo::halfCleaner(Ciphertext& cipher, double* mask, long dist, BootSche
     scheme.reScaleByAndEqual(dummy, param.logp);
     scheme.modDownByAndEqual(cipher, param.logp);
     scheme.subAndEqual(cipher, dummy);
-
+    
+    long n = cipher.n;
     double* maskDummy = new double[n];
+    
     for (int i = 0; i < n; i++) {
-        maskDummy[i] = mask[i] / ((double) 1 << (cipher.n-2));
+        maskDummy[i] = mask[i] / ((double) (1 << (cipher.n-2)));
     }
     ZZ* maskDummyPoly = new ZZ[1 << param.logN];
     ring.encode(maskDummyPoly, maskDummy, n, param.logp);
