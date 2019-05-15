@@ -22,9 +22,9 @@ void TestBoot::bootstrapping(Parameter parameter) {
 	timeutils.stop("Bootstrapping Helper construct");
 
 	complex<double>* r10 = EvaluatorUtils::randomComplexArray(n);
-    for (int i = 0; i < n; i++) {
-        r10[i] *= -1;
-    }
+    // for (int i = 0; i < n; i++) {
+    //     r10[i] *= -1;
+    // }
     
 	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
 
@@ -40,7 +40,7 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
 	// Print Result and Difference //
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(r10, dvec, n);
+    // PrintUtils::printArrays(r10, dvec, n);
     PrintUtils::averageDifference(r10, dvec, n);
 	
 	return;
@@ -436,13 +436,13 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     
     long logn = parameter.log2n - logDataNum;
     long maskNum = logn * (logn + 1) / 2;
-    PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-    cout << endl;
-    PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+    // PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
+    // cout << endl;
+    // PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
+    // cout << endl;
+    // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
+    // cout << endl;
+    // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
     
     complex<double>* dvec;
 
@@ -451,19 +451,55 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     // bootHelper.bootstrapping(cipher, parameter.logq, parameter.logQ, parameter.logT);
 	bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << logDataNum, scheme, ring, bootHelper, secretKey);
     dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(mvec, dvec, n);
+    // PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
     bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask[1], maskOther[1], maskTable[1], maskTableOther[1], 1 << (logDataNum + 1), scheme, ring, bootHelper, secretKey);
     dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(mvec, dvec, n);
+    // PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
     bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask[2], maskOther[2], maskTable[2], maskTableOther[2], 1 << (logDataNum), scheme, ring, bootHelper, secretKey);
     dvec = scheme.decrypt(secretKey, cipher);
-    PrintUtils::printArrays(mvec, dvec, n);
+    // PrintUtils::printArrays(mvec, dvec, n);
     PrintUtils::averageDifference(mvec, dvec, n);
     timeutils.stop("compAndSwapTable");
     // Print Result and Difference //	
 	// dvec = scheme.decrypt(secretKey, cipher);
     // PrintUtils::printArrays(mvec, dvec, n);
     // PrintUtils::averageDifference(mvec, dvec, n);
+}
+
+void TestBoot::halfCleaner(Parameter param, long iter) {
+    srand(time(NULL));
+	SetNumThreads(16);
+    
+    long n = 1 << param.log2n;
+	
+    PrintUtils::parameter(param, "TestBoot::halfCleaner");
+
+    TimeUtils timeutils;
+    timeutils.start("KeyGen");
+    Ring ring(param.logN, param.logQ);
+    SecretKey secretKey(ring);
+    BootScheme scheme(secretKey, ring);
+    scheme.addConjKey(secretKey);
+    scheme.addLeftRotKeys(secretKey);
+    scheme.addRightRotKeys(secretKey);
+    timeutils.stop("KeyGen");
+
+	timeutils.start("Bootstrapping Helper construct");
+	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
+	timeutils.stop("Bootstrapping Helper construct");
+
+
+    double* mvec = EvaluatorUtils::randomRealArray(n);
+
+	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
+
+	MaskingGenerator mg(param.log2n);
+    double** mask = mg.getBitonicMergeMasking();
+	BootAlgo bootAlgo(param, iter);
+	bootAlgo.halfCleaner(cipher, mask[0], 1 << (param.log2n - 1), scheme, ring, bootHelper, secretKey);
+
+	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
+	PrintUtils::printArrays(mvec, dvec, n);
 }

@@ -25,6 +25,8 @@ public:
 	static void compAndSwapTable(Parameter param, long logDataNum, long colNum, long invIter, long compIter);
 
 	static void reverse(Parameter param);
+
+	static void halfCleaner(Parameter param, long iter);
 };
 
 #endif // !TestBoot_H_

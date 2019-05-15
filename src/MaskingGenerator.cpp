@@ -100,6 +100,36 @@ double** MaskingGenerator::getColNumMasking() {
     return mask;
 }
 
+double** MaskingGenerator::getReverseMasking(long level) {
+    mask = new double*[level];
+    for (int i = 0; i < level; i++) {
+        mask[i] = new double[length];
+        for (int j = 0; j < length; j++) {
+            mask[i][j] = 0.;
+        }
+    }
+    
+    for (int i = 0; i < level; i++) {
+        generateReverseMasking(level, i);
+    }
+    return mask;
+}
+
+double** MaskingGenerator::getReverseMaskingRight(long level) {
+    mask = new double*[level];
+    for (int i = 0; i < level; i++) {
+        mask[i] = new double[length];
+        for (int j = 0; j < length; j++) {
+            mask[i][j] = 0.;
+        }
+    }
+    
+    for (int i = 0; i < level; i++) {
+        generateReverseMaskingRight(level, i);
+    }
+    return mask;
+}
+
 void MaskingGenerator::generateBitonicMergeMasking(long num) {
     for(int j = 0; j < (1 << num); j++) {
         for(int k = 0; k < (1 << (log2n - 1 - num)); k++) {
@@ -243,5 +273,33 @@ void MaskingGenerator::generateMaskingMergeOther(long loc, long num, long jump) 
             }
             
         }        
+    }
+}
+
+void MaskingGenerator::generateReverseMasking(long level, long num) {
+    long repeat = length / (1 << (level + 1));
+    long subRepeat = 1 << num;
+    for (int i = 0; i < repeat; i++) {
+        for (int j = 0; j < subRepeat; j++) {
+            for (int k = 0; k < (1 << (level - num - 1)); k++) {
+                long tmp = i * (1 << (level + 1)) + (1 << level) + j * (1 << (level - num)) + k;
+                if(!increase) tmp = length - 1 - tmp;
+                mask[num][tmp] = 1.;
+            }
+        }
+    }
+}
+
+void MaskingGenerator::generateReverseMaskingRight(long level, long num) {
+    long repeat = length / (1 << (level + 1));
+    long subRepeat = 1 << num;
+    for (int i = 0; i < repeat; i++) {
+        for (int j = 0; j < subRepeat; j++) {
+            for (int k = 0; k < (1 << (level - num - 1)); k++) {
+                long tmp = i * (1 << (level + 1)) + (1 << level) + j * (1 << (level - num)) +  (1 << (level - num - 1)) + k;
+                if(!increase) tmp = length - 1 - tmp;
+                mask[num][tmp] = 1.;
+            }
+        }
     }
 }

@@ -71,3 +71,17 @@ void TestMask::showTableMergeMaskingOther(long log2n, long logDataNum, long colN
     double** mask = mg.getBitonicMergeMaskingOther(); 
     mg.printMask(mask, log2n - logDataNum);
 }
+
+void TestMask::showReverseMasking(long log2n, bool increase) {
+    MaskingGenerator mg(log2n, increase);
+    long level = 3;
+    double** mask = mg.getReverseMasking(level); 
+    mg.printMask(mask, level);
+}
+
+void TestMask::showReverseMaskingRight(long log2n, bool increase) {
+    MaskingGenerator mg(log2n, increase);
+    long level = 3;
+    double** mask = mg.getReverseMaskingRight(level); 
+    mg.printMask(mask, level);
+}

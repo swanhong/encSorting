@@ -22,6 +22,9 @@ public:
     static void showTableMergeMasking(long log2n, long logDataNum, long colNum, bool increase);
 
     static void showTableMergeMaskingOther(long log2n, long logDataNum, long colNum, bool increase);    
+
+    static void showReverseMasking(long log2n, bool increase);    
+    static void showReverseMaskingRight(long log2n, bool increase);    
 };
 
 

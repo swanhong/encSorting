@@ -11,18 +11,18 @@ int main() {
     // {logN, logQ, logp, logc, log2n, radix, logq, logT}
     // ******************************
     Parameter sortingTestParamSmall = {7, 1350, 40, 40, 4, 4, 50, 4};
-    Parameter sortingTestParamSmall2 = {7, 1350, 50, 50, 6, 8, 65, 4};
-    Parameter paramLee = {12, 1350, 50, 50, 10, 32, 60, 5};
-    Parameter sortingTestParam1 = {10, 1350, 45, 45, 6, 8, 55, 5};
-    Parameter sortingTestParamBig = {15, 1350, 40, 40, 14, 128, 50, 5};
-    Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
+    Parameter sortingTestParamSmall2 = {7, 1350, 40, 40, 6, 8, 50, 4};
+    Parameter sortingTestParam1 = {12, 1350, 40, 40, 10, 32, 50, 5};
+    Parameter sortingTestParamBig = {15, 650, 30, 30, 14, 128, 40, 5};
+    Parameter sortingTestParamBig2 = {16, 1350, 50, 50, 15, 32, 60, 4};
+    Parameter sortingTestParamBig22 = {16, 1350, 30, 30, 6, 8, 35, 4};
     Parameter sortingTestParamBig3 = {17, 1350, 40, 40, 16, 256, 50, 4};
 
 
     // ******************************
     // *** Test Maskings
     // ******************************
-    long logn = 4;
+    long logn = 5;
     long logDataNum = 2;
     long colNum = 1;
     // TestMask::showMasking(logn, true);
@@ -35,9 +35,14 @@ int main() {
     // TestMask::showTableMergeMaskingOther(logn, logDataNum, colNum, true);
     // TestMask::showTableMergeMasking(logn, logDataNum, colNum, false);
     // TestMask::showTableMergeMaskingOther(logn, logDataNum, colNum, false);
-    // TestMask::showTableMasking(logn + logDataNum, logDataNum, true);
-    // TestMask::showTableMaskingBy(logn + logDataNum, logDataNum, 0, true);
+    // TestMask::showTableMasking(logn, logDataNum, true);
+    // TestMask::showTableMaskingBy(logn, logDataNum, 0, true);
     // TestMask::showTableMaskingOther(logn + logDataNum, logDataNum, 0, true);
+    // TestMask::showReverseMasking(logn, true);
+    // TestMask::showReverseMaskingRight(logn, true);
+
+    // TestMask::showReverseMasking(logn, false);
+    // TestMask::showReverseMaskingRight(logn, false);
 
     // ******************************
     // *** Test PlainSort
@@ -58,23 +63,25 @@ int main() {
     // TestBoot::minMax(sortingTestParamSmall, 15);
     // TestBoot::compAndSwap(sortingTestParamSmall, 13);
     // TestBoot::reverse(sortingTestParamSmall);
-    // TestBoot::compAndSwapTable(sortingTestParamSmall, 2, 0, 5, 5);
+    // TestBoot::compAndSwapTable(sortingTestParamBig2, 2, 0, 5, 8);
+    // TestBoot::halfCleaner(sortingTestParamSmall, 10);
 
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParam1);
+    // TestBoot::bootstrapping(sortingTestParamBig22);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParamBig, 13);
+    TestSort::sort(sortingTestParam1, 13);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 
     // TestSort::tableSort(sortingTestParam1, 0, 0, 4, 4, true);
     // TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 5, 5);    
+    TestSort::bitonicSort(sortingTestParam1, 13);
 
     return 0;
 }

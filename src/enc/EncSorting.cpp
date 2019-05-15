@@ -332,4 +332,63 @@ void EncSorting::reverseHalf(Ciphertext* cipher, long logNum, BootScheme& scheme
         
         scheme.modDownToAndEqualModified(cipher[2 * i], cipher[2 * i + 1], bootHelper, param);
     }    
-} 
+}
+
+void EncSorting::runBitonicSortDec(Ciphertext& cipher, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase, SecretKey sk) {
+    double*** maskReverse = new double**[param.log2n];
+    MaskingGenerator mg(param.log2n, increase);
+    for (int i = 1; i < param.log2n; i++) {
+        maskReverse[i-1] = mg.getReverseMasking(i);
+        cout << "i = " << i << endl;
+        mg.printMask(maskReverse[i-1], i);
+    }
+
+    double*** maskReverseRight = new double**[param.log2n];
+    MaskingGenerator mg2(param.log2n, increase);
+    for (int i = 1; i < param.log2n; i++) {
+        maskReverseRight[i-1] = mg2.getReverseMaskingRight(i);
+        cout << "i = " << i << endl;
+        mg2.printMask(maskReverseRight[i-1], i);
+    }
+
+    for (int i = 1; i < param.log2n; i++) {
+        cout << "i = " << i << endl;
+        for(int j = 0; j < i; j++) {
+            cout << "maskReverse[" << i  - 1 << "][" << j << "] = ";  
+            for(int k = 0; k < (1 << param.log2n); k++) {
+                cout << maskReverse[i-1][j][k] << ",";
+            }cout << endl;
+        }
+    }
+
+    MaskingGenerator mg3(param.log2n, increase);
+    double** mask = mg3.getBitonicMergeMasking();
+
+    bootAlgo = BootAlgo(param, sqrtIter, increase);
+    TimeUtils timeutils;
+    for (int i = 0; i < param.log2n; i++) {
+        
+        for(int j = i; j >= 0; j--) {
+            timeutils.start(to_string(j)+", " + to_string(i) + "th halfCleaner");
+            scheme.resetImagErrorAndEqual(cipher);
+            bootAlgo.halfCleaner(cipher, mask[param.log2n - 1 - j], 1 << j, scheme, ring, bootHelper, sk);
+            timeutils.stop(to_string(j)+", " + to_string(i) + "th halfCleaner");
+            scheme.showCurrentCount();
+            scheme.resetCount();
+        }
+        
+        if (i < param.log2n - 1) {
+        timeutils.start(to_string(i) + "th Reverse");
+        scheme.resetImagErrorAndEqual(cipher);
+        bootAlgo.reverse(cipher, maskReverse[i], maskReverseRight[i], i+1, scheme, ring, bootHelper);
+        timeutils.stop(to_string(i) + "th Reverse");
+        scheme.showCurrentCount();
+        scheme.resetCount();
+        }
+    }
+    scheme.showTotalCount();
+}
+
+// void EncSorting::runBitonicSortRecursion(Ciphertext& cipher, long logNum, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    
+// }

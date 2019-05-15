@@ -38,7 +38,8 @@ public:
     double **getBitonicMergeMasking();
     double **getBitonicMergeMaskingOther();
     double **getColNumMasking();
-    // double **getTableMaskingBy(long = 0);
+    double **getReverseMasking(long level);
+    double **getReverseMaskingRight(long level);
 
     // ********************
     // *** Odd-Even maskings
@@ -56,6 +57,8 @@ public:
     // ********************
     void generateBitonicMergeMasking(long num);
     void generateBitonicMergeMaskingOther(long num);
+    void generateReverseMasking(long level, long num);
+    void generateReverseMaskingRight(long level, long num);
 };
 
 #endif // !MASKINGGENERATOR_H_
