@@ -7,13 +7,13 @@
 */
 #include "SerializationUtils.h"
 
-void SerializationUtils::writeCiphertext(Ciphertext* cipher, string path) {
+void SerializationUtils::writeCiphertext(Ciphertext& cipher, string path) {
 	fstream fout;
 	fout.open(path, ios::binary|ios::out);
-	long N = cipher -> N;
-	long n = cipher->n;
-	long logp = cipher->logp;
-	long logq = cipher->logq;
+	long N = cipher.N;
+	long n = cipher.n;
+	long logp = cipher.logp;
+	long logq = cipher.logq;
 	fout.write(reinterpret_cast<char*>(&N), sizeof(long));
 	fout.write(reinterpret_cast<char*>(&n), sizeof(long));
 	fout.write(reinterpret_cast<char*>(&logp), sizeof(long));
@@ -23,19 +23,19 @@ void SerializationUtils::writeCiphertext(Ciphertext* cipher, string path) {
 	ZZ q = conv<ZZ>(1) << logq;
 	unsigned char* bytes = new unsigned char[np];
 	for (long i = 0; i < N; ++i) {
-		cipher->ax[i] %= q;
-		BytesFromZZ(bytes, cipher->ax[i], np);
+		cipher.ax[i] %= q;
+		BytesFromZZ(bytes, cipher.ax[i], np);
 		fout.write(reinterpret_cast<char*>(bytes), np);
 	}
 	for (long i = 0; i < N; ++i) {
-		cipher->bx[i] %= q;
-		BytesFromZZ(bytes, cipher->bx[i], np);
+		cipher.bx[i] %= q;
+		BytesFromZZ(bytes, cipher.bx[i], np);
 		fout.write(reinterpret_cast<char*>(bytes), np);
 	}
 	fout.close();
 }
 
-Ciphertext* SerializationUtils::readCiphertext(string path) {
+Ciphertext SerializationUtils::readCiphertext(string path) {
 	long N, n, logp, logq;
 	fstream fin;
 	fin.open(path, ios::binary|ios::in);
@@ -58,7 +58,7 @@ Ciphertext* SerializationUtils::readCiphertext(string path) {
 		ZZFromBytes(bx[i], bytes, np);
 	}
 	fin.close();
-	return new Ciphertext(ax, bx, logp, logq, N, n);
+	return Ciphertext(ax, bx, logp, logq, N, n);
 }
 
 void SerializationUtils::writeKey(Key* key, string path) {
@@ -68,8 +68,8 @@ void SerializationUtils::writeKey(Key* key, string path) {
 	long np = key -> np;
 	fout.write(reinterpret_cast<char*>(&N), sizeof(long));
 	fout.write(reinterpret_cast<char*>(&np), sizeof(long));
-	fout.write(reinterpret_cast<char*>(key->rax), N * np * sizeof(uint64_t));
-	fout.write(reinterpret_cast<char*>(key->rbx), N * np * sizeof(uint64_t));
+	fout.write(reinterpret_cast<char*>(key -> rax), N * np * sizeof(uint64_t));
+	fout.write(reinterpret_cast<char*>(key -> rbx), N * np * sizeof(uint64_t));
 	fout.close();
 }
 
@@ -85,5 +85,39 @@ Key* SerializationUtils::readKey(string path) {
 	fin.read(reinterpret_cast<char*>(rbx), N*np*sizeof(uint64_t));
 	fin.close();
 	return new Key(rax, rbx, N, np);
+}
+
+void SerializationUtils::writeSecretKey(SecretKey& sk, string path) {
+	fstream fout;
+	fout.open(path, ios::binary|ios::out);
+
+	long N = sk.N;
+	ZZ* dummy = new ZZ[N];
+	long np = 1;
+
+	fout.write(reinterpret_cast<char*>(&N), sizeof(long));
+	unsigned char* bytes = new unsigned char[np];
+	for (long i = 0; i < N; ++i) {
+		BytesFromZZ(bytes, sk.sx[i] + 1, np);
+		fout.write(reinterpret_cast<char*>(bytes), np);
+	}
+}
+
+SecretKey SerializationUtils::readSecretKey(string path) {
+	long N;
+	long np = 1;
+	fstream fin;
+	fin.open(path, ios::binary|ios::in);
+	fin.read(reinterpret_cast<char*>(&N), sizeof(long));
+
+	unsigned char* bytes = new unsigned char[np];
+	ZZ* sx = new ZZ[N];
+	for (long i = 0; i < N; ++i) {
+		fin.read(reinterpret_cast<char*>(bytes), np);
+		ZZFromBytes(sx[i], bytes, np);
+		sx[i] -= 1;
+	}
+	
+	return SecretKey(N, sx);
 }
 

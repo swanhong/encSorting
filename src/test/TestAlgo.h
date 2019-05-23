@@ -1,5 +1,5 @@
-#ifndef TestBoot_H_
-#define TestBoot_H_
+#ifndef TestAlgo_H_
+#define TestAlgo_H_
 
 #include "../Parameter.h"
 #include "../PrintUtils.h"
@@ -8,7 +8,7 @@
 #include "stdlib.h"
 
 
-class TestBoot {
+class TestAlgo {
 public:
     static void bootstrapping(Parameter parameter);
 	
@@ -29,4 +29,4 @@ public:
 	static void halfCleaner(Parameter param, long iter);
 };
 
-#endif // !TestBoot_H_
+#endif // !TestAlgo_H_

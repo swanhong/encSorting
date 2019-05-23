@@ -1,8 +1,8 @@
 #include "test/TestMask.h"
 #include "test/TestPlain.h"
-#include "test/TestEnc.h"
-#include "test/TestBoot.h"
+#include "test/TestAlgo.h"
 #include "test/TestSort.h"
+#include "test/TestSetup.h"
 
 
 int main() { 
@@ -14,10 +14,11 @@ int main() {
     Parameter sortingTestParamSmall2 = {7, 1350, 40, 40, 6, 8, 50, 4};
     Parameter sortingTestParam1 = {12, 1350, 40, 40, 10, 32, 50, 5};
     Parameter sortingTestParamBig = {15, 650, 30, 30, 14, 128, 40, 5};
-    Parameter sortingTestParamBig2 = {16, 1350, 50, 50, 15, 32, 60, 4};
-    Parameter sortingTestParamBig22 = {16, 1350, 30, 30, 6, 8, 35, 4};
+    Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
     Parameter sortingTestParamBig3 = {17, 1350, 40, 40, 16, 256, 50, 4};
 
+
+    TestSetup::runSetup(sortingTestParamSmall);
 
     // ******************************
     // *** Test Maskings
@@ -57,31 +58,31 @@ int main() {
     // *** Test algorithms for encrypted data with Bootstrapping
     // ******************************
     // ******************************
-    // TestBoot::approxSqrt(sortingTestParam1, 15);
-    // TestBoot::approxInverse(sortingTestParamSmall, 5);
-    // TestBoot::approxComp(sortingTestParamSmall, 5, 5);
-    // TestBoot::minMax(sortingTestParamSmall, 15);
-    // TestBoot::compAndSwap(sortingTestParamSmall, 13);
-    // TestBoot::reverse(sortingTestParamSmall);
-    // TestBoot::compAndSwapTable(sortingTestParamBig2, 2, 0, 5, 8);
-    // TestBoot::halfCleaner(sortingTestParamSmall, 10);
+    // TestAlgo::approxSqrt(sortingTestParam1, 15);
+    // TestAlgo::approxInverse(sortingTestParamSmall, 5);
+    // TestAlgo::approxComp(sortingTestParamSmall, 5, 5);
+    // TestAlgo::minMax(sortingTestParamSmall, 10);
+    // TestAlgo::compAndSwap(sortingTestParamSmall, 13);
+    // TestAlgo::reverse(sortingTestParamSmall);
+    // TestAlgo::compAndSwapTable(sortingTestParamBig2, 2, 0, 5, 8);
+    // TestAlgo::halfCleaner(sortingTestParamSmall, 10);
 
     // ******************************
     // *** Check Parameters
     // ******************************
-    // TestBoot::bootstrapping(sortingTestParamSmall);
+    // TestAlgo::bootstrapping(sortingTestParamSmall);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
     // *** Test EncSorting
     // ******************************
-    // TestSort::sort(sortingTestParam1, 13);
+    // TestSort::sort(sortingTestParamSmall, 12);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 
     // TestSort::tableSort(sortingTestParam1, 0, 0, 4, 4, true);
     // TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 5, 5);    
-    TestSort::bitonicSort(sortingTestParamSmall, 13);
-
+    // TestSort::bitonicSort(sortingTestParamSmall, 13);
+    
     return 0;
 }

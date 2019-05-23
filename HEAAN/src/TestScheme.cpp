@@ -853,7 +853,7 @@ void TestScheme::testWriteAndRead(long logN, long logQ, long logp, long logSlots
 }
 
 
-void TestScheme::testBootstrap(long logN, long logp, long logq, long logQ, long logSlots, long logT) {
+void TestScheme::TestAlgostrap(long logN, long logp, long logq, long logQ, long logSlots, long logT) {
 	cout << "!!! START TEST BOOTSTRAP !!!" << endl;
 
 	srand(time(NULL));
@@ -909,7 +909,7 @@ void TestScheme::testBootstrap(long logN, long logp, long logq, long logQ, long 
 	cout << "!!! END TEST BOOTSRTAP !!!" << endl;
 }
 
-void TestScheme::testBootstrapSingleReal(long logN, long logp, long logq, long logQ, long logT) {
+void TestScheme::TestAlgostrapSingleReal(long logN, long logp, long logq, long logQ, long logT) {
 	cout << "!!! START TEST BOOTSTRAP SINGLE REAL !!!" << endl;
 
 	srand(time(NULL));

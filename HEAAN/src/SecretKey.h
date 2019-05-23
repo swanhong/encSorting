@@ -22,6 +22,7 @@ public:
 	ZZ* sx; ///< secret key
 
 	SecretKey(Ring& ring);
+	SecretKey(long _N, ZZ* _sx);
 
 };
 

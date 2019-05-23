@@ -11,3 +11,10 @@ SecretKey::SecretKey(Ring& ring) : N(ring.N) {
 	sx = new ZZ[N];
 	ring.sampleHWT(sx);
 }
+
+SecretKey::SecretKey(long _N, ZZ* _sx) : N(_N) {
+	sx = new ZZ[N];
+	for (long i = 0; i < N; i++) {
+		sx[i] = _sx[i];
+	}
+}

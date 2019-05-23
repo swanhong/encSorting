@@ -89,9 +89,9 @@ public:
 	//----------------------------------------------------------------------------------
 
 
-	static void testBootstrap(long logN, long logq, long logQ, long logn, long nu, long logT);
+	static void TestAlgostrap(long logN, long logq, long logQ, long logn, long nu, long logT);
 
-	static void testBootstrapSingleReal(long logN, long logq, long logQ, long nu, long logT);
+	static void TestAlgostrapSingleReal(long logN, long logq, long logQ, long nu, long logT);
 
 	static void test();
 };

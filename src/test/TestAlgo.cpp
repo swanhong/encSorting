@@ -1,6 +1,6 @@
-#include "TestBoot.h"
+#include "TestAlgo.h"
 
-void TestBoot::bootstrapping(Parameter parameter) {
+void TestAlgo::bootstrapping(Parameter parameter) {
 	PrintUtils::parameter(parameter, "Improved Bootstrapping");
 	
 	long n = 1 << parameter.log2n;   
@@ -27,12 +27,22 @@ void TestBoot::bootstrapping(Parameter parameter) {
     // }
     
 	Ciphertext cipher = scheme.encrypt(r10, n, parameter.logp, parameter.logQ);
+    double* one = new double[n];
+    for (int i = 0; i < n; i++) {
+        one[i] = 1.;
+    }
+    ZZ* onePoly = new ZZ[1 << parameter.logN];
+    ring.encode(onePoly, one, n, parameter.logp);
+    while(cipher.logq > parameter.logq + parameter.logp) {
+        cout << "mult" << endl;
 
-
+        scheme.multByPolyAndEqual(cipher, onePoly, parameter.logp);
+        scheme.reScaleByAndEqual(cipher, parameter.logp);
+    }
 	timeutils.start("Improved bootstrapping");
-	
+	complex<double>* dvec1 = scheme.decrypt(secretKey, cipher);
 	boothelper.bootstrapping_cos(cipher, parameter.logq, parameter.logQ, 5);
-    
+    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher);
 	timeutils.stop("Improved bootstrapping");
 
 	cout << "* Before logQ = " << parameter.logq << endl;
@@ -40,16 +50,18 @@ void TestBoot::bootstrapping(Parameter parameter) {
 
 	// Print Result and Difference //
     complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-    // PrintUtils::printArrays(r10, dvec, n);
-    PrintUtils::averageDifference(r10, dvec, n);
+    // PrintUtils::printArrays(r10, dvec2, n);
+    PrintUtils::averageDifference(r10, dvec2, n);
+    // PrintUtils::printArrays(dvec1, dvec2, n);
+    PrintUtils::averageDifference(dvec1, dvec2, n);
 	
 	return;
 }
 
-void TestBoot::approxSqrt(Parameter parameter, long iter) {
+void TestAlgo::approxSqrt(Parameter parameter, long iter) {
 	long n = 1 << parameter.log2n;
 
-	PrintUtils::parameter(parameter, "TestBoot::approxSqrt");
+	PrintUtils::parameter(parameter, "TestAlgo::approxSqrt");
 	
 	TimeUtils timeutils;
 	timeutils.start("KeyGen");
@@ -64,63 +76,22 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
 	BootHelper bootHelper(parameter.log2n, parameter.radix, parameter.logc, scheme, ring, secretKey);
 	timeutils.stop("Bootstrapping Helper construct");
 
-	double* mvec = EvaluatorUtils::randomRealArray(n);
-    for(int i = 0; i < n; i++) {
-        mvec[i] = -0.00000001;
-    }
-    // double* mvec = new double[n];
-    // mvec[0] = 0.0086326; // 0.00821181
-    // mvec[1] = 0.1; // 0.0999609
-    // mvec[2] = 0.00555455; // 0.0049605
-    // mvec[3] = 0.1; // 0.0999609
-    // mvec[4] = 0.0155735; // 0.015328
-    // mvec[5] = 0.1; // 0.0999609
-    // mvec[6] = 0.061951; // 0.061888
-    // mvec[7] = 0.1; // 0.0999609
-    // mvec[8] = 0.0482967; // 0.0482158
-    // mvec[9] = 0.1; // 0.0999609
-    // mvec[10] = 0.0374798; // 0.0373758
-    // mvec[11] = 0.1; // 0.0999609
-    // mvec[12] = 0.0775831; // 0.0775327
-    // mvec[13] = 0.000242687; // 0.0999609
-    // mvec[14] = 0.0109508; // 0.0106098
-    // mvec[15] = 0.443224; // 0.443215
-    
+	double* mvec = EvaluatorUtils::randomRealArray(n, 2);
     // for(int i = 0; i < n; i++) {
-    //     mvec[i] = mvec[i] * mvec[i];
-    //     // cout << "mvec[" << i << "] = " << mvec[i] << endl;
+    //     mvec[i] -= 1.;
     // }
-	// Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
-    Ciphertext cipher2 = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     
-    // for (int i = 0; i < 3; i++) {
-    //     for(int j = 0; j < n; j++) {
-    //         mvec[j] = mvec[j] * mvec[j];
-    //     }   
-    //     scheme.squareAndEqual(cipher2);
-    //     scheme.reScaleByAndEqual(cipher2, parameter.logp);
-    // }
-    // for (int i = 0; i < 10; i++) {
-    //     for(int j = 0; j < n; j++) {
-    //         mvec[j] = mvec[j] * 1.1;
-    //     }   
-    //     scheme.multByConstAndEqual(cipher2, 1.1, parameter.logp);
-    //     scheme.reScaleByAndEqual(cipher2, parameter.logp);
-    // }
-    // scheme.decryptAndPrint("cipher2", secretKey, cipher2);
-
-    // scheme.modDownToAndEqual(cipher, parameter.logq);
-    // scheme.modDownToAndEqual(cipher2, parameter.logq);
-    // scheme.modDownToAndEqual(cipher3, parameter.logq);   
+    Ciphertext cipher = scheme.encrypt(mvec, n, parameter.logp, parameter.logQ);
     
-    BootAlgo bootAlgo(parameter, 5, 5, 0, true);
+    BootAlgo bootAlgo(parameter, iter, 5, 0, true);
     // timeutils.start("Sqrt");
 	// bootAlgo.approxSqrt(cipher2, scheme, bootHelper);
     // timeutils.stop("Sqrt");
     timeutils.start("Sqrt2");
     // double addCnst = 0.5;
     // scheme.addConstAndEqual(cipher2, addCnst, parameter.logp);
-    bootAlgo.approxSqrt2Dec(cipher2, scheme, bootHelper, secretKey);
+    bootAlgo.approxSqrt2Dec(cipher, scheme, bootHelper, secretKey);
+    // bootAlgo.evalFcn(cipher, scheme, bootHelper);
     // bootAlgo.approxSqrt4Dec(cipher2, scheme, bootHelper, secretKey);
 
     timeutils.stop("Sqrt2");
@@ -133,12 +104,13 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     // cout << "1 : comsumed logQ = " << parameter.logQ - cipher.logq << endl;   
 	// complex<double>* dvec = scheme.decrypt(secretKey, cipher);
     // cout << "2 : comsumed logQ = " << parameter.logQ - cipher2.logq << endl;
-    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher2);
+    complex<double>* dvec2 = scheme.decrypt(secretKey, cipher);
     // cout << "3 : comsumed logQ = " << parameter.logQ - cipher3.logq << endl;
     // complex<double>* dvec3 = scheme.decrypt(secretKey, cipher3);
     for(int i = 0; i < n; i++) {
-        mvec[i] = sqrt(mvec[i]);
         // mvec[i] = sqrt(mvec[i]);
+        // mvec[i] = sqrt(mvec[i]);
+        mvec[i] = mvec[i] * (3 - mvec[i] * mvec[i]) / 2;
     }
     // PrintUtils::printArrays(mvec, dvec, n);
     // PrintUtils::averageDifference(mvec, dvec, n);
@@ -148,10 +120,10 @@ void TestBoot::approxSqrt(Parameter parameter, long iter) {
     // PrintUtils::averageDifference(mvec, dvec3, n);
 }
 
-void TestBoot::approxInverse(Parameter parameter, long iter) {
+void TestAlgo::approxInverse(Parameter parameter, long iter) {
 	long n = 1 << parameter.log2n;
 
-	PrintUtils::parameter(parameter, "TestBoot::approxInverse");
+	PrintUtils::parameter(parameter, "TestAlgo::approxInverse");
 	
 	TimeUtils timeutils;
 	timeutils.start("KeyGen");
@@ -199,10 +171,10 @@ void TestBoot::approxInverse(Parameter parameter, long iter) {
     PrintUtils::averageDifference(invvec, dvec, n);
 }
 
-void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
+void TestAlgo::approxComp(Parameter parameter, long invIter, long compIter) {
     long n = 1 << parameter.log2n;
 
-	PrintUtils::parameter(parameter, "TestBoot::approxComp");
+	PrintUtils::parameter(parameter, "TestAlgo::approxComp");
 	
 	TimeUtils timeutils;
 	timeutils.start("KeyGen");
@@ -249,8 +221,8 @@ void TestBoot::approxComp(Parameter parameter, long invIter, long compIter) {
     PrintUtils::averageDifference(compvec, dvec, n);   
 }
 
-void TestBoot::minMax(Parameter param, long iter) {
-    PrintUtils::parameter(param, "TestBoot::minMax");
+void TestAlgo::minMax(Parameter param, long iter) {
+    PrintUtils::parameter(param, "TestAlgo::minMax");
 	long n = 1 << param.log2n;
 
     TimeUtils timeutils;
@@ -274,13 +246,14 @@ void TestBoot::minMax(Parameter param, long iter) {
 	Ciphertext cipher1 = scheme.encrypt(mvec1, n, param.logp, param.logQ);
     Ciphertext cipher2 = scheme.encrypt(mvec2, n, param.logp, param.logQ);
 
-    scheme.modDownToAndEqual(cipher1, param.logq);
-    scheme.modDownToAndEqual(cipher2, param.logq);
+    // scheme.modDownToAndEqual(cipher1, param.logq);
+    // scheme.modDownToAndEqual(cipher2, param.logq);
     
 	timeutils.start("minMax");
     BootAlgo bootAlgo(param, iter);
     // bootAlgo.minMax(cipher1, cipher2, scheme, boothelper);
-    bootAlgo.minMaxDec(cipher1, cipher2, scheme, boothelper, secretKey);
+    // bootAlgo.minMaxDec(cipher1, cipher2, scheme, boothelper, secretKey);
+    bootAlgo.newMinMax(cipher1, cipher2, scheme, boothelper);
     timeutils.stop("minMax");
 
 	complex<double>* dmax = scheme.decrypt(secretKey, cipher2);
@@ -297,13 +270,13 @@ void TestBoot::minMax(Parameter param, long iter) {
     PrintUtils::averageDifference(max, dmax, n);
 }
 
-void TestBoot::compAndSwap(Parameter param, long iter) {
+void TestAlgo::compAndSwap(Parameter param, long iter) {
     srand(time(NULL));
 	SetNumThreads(16);
     
     long n = 1 << param.log2n;
 	
-    PrintUtils::parameter(param, "TestBoot::compAndSwap");
+    PrintUtils::parameter(param, "TestAlgo::compAndSwap");
 
     TimeUtils timeutils;
     timeutils.start("KeyGen");
@@ -363,13 +336,13 @@ void TestBoot::compAndSwap(Parameter param, long iter) {
     PrintUtils::averageDifference(mvec, dvec, n);
 }
 
-void TestBoot::reverse(Parameter param) {
+void TestAlgo::reverse(Parameter param) {
     srand(time(NULL));
 	SetNumThreads(16);
     
     long n = 1 << param.log2n;
 	
-    PrintUtils::parameter(param, "TestBoot::reverse");
+    PrintUtils::parameter(param, "TestAlgo::reverse");
 
     TimeUtils timeutils;
     timeutils.start("KeyGen");
@@ -399,10 +372,10 @@ void TestBoot::reverse(Parameter param) {
 	PrintUtils::printArrays(mvec, dvec, n);
 }
 
-void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNum, long invIter, long compIter) {
+void TestAlgo::compAndSwapTable(Parameter parameter, long logDataNum, long colNum, long invIter, long compIter) {
     long n = 1 << parameter.log2n;
 
-	PrintUtils::parameter(parameter, "TestBoot::compAndSwapTable");
+	PrintUtils::parameter(parameter, "TestAlgo::compAndSwapTable");
 	
 	TimeUtils timeutils;
 	timeutils.start("KeyGen");
@@ -468,13 +441,13 @@ void TestBoot::compAndSwapTable(Parameter parameter, long logDataNum, long colNu
     // PrintUtils::averageDifference(mvec, dvec, n);
 }
 
-void TestBoot::halfCleaner(Parameter param, long iter) {
+void TestAlgo::halfCleaner(Parameter param, long iter) {
     srand(time(NULL));
 	SetNumThreads(16);
     
     long n = 1 << param.log2n;
 	
-    PrintUtils::parameter(param, "TestBoot::halfCleaner");
+    PrintUtils::parameter(param, "TestAlgo::halfCleaner");
 
     TimeUtils timeutils;
     timeutils.start("KeyGen");

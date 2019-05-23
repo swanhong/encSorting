@@ -21,7 +21,7 @@ ENC_DIR = enc/
 ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncSorting
 
 TEST_DIR = test/
-TEST_FILES = TestMask TestPlain TestEnc TestBoot TestSort
+TEST_FILES = TestMask TestPlain TestSetup TestAlgo TestSort
 
 OBJS = $(foreach NAME, $(FOLDER_NAMES), $(addprefix $($(NAME)_DIR), $(addsuffix .o, $($(NAME)_FILES))))
 

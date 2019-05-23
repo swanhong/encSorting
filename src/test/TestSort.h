@@ -13,7 +13,6 @@ public:
     static void tableMerge(Parameter param, long logNum, long logDataNum, long colNum, long invIter, long compIter);
     static void sortAndMerge(Parameter param, long iter, long logNum);
     static void bitonicSort(Parameter param, long iter, bool=true);
-
 };
 
 

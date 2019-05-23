@@ -22,6 +22,7 @@ public:
     BootAlgo(Parameter _param, long _sqrtIter, long _invIter, long _compIter, bool=true);
     ~BootAlgo() {}
 
+    void evalFcn(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
     void approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
     void approxSqrtDec(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
     void approxSqrt2(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper);
@@ -37,6 +38,9 @@ public:
 
     void minMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper);
     void minMaxDec(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper, SecretKey sk);
+
+    void newMinMax(Ciphertext& minCipher, Ciphertext& maxCipher, BootScheme& scheme, BootHelper& bootHelper);
+
     
     void comparison(Ciphertext& cipher1, Ciphertext& cipher2, BootScheme& scheme, BootHelper& bootHelper);
     void comparisonDec(Ciphertext& a, Ciphertext& b, BootScheme& scheme, BootHelper& bootHelper, SecretKey& sk);
