@@ -2,29 +2,37 @@
 #define ENCSORTING_H_
 
 #include "BootAlgorithm.h"
+#include "EncAlgo.h"
 #include "../plain/PlainSorting.h"
 #include "../Parameter.h"
 #include "../MaskingGenerator.h"
 
 class EncSorting {
-private:
+protected:
     Parameter param;
-    long sqrtIter;
-    long invIter;
-    long compIter;
-    BootAlgo bootAlgo;
+    EncAlgo* encAlgo;
+    bool increase = true; 
+
+    ZZ** maskSorting;
+    bool maskSortingGen = false;
+    ZZ** maskSortingDec;
+    bool maskSortingDecGen = false;
 
 public:
-    EncSorting(Parameter _param, long _sqrtIter) : param(_param), sqrtIter(_sqrtIter) {}
-    EncSorting(Parameter _param, long _invIter, long _compIter) : param(_param), invIter(_invIter), compIter(_compIter) {}
+    EncSorting(Parameter _param, long* iter, long numOfIter, bool = true, bool = false);
     ~EncSorting() {}
+
+    Ciphertext encrypt(double* mvec);
+    complex<double>* decrypt(Ciphertext& cipher);
+
+    void genMaskSorting();
+    void genMaskSortingDec();
     
-    void runEncSorting(Ciphertext& cipher, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool=true);
-    void runEncSortingDec(Ciphertext& cipher, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase, SecretKey sk);
+    void runEncSorting(Ciphertext& cipher, bool=true);
+    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc);
 
     void runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool=true);
-
-    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    
     long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
     
     long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logJump, long loc,

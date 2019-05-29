@@ -9,7 +9,7 @@
  */
 class MaskingGenerator
 {
-private:
+public:
     double **mask;
     long log2n;
     long length;
@@ -19,7 +19,6 @@ private:
     long colNum;
     long maskNum;
 
-public:
     MaskingGenerator(long _log2n, bool = true);
     MaskingGenerator(long _log2n, long _logDataNum, bool = true);
     MaskingGenerator(long _log2n, long _logDataNum, long _colNum, bool=true);

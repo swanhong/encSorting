@@ -18,10 +18,10 @@ PLAIN_DIR = plain/
 PLAIN_FILES = CyclicArray PlainSorting
 
 ENC_DIR = enc/
-ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncSorting
+ENC_FILES = EncAlgorithm BootScheme BootAlgorithm EncInterface EncAlgo EncTableAlgo EncSorting
 
 TEST_DIR = test/
-TEST_FILES = TestMask TestPlain TestSetup TestAlgo TestSort
+TEST_FILES = TestMask TestPlain TestAlgo TestSort
 
 OBJS = $(foreach NAME, $(FOLDER_NAMES), $(addprefix $($(NAME)_DIR), $(addsuffix .o, $($(NAME)_FILES))))
 

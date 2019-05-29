@@ -25,6 +25,7 @@ BootAlgo::BootAlgo(Parameter _param, long _sqrtIter, long _invIter, long _compIt
 }
 
 void BootAlgo::evalFcn(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper) {
+    
     // x <- x (3 - x^2) / 2, consumes 2 * logq
     for(int i = 0; i < sqrtIter; i++) {
         scheme.checkModulusAndBoot(cipher, 2 * param.logp, bootHelper, param);
@@ -39,6 +40,42 @@ void BootAlgo::evalFcn(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootH
     }
     scheme.addConstAndEqual(cipher, 1.0, param.logp);
     scheme.divByPo2AndEqual(cipher, 1);
+
+    // ********************
+
+    // // x <- ( x^4 * (-5x^3 + 21x) + 35(-x^3 + x) ) / 16
+    // for (int i = 0; i < sqrtIter; i++) {
+    //     Ciphertext cipher2 = scheme.square(cipher);
+    //     scheme.reScaleByAndEqual(cipher2, param.logp);
+    //     scheme.modDownByAndEqual(cipher, param.logp);
+    //     Ciphertext cipher3 = scheme.mult(cipher, cipher2);
+    //     scheme.reScaleByAndEqual(cipher3, param.logp);
+    //     Ciphertext cipher4 = scheme.square(cipher2);
+    //     scheme.reScaleByAndEqual(cipher4, param.logp);
+    //     scheme.modDownByAndEqual(cipher, param.logp);
+    //     Ciphertext cipherLow = scheme.sub(cipher, cipher3);
+    //     // cipherLow *= 35
+    //     Ciphertext cipherLow35 = cipherLow;
+    //     Ciphertext cipher_21 = cipher;
+    //     Ciphertext cipher3_5 = cipher3;
+    //     for (int j = 0; j < 34; j++) {
+    //         scheme.addAndEqual(cipherLow35, cipherLow);
+    //     }
+    //     for (int j = 0; j < 20; j++) {
+    //         scheme.addAndEqual(cipher_21, cipher);
+    //     }
+    //     for (int j = 0; j < 4; j++) {
+    //         scheme.addAndEqual(cipher3_5, cipher3);
+    //     }
+    //     Ciphertext cipherSub = scheme.sub(cipher_21, cipher3_5);
+    //     scheme.multAndEqual(cipher4, cipherSub);
+    //     scheme.reScaleByAndEqual(cipher4, param.logp);
+    //     scheme.modDownByAndEqual(cipherLow35, param.logp);
+    //     cipher = scheme.add(cipher4, cipherLow35);
+    //     scheme.divByPo2AndEqual(cipher, 4);
+    // }
+    // scheme.addConstAndEqual(cipher, 1.0, param.logp);
+    // scheme.divByPo2AndEqual(cipher, 1);
 }
 
 void BootAlgo::approxSqrt(Ciphertext& cipher, BootScheme& scheme, BootHelper& bootHelper) {

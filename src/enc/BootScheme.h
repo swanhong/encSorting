@@ -50,6 +50,7 @@ public:
 	Ciphertext squareByConjugate(Ciphertext& cipher, long logp);
 	void squareByConjugateAndEqual(Ciphertext& cipher, long logp);
     void decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher);
+    void decryptAndPrintConditional(std::string str, SecretKey& secretKey, Ciphertext& cipher, bool condition);
     void decryptAndPrintAll(std::string str, SecretKey& secretKey, Ciphertext& cipher);
 
     void showTotalCount();

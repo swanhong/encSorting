@@ -121,3 +121,50 @@ SecretKey SerializationUtils::readSecretKey(string path) {
 	return SecretKey(N, sx);
 }
 
+void SerializationUtils::writeRing(Ring& ring, string path) {
+	fstream fout;
+	fout.open(path, ios::binary|ios::out);
+
+	long N = ring.N;
+	ZZ* dummy = new ZZ[N];
+
+	fout.write(reinterpret_cast<char*>(&ring.logN), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.logM), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.logNh), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.N), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.M), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.Nh), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.logQ), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.sigma), sizeof(double));
+	fout.write(reinterpret_cast<char*>(&ring.h), sizeof(long));
+	fout.write(reinterpret_cast<char*>(&ring.logQQ), sizeof(long));
+
+	long np = ceil(((double)ring.logQQ + 1)/8);
+	unsigned char* bytes = new unsigned char[np];
+
+	BytesFromZZ(bytes, ring.Q, np);
+	fout.write(reinterpret_cast<char*>(bytes), np);
+	BytesFromZZ(bytes, ring.QQ, np);
+	fout.write(reinterpret_cast<char*>(bytes), np);
+
+	for (long i = 0; i < logQQ + 1; ++i) {
+		BytesFromZZ(bytes, sk.qpows[i], np);
+		fout.write(reinterpret_cast<char*>(bytes), np);
+	}
+}
+
+void SerializationUtils::writeScheme(Scheme& scheme, string path) {
+	fstream fout;
+	fout.open(path, ios::binary|ios::out);
+
+	long N = sk.N;
+	ZZ* dummy = new ZZ[N];
+	long np = 1;
+
+	fout.write(reinterpret_cast<char*>(&N), sizeof(long));
+	unsigned char* bytes = new unsigned char[np];
+	for (long i = 0; i < N; ++i) {
+		BytesFromZZ(bytes, sk.sx[i] + 1, np);
+		fout.write(reinterpret_cast<char*>(bytes), np);
+	}
+}

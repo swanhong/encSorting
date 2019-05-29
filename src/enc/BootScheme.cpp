@@ -23,7 +23,7 @@ void BootScheme::checkAndBoot(Ciphertext& cipher, bool condition, BootHelper& bo
         // Ciphertext cipherConj = conjugate(cipher);
         // addAndEqual(cipher, cipherConj);
         // divByPo2AndEqual(cipher, 1);
-        cout << "bootstrapping.... when logq = " << cipher.logq << endl;
+        // cout << "bootstrapping.... when logq = " << cipher.logq << endl;
         bootHelper.bootstrapping_cos(cipher, param.logq, param.logQ, 5);
         // cout << "after boot... logq = " << cipher.logq << endl;
         PrintUtils::nprint("Run Boot in BootScheme::checkAndBoot -- after : " + to_string(cipher.logq), WANT_TO_PRINT);
@@ -154,6 +154,12 @@ void BootScheme::squareByConjugateAndEqual(Ciphertext& cipher, long logp) {
 void BootScheme::decryptAndPrint(std::string str, SecretKey& secretKey, Ciphertext& cipher) {
     complex<double>* dvec = decrypt(secretKey, cipher);
     PrintUtils::printSingleArraySmall(str, dvec, cipher.n);
+}
+
+void BootScheme::decryptAndPrintConditional(std::string str, SecretKey& secretKey, Ciphertext& cipher, bool condition) {
+    if(condition) {
+        decryptAndPrint(str, secretKey, cipher);
+    }
 }
 
 void BootScheme::decryptAndPrintAll(std::string str, SecretKey& secretKey, Ciphertext& cipher) {

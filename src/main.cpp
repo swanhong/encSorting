@@ -1,8 +1,8 @@
 #include "test/TestMask.h"
 #include "test/TestPlain.h"
 #include "test/TestAlgo.h"
+#include "test/TestTableAlgo.h"
 #include "test/TestSort.h"
-#include "test/TestSetup.h"
 
 
 int main() { 
@@ -16,9 +16,6 @@ int main() {
     Parameter sortingTestParamBig = {15, 650, 30, 30, 14, 128, 40, 5};
     Parameter sortingTestParamBig2 = {16, 1350, 40, 40, 15, 32, 50, 4};
     Parameter sortingTestParamBig3 = {17, 1350, 40, 40, 16, 256, 50, 4};
-
-
-    TestSetup::runSetup(sortingTestParamSmall);
 
     // ******************************
     // *** Test Maskings
@@ -55,17 +52,17 @@ int main() {
     // TestPlain::plainTableSort(4, 1, 0, false);
 
     // ******************************
-    // *** Test algorithms for encrypted data with Bootstrapping
+    // *** Test algorithms for encrypted data
     // ******************************
     // ******************************
-    // TestAlgo::approxSqrt(sortingTestParam1, 15);
-    // TestAlgo::approxInverse(sortingTestParamSmall, 5);
-    // TestAlgo::approxComp(sortingTestParamSmall, 5, 5);
-    // TestAlgo::minMax(sortingTestParamSmall, 10);
-    // TestAlgo::compAndSwap(sortingTestParamSmall, 13);
+    // TestAlgo::approxSqrt(sortingTestParam1, 10);    
+    // TestAlgo::minMax(sortingTestParamSmall, 15);
+    // TestAlgo::EncSwap(sortingTestParamSmall, 13);
     // TestAlgo::reverse(sortingTestParamSmall);
-    // TestAlgo::compAndSwapTable(sortingTestParamBig2, 2, 0, 5, 8);
-    // TestAlgo::halfCleaner(sortingTestParamSmall, 10);
+    // TestAlgo::halfCleaner(sortingTestParamSmall, 15);
+    // TestAlgo::approxInverse(sortingTestParamSmall, 5);
+    // TestAlgo::comparison(sortingTestParamSmall, 5, 5);
+    // TestAlgo::encSwapTable(sortingTestParamSmall, 2, 0, 5, 5);
 
     // ******************************
     // *** Check Parameters
@@ -76,7 +73,7 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    // TestSort::sort(sortingTestParamSmall, 12);
+    TestSort::sort(sortingTestParamSmall, 12);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 

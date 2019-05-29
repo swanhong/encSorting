@@ -31,6 +31,8 @@ public:
 
 	static void writeSecretKey(SecretKey& sk, string path);
 	static SecretKey readSecretKey(string path);
+
+	static void writeScheme(Scheme& scheme, string path);
 };
 
 #endif /* SERIALIZATIONUTILS_H_ */

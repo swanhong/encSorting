@@ -3,7 +3,8 @@
 
 #include "../Parameter.h"
 #include "../PrintUtils.h"
-#include "../enc/BootAlgorithm.h"
+#include "../enc/EncAlgo.h"
+#include "../plain/PlainSorting.h"
 #include "../MaskingGenerator.h"
 #include "stdlib.h"
 
@@ -11,22 +12,18 @@
 class TestAlgo {
 public:
     static void bootstrapping(Parameter parameter);
-	
 	static void approxSqrt(Parameter parameter, long iter);
-
-	static void approxInverse(Parameter parameter, long iter);
-
-	static void approxComp(Parameter parameter, long invIter, long compIter);
-	
 	static void minMax(Parameter parameter, long iter);
-
-	static void compAndSwap(Parameter param, long iter);
-
-	static void compAndSwapTable(Parameter param, long logDataNum, long colNum, long invIter, long compIter);
-
+	static void EncSwap(Parameter param, long iter);
 	static void reverse(Parameter param);
-
 	static void halfCleaner(Parameter param, long iter);
+
+	//************
+	
+	static void approxInverse(Parameter param, long iter);
+	static void comparison(Parameter param, long invIter, long compIter);
+	static void encSwapTable(Parameter param, long logDataNum, long colNum, long invIter, long compIter);
+
 };
 
 #endif // !TestAlgo_H_
