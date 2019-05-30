@@ -12,6 +12,7 @@ class PlainSort {
 public:
     MaskingGenerator* mg;
     double** mask;
+    bool increase;
 
 
     PlainSort() {}

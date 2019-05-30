@@ -1,8 +1,8 @@
 #include "PlainSorting.h"
 
 
-PlainSort::PlainSort(long log2n, bool increase) {
-    mg = new MaskingGenerator(log2n);
+PlainSort::PlainSort(long log2n, bool _increase) : increase(_increase) {
+    mg = new MaskingGenerator(log2n, increase);
     mask = mg->getMasking();
 }
 
@@ -30,7 +30,8 @@ void PlainSort::compAndSwap(CyclicArray& ca, long loc, long dist, bool increase)
     //     cout << mask[loc][i] << " ";
     // }cout << endl;
     long length = ca.length;
-    CyclicArray maskCA(mask[loc], length);     
+
+    CyclicArray maskCA(mask[loc], length);
     
     CyclicArray dummy(length);
     mult(dummy, ca, maskCA);

@@ -44,16 +44,16 @@ void EncSorting::genMaskPolyDec() {
     }
 }
 
-void EncSorting::runEncSorting(Ciphertext& cipher, bool increase) {
-    cout << "maskPolyGen = " << maskPolyGen << endl;
+void EncSorting::runEncSorting(Ciphertext& cipher) {
+    cout << "maskPolyGen = " << maskPolyGen << ", increase = " << increase << endl;
     if (increase) {
         if (!maskPolyGen) {
             genMaskPoly();
             maskPolyGen = true;
-
         }
     } else {
         if(!maskPolyDecGen) {
+            cout << "************** decresae mask gen" << endl;
             genMaskPolyDec();
             maskPolyDecGen = true;
         }

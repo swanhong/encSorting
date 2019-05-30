@@ -3,10 +3,8 @@
 void TestSort::sort(Parameter param, long _iter, bool increase) {
     long n = 1 << param.log2n;
     long iter[1] = {_iter};
-    EncSorting encSorting(param, iter, 1, true, true);
+    EncSorting encSorting(param, iter, 1, increase, true);
     encSorting.showDiffFromPlain();
-
-    cout << encSorting.plainSort->mask[0][0] << endl;
 
     // double* mvec = EvaluatorUtils::randomRealArray(n);
     double* mvec = new double[n];
@@ -26,7 +24,7 @@ void TestSort::sort(Parameter param, long _iter, bool increase) {
 
     // run PlainSort
     CyclicArray ca(mvec, 1 << param.log2n);
-    PlainSort plainSort(param.log2n);
+    PlainSort plainSort(param.log2n, increase);
     plainSort.runPlainSorting(ca, param.log2n, increase);
     mvec = ca.getArray();
 

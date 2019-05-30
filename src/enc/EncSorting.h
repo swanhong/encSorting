@@ -38,7 +38,7 @@ public:
     void genMaskPoly();
     void genMaskPolyDec();
     
-    void runEncSorting(Ciphertext& cipher, bool=true);
+    void runEncSorting(Ciphertext& cipher);
     long sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc);
 
     void runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool=true);
