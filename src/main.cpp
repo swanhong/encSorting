@@ -73,7 +73,7 @@ int main() {
     // ******************************
     // *** Test EncSorting
     // ******************************
-    TestSort::sort(sortingTestParamSmall, 12);
+    TestSort::sort(sortingTestParamSmall, 10);
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 

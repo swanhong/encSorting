@@ -32,6 +32,7 @@ public:
     // *** get functions
     // ********************
     double **getMasking();
+    void getMasking(double** inputMask);
     double **getMaskingOther();
     // double **getTableMasking();
     double **getBitonicMergeMasking();

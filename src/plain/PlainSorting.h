@@ -10,13 +10,18 @@
 
 class PlainSort {
 public:
+    MaskingGenerator* mg;
+    double** mask;
+
+
     PlainSort() {}
+    PlainSort(long log2n, bool = true);
     ~PlainSort() {}
     void runPlainSorting(CyclicArray& ca, long log2n, bool=true);
 
-    long sortingRec(CyclicArray& ca, double** mask, long logNum, long logJump, long loc, bool increase);
+    long sortingRec(CyclicArray& ca, long logNum, long logJump, long loc, bool increase);
 
-    void compAndSwap(CyclicArray& ca, double** mask, long loc, long dist, bool increase);
+    void compAndSwap(CyclicArray& ca, long loc, long dist, bool increase);
 
     void selfBitonicMerge(CyclicArray& ca, long log2n, double** mask, bool increase);
 

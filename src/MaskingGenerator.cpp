@@ -48,11 +48,11 @@ void MaskingGenerator::setMaskNum() {
     }
 }
 
-void MaskingGenerator::printMask(double** mask, long maskNum) {
+void MaskingGenerator::printMask(double** inputMask, long maskNum) {
     for(int i = 0; i < maskNum; i++){
         std::cout << "mask[" << i << "] = [";
         for(int j = 0; j < length; j++) {
-            std::cout << mask[i][j] << ", ";
+            std::cout << inputMask[i][j] << ", ";
         }
         std::cout << "]" << std::endl;        
     }
@@ -62,6 +62,18 @@ void MaskingGenerator::printMask(double** mask, long maskNum) {
 double** MaskingGenerator::getMasking() {
     generateMaskingRec(log2n, 0, 0);
     return mask;
+}
+
+void MaskingGenerator::getMasking(double** inputMask) {
+    generateMaskingRec(log2n, 0, 0); 
+    inputMask = new double*[maskNum];
+    for (int i = 0; i < maskNum; i++) {
+        inputMask[i] = new double[length];
+        for (int j = 0; j < length; j++) {
+            inputMask[i][j] = mask[i][j];
+        }
+    }
+    std::cout << inputMask[0][0] << std::endl;
 }
 
 double** MaskingGenerator::getMaskingOther() {

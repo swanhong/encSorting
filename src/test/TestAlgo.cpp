@@ -44,7 +44,7 @@ void TestAlgo::minMax(Parameter param, long _iter) {
     long n = 1 << param.log2n;
 
     long iter[1] = {_iter};
-    EncAlgo encAlgo(param, iter, 1);
+    EncAlgo encAlgo(param, iter, 1, true);
 
 	double* mvec1 = EvaluatorUtils::randomRealArray(n);
     double* mvec2 = EvaluatorUtils::randomRealArray(n);

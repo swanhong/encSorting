@@ -51,8 +51,8 @@ void EncAlgo::evalFcn(Ciphertext& cipher) {
         scheme->multAndEqual(cipher, square);
         scheme->reScaleByAndEqual(cipher, param.logp);
     }
-    scheme->addConstAndEqual(cipher, 1.0, param.logp);
-    scheme->divByPo2AndEqual(cipher, 1);
+    // scheme->addConstAndEqual(cipher, 1.0, param.logp);
+    // scheme->divByPo2AndEqual(cipher, 1);
 
     // ********************
 
@@ -240,22 +240,45 @@ void EncAlgo::minMax(Ciphertext& minCipher, Ciphertext& maxCipher) {
 }
 
 void EncAlgo::newMinMax(Ciphertext& minCipher, Ciphertext& maxCipher) {
-    Ciphertext max = scheme->sub(maxCipher, minCipher);
-    evalFcn(max);
-    Ciphertext min = scheme->negate(max);
-    scheme->addConstAndEqual(min, 1.0, param.logp);
+    // Ciphertext max = scheme->sub(maxCipher, minCipher);
+    // evalFcn(max);
+    // scheme->addConstAndEqual(max, 1.0, param.logp);
+    // scheme->divByPo2AndEqual(max, 1);
+    // Ciphertext min = scheme->negate(max);
+    // scheme->addConstAndEqual(min, 1.0, param.logp);
     
-    scheme->modDownToAndEqualModified(minCipher, max, *bootHelper, param);
-    scheme->modDownToAndEqualModified(maxCipher, max, *bootHelper, param);
-    Ciphertext minMin = scheme->mult(minCipher, min);
-    Ciphertext minMax = scheme->mult(minCipher, max);
-    Ciphertext maxMin = scheme->mult(maxCipher, min);
-    Ciphertext maxMax = scheme->mult(maxCipher, max);
+    // scheme->modDownToAndEqualModified(minCipher, max, *bootHelper, param);
+    // scheme->modDownToAndEqualModified(maxCipher, max, *bootHelper, param);
+    // Ciphertext minMin = scheme->mult(minCipher, min);
+    // Ciphertext minMax = scheme->mult(minCipher, max);
+    // Ciphertext maxMin = scheme->mult(maxCipher, min);
+    // Ciphertext maxMax = scheme->mult(maxCipher, max);
 
-    minCipher = scheme->add(minMax, maxMin);
-    maxCipher = scheme->add(minMin, maxMax);
-    scheme->reScaleByAndEqual(minCipher, param.logp);
-    scheme->reScaleByAndEqual(maxCipher, param.logp);
+    // minCipher = scheme->add(minMax, maxMin);
+    // maxCipher = scheme->add(minMin, maxMax);
+    // scheme->reScaleByAndEqual(minCipher, param.logp);
+    // scheme->reScaleByAndEqual(maxCipher, param.logp);
+
+    Ciphertext add = scheme->add(maxCipher, minCipher);
+    Ciphertext sub = scheme->sub(maxCipher, minCipher);
+    Ciphertext minMax = sub;
+    
+    nprint("a - b", minMax);
+    evalFcn(minMax);
+    nprint("f(a - b)", minMax);
+
+    scheme->divByPo2AndEqual(add, 1);
+    scheme->divByPo2AndEqual(sub, 1);
+    scheme->modDownToAndEqualModified(minMax, sub, *bootHelper, param);
+    scheme->multAndEqual(sub, minMax);
+    scheme->reScaleByAndEqual(sub, param.logp);
+
+    nprint("0 < (a-b)/ * f(a-b)", sub);
+
+    scheme->modDownToAndEqualModified(add, sub, *bootHelper, param);
+    
+    maxCipher = scheme->add(add, sub);
+    minCipher = scheme->sub(add, sub);
 }
 
 

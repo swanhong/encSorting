@@ -1,36 +1,40 @@
 #include "PlainSorting.h"
 
-void PlainSort::runPlainSorting(CyclicArray& ca, long log2n, bool increase) {
-    MaskingGenerator mg(log2n, increase);
-    double** mask = mg.getMasking();
-    sortingRec(ca, mask, log2n, 0, 0, increase);
+
+PlainSort::PlainSort(long log2n, bool increase) {
+    mg = new MaskingGenerator(log2n);
+    mask = mg->getMasking();
 }
 
-long PlainSort::sortingRec(CyclicArray& ca, double** mask, long logNum, long logJump, long loc, bool increase) {
+void PlainSort::runPlainSorting(CyclicArray& ca, long log2n, bool increase) {
+    sortingRec(ca, log2n, 0, 0, increase);
+}
+
+long PlainSort::sortingRec(CyclicArray& ca, long logNum, long logJump, long loc, bool increase) {
     if (logNum == 1) {
-        compAndSwap(ca, mask, loc, 1 << logJump, increase);
+        compAndSwap(ca, loc, 1 << logJump, increase);
         return loc + 1;
     } else {
         if (logJump == 0) {
-            loc = sortingRec(ca, mask, logNum - 1, logJump, loc, increase);
+            loc = sortingRec(ca, logNum - 1, logJump, loc, increase);
         }
-        loc = sortingRec(ca, mask, logNum - 1, logJump + 1, loc, increase);
-        compAndSwap(ca, mask, loc, 1 << logJump, increase);
+        loc = sortingRec(ca, logNum - 1, logJump + 1, loc, increase);
+        compAndSwap(ca, loc, 1 << logJump, increase);
         return loc + 1;
     }
 }
 
-void PlainSort::compAndSwap(CyclicArray& ca, double** mask, long loc, long dist, bool increase) {
+void PlainSort::compAndSwap(CyclicArray& ca, long loc, long dist, bool increase) {
     // cout << "compAndSwap with dist = " << dist << ", inc = " << increase << endl;
     // for (int i = 0; i < ca.length; i++) {
     //     cout << mask[loc][i] << " ";
     // }cout << endl;
-    
     long length = ca.length;
     CyclicArray maskCA(mask[loc], length);     
     
     CyclicArray dummy(length);
     mult(dummy, ca, maskCA);
+
     ca.sub(dummy);
     if (increase) {
         dummy.rightRotate(dist);
@@ -46,7 +50,7 @@ void PlainSort::compAndSwap(CyclicArray& ca, double** mask, long loc, long dist,
 
 void PlainSort::selfBitonicMerge(CyclicArray& ca, long log2n, double** mask, bool increase) {
     for(int i = 0; i <log2n; i++) {
-        compAndSwap(ca, mask, i, 1 << (log2n - 1 - i), increase);
+        compAndSwap(ca, i, 1 << (log2n - 1 - i), increase);
     }
 }
 

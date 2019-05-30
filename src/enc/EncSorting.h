@@ -8,38 +8,48 @@
 #include "../MaskingGenerator.h"
 
 class EncSorting {
-protected:
-    Parameter param;
-    EncAlgo* encAlgo;
-    bool increase = true; 
-
-    ZZ** maskSorting;
-    bool maskSortingGen = false;
-    ZZ** maskSortingDec;
-    bool maskSortingDecGen = false;
-
 public:
+
+    Parameter param;
+    bool increase = true; 
+    
+    // Enc
+    EncAlgo* encAlgo;
+    ZZ** maskPoly;
+    bool maskPolyGen = false;
+    ZZ** maskPolyDec;
+    bool maskPolyDecGen = false;
+
+    // Plain
+    bool showDiff = false;
+
+    PlainSort* plainSort;
+    CyclicArray* ca;
+
+
     EncSorting(Parameter _param, long* iter, long numOfIter, bool = true, bool = false);
     ~EncSorting() {}
 
     Ciphertext encrypt(double* mvec);
     complex<double>* decrypt(Ciphertext& cipher);
 
-    void genMaskSorting();
-    void genMaskSortingDec();
+    void showDiffFromPlain();
+
+    void genMaskPoly();
+    void genMaskPolyDec();
     
     void runEncSorting(Ciphertext& cipher, bool=true);
-    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc);
+    long sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc);
 
     void runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool=true);
     
-    long sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
+    long sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
     
-    long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logJump, long loc,
+    long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logDist, long loc,
                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);
 
-    void compAndSwapBothWithDec(Ciphertext& cipher, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
+    void encSwapCall(Ciphertext& cipher, long logDist, long loc);
     void CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long colNum, long dist,
                                     double* mask, double* maskRight, double* maskTable, double* maskTableRight,
                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);

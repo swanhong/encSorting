@@ -2,84 +2,116 @@
 
 EncSorting::EncSorting(Parameter _param, long* iter, long numOfIter, bool _increase, bool _printCondition) : param(_param), increase(_increase) {
     encAlgo = new EncAlgo(_param, iter, numOfIter, _printCondition);
+    plainSort = new PlainSort(param.log2n, increase);
+    long maskNum = param.log2n * (param.log2n + 1) / 2;
+    for (int i = 0; i < maskNum; i++) {
+        std::cout << "mask[" << i << "] = ";
+        for (int j = 0; j < (1 << param.log2n); j++) {
+            std::cout << plainSort->mask[i][j] << ", ";
+        }
+        std::cout << std::endl;
+    }
+    cout << "end" << endl;
+}
+
+void EncSorting::showDiffFromPlain() {
+    showDiff = true;
 }
 
 Ciphertext EncSorting::encrypt(double* mvec) {
+    ca = new CyclicArray(mvec, 1 << param.log2n);
     return encAlgo->encrypt(mvec);
 }
 complex<double>* EncSorting::decrypt(Ciphertext& cipher) {
     return encAlgo->decrypt(cipher);
 }
 
-void EncSorting::genMaskSorting() {
+void EncSorting::genMaskPoly() {
     MaskingGenerator mg(param.log2n, true);
     double** mask = mg.getMasking();
-    maskSorting = new ZZ*[mg.maskNum];
+    maskPoly = new ZZ*[mg.maskNum];
     for (int i = 0; i < mg.maskNum; i++) {
-        maskSorting[i] = encAlgo->encode(mask[i]);
+        maskPoly[i] = encAlgo->encode(mask[i]);
     }
 }
 
-void EncSorting::genMaskSortingDec() {
+void EncSorting::genMaskPolyDec() {
     MaskingGenerator mg(param.log2n, false);
-    double** mask = mg.getMasking();
-    maskSortingDec = new ZZ*[mg.maskNum];
+    double** maskDec = mg.getMasking();
+    maskPolyDec = new ZZ*[mg.maskNum];
     for (int i = 0; i < mg.maskNum; i++) {
-        maskSortingDec[i] = encAlgo->encode(mask[i]);
+        maskPolyDec[i] = encAlgo->encode(maskDec[i]);
     }
 }
 
 void EncSorting::runEncSorting(Ciphertext& cipher, bool increase) {
-    if (increase) if (!maskSortingGen) genMaskSorting();
-    else if(!maskSortingDecGen) genMaskSortingDec();
+    cout << "maskPolyGen = " << maskPolyGen << endl;
+    if (increase) {
+        if (!maskPolyGen) {
+            genMaskPoly();
+            maskPolyGen = true;
+
+        }
+    } else {
+        if(!maskPolyDecGen) {
+            genMaskPolyDec();
+            maskPolyDecGen = true;
+        }
+    }          
     sortingRecursion(cipher, param.log2n, 0, 0);
     encAlgo->showTotalCount();
 }
 
-long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump, long loc) {
+long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc) {
     TimeUtils timeutils;
-    ZZ* mask;
+    cout << "recursion " << logNum << ", " << logDist << ", " << loc << endl;
+    
     PrintUtils::nprint("run encBatcherSort with loc = " + to_string(loc), WANT_TO_PRINT);
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        if (increase) mask = maskSorting[loc];
-        else mask = maskSortingDec[loc];
-        encAlgo->encSwap(cipher, mask, 1 << logJump, increase);
-        encAlgo->showCurrentCountAndReset();
+    
+        encSwapCall(cipher, logDist, loc);
         timeutils.stop(to_string(loc)+"th CompAndSwap");
     } else {
-        if (logJump == 0) {
-            loc = sortingRecursion(cipher, logNum - 1, logJump, loc);
+        if (logDist == 0) {
+            loc = sortingRecursion(cipher, logNum - 1, logDist, loc);
         }
-        loc = sortingRecursion(cipher, logNum - 1, logJump + 1, loc);
+        loc = sortingRecursion(cipher, logNum - 1, logDist + 1, loc);
+
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        if (increase) mask = maskSorting[loc];
-        else mask = maskSortingDec[loc];
-        encAlgo->encSwap(cipher, mask, 1 << logJump, increase);
-        encAlgo->showCurrentCountAndReset();
+        encSwapCall(cipher, logDist, loc);
         timeutils.stop(to_string(loc)+"th CompAndSwap");
     }
     return loc + 1;
 }
 
-// void EncSorting::compAndSwapBothWithDec(Ciphertext& cipher, long logJump, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps) {
-//     complex<double>* mvecCplx = scheme.decrypt(sk, cipher);
-//     double* mvec = new double[cipher.n];
-//     for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
-//     CyclicArray ca(mvec, cipher.n);
-    
-//     ps.compAndSwap(ca, mask, loc, 1 << logJump, true);
-//     // bootAlgo.compAndSwap(cipher, mask, loc, 1<< logJump, scheme, ring, bootHelper);
-//     bootAlgo.compAndSwapDec(cipher, mask[loc], 1<< logJump, scheme, ring, bootHelper, loc, sk);
+void EncSorting::encSwapCall(Ciphertext& cipher, long logDist, long loc) {
+    ZZ* maskPolyTmp;
+    cout << "start encSwapCall" << endl;
+      
+    if (increase) {
+        maskPolyTmp = maskPoly[loc];
+    } else {
+        maskPolyTmp = maskPolyDec[loc];
+    }          
+    cout << "start encSwap" << endl;
+    encAlgo->encSwap(cipher, maskPolyTmp, 1 << logDist, increase);
+    cout << "end encSwap" << endl;
 
-//     mvec = ca.getArray();
-//     complex<double>* dvec = scheme.decrypt(sk, cipher);
-//     cout << loc << "th compAndSwap Result" << endl;
-//     PrintUtils::printFewArrays(mvec, dvec, cipher.n);
-//     cout << endl << "******************" << endl;
-//     PrintUtils::averageDifference(mvec, dvec, cipher.n);
-//     cout << "******************" << endl << endl;
-// }
+    if (showDiff) {
+        cout << "start compAndSwap" << endl;
+        plainSort->compAndSwap(*ca, loc, 1 << logDist, increase);
+        cout << "end compAndSwap" << endl;
+        double* plain = ca->getArray();
+        complex<double>* enc = encAlgo->decrypt(cipher);
+        cout << loc << "th compAndSwap Result" << endl;
+        PrintUtils::printFewArrays(plain, enc, cipher.n);
+        cout << endl << "******************" << endl;
+        PrintUtils::averageDifference(plain, enc, cipher.n);
+        cout << "******************" << endl << endl;
+    }
+    encAlgo->showCurrentCountAndReset();
+}
 
 // void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool increase) {
 //     MaskingGenerator mg(param.log2n, logDataNum, increase);
@@ -106,29 +138,29 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logJump,
 //     scheme.showTotalCount();
 // }
 
-// long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logJump, long loc,
+// long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logDist, long loc,
 //                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
 //                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps) {
 //     TimeUtils timeutils;
 //     if (logNum == 1) {
 //         timeutils.start(to_string(loc)+"th CompAndSwap");
 
-//         CompAndSwapTableBothWithDec(cipher, logDataNum, colNum, 1 << (logJump + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
+//         CompAndSwapTableBothWithDec(cipher, logDataNum, colNum, 1 << (logDist + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
 
 //         scheme.showCurrentCount();
 //         scheme.resetCount();
-//         timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logJump));
+//         timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logDist));
 //     } else {
-//         if (logJump == 0) {
-//             loc = sortingTableRecursion(cipher, logDataNum, colNum, logNum - 1, logJump, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
+//         if (logDist == 0) {
+//             loc = sortingTableRecursion(cipher, logDataNum, colNum, logNum - 1, logDist, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
 //         }
-//         loc = sortingTableRecursion(cipher, logDataNum, colNum, logNum - 1, logJump + 1, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
+//         loc = sortingTableRecursion(cipher, logDataNum, colNum, logNum - 1, logDist + 1, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
 //         timeutils.start(to_string(loc)+"th CompAndSwap");
 
-//         CompAndSwapTableBothWithDec(cipher, logDataNum, colNum, 1 << (logJump + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
+//         CompAndSwapTableBothWithDec(cipher, logDataNum, colNum, 1 << (logDist + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
 //         scheme.showCurrentCount();
 //         scheme.resetCount();
-//         timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logJump));
+//         timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logDist));
 //     }
 //     return loc + 1;
 // }
