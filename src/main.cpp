@@ -77,7 +77,7 @@ int main() {
     // TestSort::merge(sortingTestParamSmall, 13, 2);
     // TestSort::sortAndMerge(sortingTestParamSmall, 15, 4);
 
-    // TestSort::tableSort(sortingTestParam1, 0, 0, 4, 4, true);
+    // TestSort::tableSort(sortingTestParam1, 0, 0, 4, 4, true); 
     // TestSort::tableMerge(sortingTestParamSmall, 2, 2, 0, 5, 5);    
     // TestSort::bitonicSort(sortingTestParamSmall, 13);
     

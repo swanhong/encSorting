@@ -41,15 +41,16 @@ void EncAlgo::evalFcn(Ciphertext& cipher) {
     
     // x <- x (3 - x^2) / 2, consumes 2 * logq
     for(int i = 0; i < iter[minMaxLoc]; i++) {
-        scheme->checkModulusAndBoot(cipher, 2 * param.logp + 1, *bootHelper, param);
+        scheme->checkModulusAndBoot(cipher, 2 * param.logp, *bootHelper, param);
         nprint("start cipher" + to_string(i), cipher);
         Ciphertext square = scheme->square(cipher);
         scheme->reScaleByAndEqual(square, param.logp);
-        nprint("square" + to_string(i), cipher);
+        nprint("square" + to_string(i), square);
         scheme->negateAndEqual(square);
         scheme->addConstAndEqual(square, 3.0, param.logp);
+        nprint("3 - x^2" + to_string(i), square);
         scheme->divByPo2AndEqual(cipher, 1);
-        nprint("( 3 - x^2 ) / 2" + to_string(i), cipher);
+        nprint("x / 2" + to_string(i), cipher);
         scheme->modDownToAndEqual(cipher, square.logq);
         scheme->multAndEqual(cipher, square);
         scheme->reScaleByAndEqual(cipher, param.logp);

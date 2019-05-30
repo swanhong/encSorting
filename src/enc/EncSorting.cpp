@@ -53,7 +53,6 @@ void EncSorting::runEncSorting(Ciphertext& cipher) {
         }
     } else {
         if(!maskPolyDecGen) {
-            cout << "************** decresae mask gen" << endl;
             genMaskPolyDec();
             maskPolyDecGen = true;
         }
@@ -64,7 +63,6 @@ void EncSorting::runEncSorting(Ciphertext& cipher) {
 
 long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc) {
     TimeUtils timeutils;
-    cout << "recursion " << logNum << ", " << logDist << ", " << loc << endl;
     
     PrintUtils::nprint("run encBatcherSort with loc = " + to_string(loc), WANT_TO_PRINT);
     if (logNum == 1) {

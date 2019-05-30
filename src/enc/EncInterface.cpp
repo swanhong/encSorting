@@ -44,6 +44,7 @@ void EncInterface::nprint(string str) {
 void EncInterface::nprint(string str, Ciphertext& cipher) {
     if(printCondition) {
         scheme->decryptAndPrint(str, *secretKey, cipher);
+        std::cout << "logq = " << cipher.logq << endl;
     }
 }
 
