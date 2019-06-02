@@ -211,7 +211,7 @@ void TestAlgo::comparison(Parameter param, long invIter, long compIter) {
     
     TimeUtils timeutils;
     timeutils.start("approxComp");
-	encAlgo.comparison(cipher1, cipher2);
+	encAlgo.comparisonAlgorithm(cipher1, cipher2);
     timeutils.stop("approxComp");
 
     // Print Result and Difference //	
@@ -261,13 +261,13 @@ void TestAlgo::encSwapTable(Parameter param, long logDataNum, long colNum, long 
     encAlgo.encSwapTable(cipher, maskLeft, maskRight, maskTableLeft, maskTableRight, 1 << logDataNum);
     timeutils.stop("encSwapTable");
 
-    PlainSort plainSort;
+    PlainSort plainSort(param.log2n, logDataNum, colNum);
     CyclicArray ca(mvec, n);
-    plainSort.compAndSwapTable(ca, logDataNum, colNum, mask[0], maskOther[0], maskTable[0], maskTableOther[0], 1 << (logDataNum), true);
+    plainSort.compAndSwapTable(ca, 0, 1 << logDataNum, true);
     mvec = ca.getArray();
     
     // Print Result and Difference //	
 	complex<double>* dvec = encAlgo.decrypt(cipher);
-    PrintUtils::printArrays(mvec, dvec, n);
+    PrintUtils::printArraysWithDataNum(mvec, dvec, n, logDataNum, colNum);
     PrintUtils::averageDifference(mvec, dvec, n);
 }

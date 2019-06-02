@@ -98,6 +98,22 @@ void CyclicArray::rightRotate(long num) {
 	}
 }
 
+void CyclicArray::leftRotateConditional(long num, bool condition) {
+	if (condition) {
+		leftRotate(num);
+	} else {
+		rightRotate(num);
+	}
+}
+
+void CyclicArray::rightRotateConditional(long num, bool condition) {
+	if (condition) {
+		rightRotate(num);
+	} else {
+		leftRotate(num);
+	}
+}
+
 void CyclicArray::printAsVector() const {
 	cout << "[";
 	for (int i = 0; i < length; ++i) {

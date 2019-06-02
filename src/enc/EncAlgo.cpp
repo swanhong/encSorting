@@ -37,6 +37,11 @@ void EncAlgo::minMaxAlgorithm(Ciphertext& minCipher, Ciphertext& maxCipher) {
     newMinMax(minCipher, maxCipher);
 }
 
+void EncAlgo::comparisonAlgorithm(Ciphertext& a, Ciphertext& b) {
+    // comparison(a, b);
+    newComparison(a, b);
+}
+
 void EncAlgo::evalFcn(Ciphertext& cipher) {
     
     // x <- x (3 - x^2) / 2, consumes 2 * logq
@@ -286,8 +291,6 @@ void EncAlgo::newMinMax(Ciphertext& minCipher, Ciphertext& maxCipher) {
     minCipher = scheme->sub(add, sub);
 }
 
-
-
 void EncAlgo::encSwap(Ciphertext& cipher, ZZ* mask, long dist, bool increase) {
     long n = cipher.n;
     // scheme->checkModulusAndBoot(cipher, param.logp + 1, *bootHelper, param);
@@ -529,6 +532,30 @@ void EncAlgo::comparison(Ciphertext& a, Ciphertext& b) {
     scheme->addConstAndEqual(b, 1.0, param.logp);
 }
 
+void EncAlgo::newComparison(Ciphertext& a, Ciphertext& b) {
+    Ciphertext max = scheme->sub(a, b);
+    evalFcn(max);
+    scheme->addConstAndEqual(max, 1.0, param.logp);
+    scheme->divByPo2AndEqual(max, 1);
+    Ciphertext min = scheme->negate(max);
+    scheme->addConstAndEqual(min, 1.0, param.logp);
+
+    a = max;
+    b = min;
+    
+    // scheme->modDownToAndEqualModified(a, max, *bootHelper, param);
+    // scheme->modDownToAndEqualModified(b, max, *bootHelper, param);
+    // Ciphertext minMin = scheme->mult(a, min);
+    // Ciphertext minMax = scheme->mult(a, max);
+    // Ciphertext maxMin = scheme->mult(b, min);
+    // Ciphertext maxMax = scheme->mult(b, max);
+
+    // minCipher = scheme->add(minMax, maxMin);
+    // maxCipher = scheme->add(minMin, maxMax);
+    // scheme->reScaleByAndEqual(a, param.logp);
+    // scheme->reScaleByAndEqual(b, param.logp);
+}
+
 void EncAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& minCipherTable, Ciphertext& maxCipherTable, ZZ* mask, ZZ* maskTable) {
     /*
         Inputs:
@@ -537,7 +564,7 @@ void EncAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Cipherte
             minCipherTable : (a, 0, 0, 0), ( ... )
             maxCipherTable : (b, 0, 0, 0), ( ... )
     */
-    comparison(minCipherTable, maxCipherTable);
+    comparisonAlgorithm(minCipherTable, maxCipherTable);
     /*
         after comp :
             minCipherTable : (comp(a,b), *, *, *), ( ... )

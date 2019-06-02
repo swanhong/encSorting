@@ -12,13 +12,19 @@ public:
 
     Parameter param;
     bool increase = true; 
+    long inc;
+
+    long logDataNum = 0;
+    long colNum = 0;
     
     // Enc
     EncAlgo* encAlgo;
-    ZZ** maskPoly;
+    ZZ*** maskPoly;
     bool maskPolyGen = false;
-    ZZ** maskPolyDec;
-    bool maskPolyDecGen = false;
+    ZZ*** maskRightPoly;
+    ZZ*** maskTablePoly;
+    ZZ*** maskTableRightPoly;
+    bool maskTableGen = false;
 
     // Plain
     bool showDiff = false;
@@ -36,23 +42,17 @@ public:
     void showDiffFromPlain();
 
     void genMaskPoly();
-    void genMaskPolyDec();
-    
+    void genTableMaskPoly();
+
     void runEncSorting(Ciphertext& cipher);
     long sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc);
 
-    void runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool=true);
-    
-    long sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc, double** mask, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey sk, PlainSort ps);
-    
-    long sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logDist, long loc,
-                                    double** mask, double** maskRight, double** maskTable, double** maskTableRight,
-                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);
+    void runEncTableSorting(Ciphertext& cipher);
 
-    void encSwapCall(Ciphertext& cipher, long logDist, long loc);
-    void CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long colNum, long dist,
-                                    double* mask, double* maskRight, double* maskTable, double* maskTableRight,
-                                    BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps);
+    long sortingTableRecursion(Ciphertext& cipher, long logNum, long logDist, long loc);
+
+    void encSwapAndCompare(Ciphertext& cipher, long logDist, long loc);
+    void encSwapTableAndCompare(Ciphertext& cipher, long dist, long loc);
 
     void bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
     void bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase);

@@ -31,6 +31,8 @@ public:
 	 */
 	void leftRotate(long num);
     void rightRotate(long num);
+	void leftRotateConditional(long num, bool condition);
+	void rightRotateConditional(long num, bool condition);
 
 	/*
 	 * setLength

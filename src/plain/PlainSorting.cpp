@@ -1,51 +1,108 @@
 #include "PlainSorting.h"
 
 
-PlainSort::PlainSort(long log2n, bool _increase) : increase(_increase) {
-    mg = new MaskingGenerator(log2n, increase);
-    mask = mg->getMasking();
+PlainSort::PlainSort(long _log2n) : log2n(_log2n) {
+    genMask();
 }
 
-void PlainSort::runPlainSorting(CyclicArray& ca, long log2n, bool increase) {
-    sortingRec(ca, log2n, 0, 0, increase);
+PlainSort::PlainSort(long _log2n, long _logDataNum, long _colNum) : 
+    log2n(_log2n), logDataNum(_logDataNum), colNum(_colNum) {
+    genTableMask();
 }
 
-long PlainSort::sortingRec(CyclicArray& ca, long logNum, long logJump, long loc, bool increase) {
-    if (logNum == 1) {
-        compAndSwap(ca, loc, 1 << logJump, increase);
-        return loc + 1;
+void PlainSort::setInc(bool increase) {
+    if (increase) {
+        inc = 0;
     } else {
-        if (logJump == 0) {
-            loc = sortingRec(ca, logNum - 1, logJump, loc, increase);
-        }
-        loc = sortingRec(ca, logNum - 1, logJump + 1, loc, increase);
-        compAndSwap(ca, loc, 1 << logJump, increase);
-        return loc + 1;
+        inc = 1;
     }
 }
 
-void PlainSort::compAndSwap(CyclicArray& ca, long loc, long dist, bool increase) {
+void PlainSort::genMask() {
+    if(!maskGen) {
+        maskGen = true;
+        mask = new double**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            mg = new MaskingGenerator(log2n, (inc == 0));
+            mask[inc] = mg->getMasking();
+            // mg->printMask(mask[inc], mg->maskNum);
+        }
+    }
+}
+
+void PlainSort::genTableMask() {
+    if(!maskTableGen) {
+        maskTableGen = true;
+
+        mask = new double**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            mg = new MaskingGenerator(log2n, logDataNum, inc == 0);
+            mask[inc] = mg->getMasking();
+        }
+        
+        maskRight = new double**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            mg = new MaskingGenerator(log2n, logDataNum, inc == 0);
+            maskRight[inc] = mg->getMaskingOther();
+        }
+
+        maskTable = new double**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            mg = new MaskingGenerator(log2n, logDataNum, colNum, inc == 0);
+            maskTable[inc] = mg->getMasking();
+        }
+
+        maskTableRight = new double**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            mg = new MaskingGenerator(log2n, logDataNum, colNum, inc == 0);
+            maskTableRight[inc] = mg->getMaskingOther();
+        }
+        std::cout << "check mask" << std::endl;
+        mg->printMask(maskTableRight[0], mg->maskNum);
+    }
+}
+
+void PlainSort::runPlainSorting(CyclicArray& ca, bool _increase) {
+    increase = _increase;
+    setInc(_increase);
+    sortingRec(ca, log2n, 0, 0);
+}
+
+long PlainSort::sortingRec(CyclicArray& ca, long logNum, long logDist, long loc) {
+    if (logNum == 1) {
+        compAndSwap(ca, loc, 1 << logDist);
+    } else {
+        if (logDist == 0) {
+            loc = sortingRec(ca, logNum - 1, logDist, loc);
+        }
+        loc = sortingRec(ca, logNum - 1, logDist + 1, loc);
+        compAndSwap(ca, loc, 1 << logDist);
+    }
+    return loc + 1;
+}
+
+void PlainSort::compAndSwap(CyclicArray& ca, long loc, long dist, bool _increase) {
+    increase = _increase;
+    setInc(increase);
+    compAndSwap(ca, loc, dist);
+}
+
+void PlainSort::compAndSwap(CyclicArray& ca, long loc, long dist) {
     // cout << "compAndSwap with dist = " << dist << ", inc = " << increase << endl;
     // for (int i = 0; i < ca.length; i++) {
     //     cout << mask[loc][i] << " ";
     // }cout << endl;
     long length = ca.length;
-
-    CyclicArray maskCA(mask[loc], length);
+    CyclicArray maskCA(mask[inc][loc], length);
     
     CyclicArray dummy(length);
     mult(dummy, ca, maskCA);
 
     ca.sub(dummy);
-    if (increase) {
-        dummy.rightRotate(dist);
-        getMinMax(dummy, ca);
-        dummy.leftRotate(dist);
-    } else {
-        dummy.leftRotate(dist);
-        getMinMax(dummy, ca);
-        dummy.rightRotate(dist);
-    }  
+    
+    dummy.rightRotateConditional(dist, increase);
+    getMinMax(dummy, ca);
+    dummy.leftRotateConditional(dist, increase);
     ca.add(dummy);
 }
 
@@ -99,15 +156,17 @@ void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long lo
     // cout << " -- end " << logNum << " -- " << endl;
 }
 
-void PlainSort::runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNum, long colNum, bool increase) {
-    MaskingGenerator mg(log2n, logDataNum, increase);
-    double** mask = mg.getMasking();
-    MaskingGenerator mg2(log2n, logDataNum, increase);
-    double** maskOther = mg2.getMaskingOther();
-    MaskingGenerator mgTable(log2n, logDataNum, colNum, increase);
-    double** maskTable = mgTable.getMasking();
-    MaskingGenerator mgTable2(log2n, logDataNum, colNum, increase);
-    double** maskTableOther = mgTable2.getMaskingOther();
+void PlainSort::runPlainTableSorting(CyclicArray& ca, bool _increase) {
+    increase = _increase;
+    setInc(increase);
+    // MaskingGenerator mg(log2n, logDataNum, increase);
+    // double** mask = mg.getMasking();
+    // MaskingGenerator mg2(log2n, logDataNum, increase);
+    // double** maskOther = mg2.getMaskingOther();
+    // MaskingGenerator mgTable(log2n, logDataNum, colNum, increase);
+    // double** maskTable = mgTable.getMasking();
+    // MaskingGenerator mgTable2(log2n, logDataNum, colNum, increase);
+    // double** maskTableOther = mgTable2.getMaskingOther();
 
     // long logn = log2n - logDataNum;
     // long n = 1 << log2n;
@@ -117,36 +176,40 @@ void PlainSort::runPlainTableSorting(CyclicArray& ca, long log2n, long logDataNu
     // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
     // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
 
-    plainSortingTableRecursion(ca, logDataNum, colNum, log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, increase);
+    plainSortingTableRecursion(ca, log2n - logDataNum, 0, 0);
 }
 
-long PlainSort::plainSortingTableRecursion(CyclicArray& ca, long logDataNum, long colNum, long logNum, long logJump, long loc, double** mask, double** maskOther, double** maskTable, double** maskTableOther, bool increase) {
+long PlainSort::plainSortingTableRecursion(CyclicArray& ca, long logNum, long logDist, long loc) {
     if (logNum == 1) {
-        compAndSwapTable(ca, logDataNum, colNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum), increase);
+        compAndSwapTable(ca, loc, 1 << (logDist + logDataNum));
     } else {
-        if (logJump == 0) {
-            loc = plainSortingTableRecursion(ca, logDataNum, colNum, logNum - 1, logJump, loc, mask, maskOther, maskTable, maskTableOther, increase);
+        if (logDist == 0) {
+            loc = plainSortingTableRecursion(ca, logNum - 1, logDist, loc);
         }
-        loc = plainSortingTableRecursion(ca, logDataNum, colNum, logNum - 1, logJump + 1, loc, mask, maskOther, maskTable, maskTableOther, increase);
-        compAndSwapTable(ca, logDataNum, colNum, mask[loc], maskOther[loc], maskTable[loc], maskTableOther[loc], 1 << (logJump + logDataNum), increase);
+        loc = plainSortingTableRecursion(ca, logNum - 1, logDist + 1, loc);
+        compAndSwapTable(ca, loc, 1 << (logDist + logDataNum));
     }
     return loc + 1;
 }
 
-void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, long colNum, double* mask, double* maskRight, double* maskTable, double* maskTableRight, long dist, bool increase) {
+void PlainSort::compAndSwapTable(CyclicArray& ca, long loc, long dist, bool _increase) {
+    increase = _increase;
+    setInc(increase);
+    compAndSwapTable(ca, loc, dist);
+}
+
+void PlainSort::compAndSwapTable(CyclicArray& ca, long loc, long dist) {
     long length = ca.length;
-    CyclicArray maskPoly(mask, length);
-    CyclicArray maskRightPoly(maskRight, length);
-    CyclicArray maskTablePoly(maskTable, length);
-    CyclicArray maskTableRightPoly(maskTableRight, length);
+    CyclicArray maskPoly(mask[inc][loc], length);
+    CyclicArray maskRightPoly(maskRight[inc][loc], length);
+    CyclicArray maskTablePoly(maskTable[inc][loc], length);
+    CyclicArray maskTableRightPoly(maskTableRight[inc][loc], length);
     CyclicArray ca1, ca1Right, caTable, caTableRight;
     mult(ca1, ca, maskPoly);
     mult(ca1Right, ca, maskRightPoly);
     mult(caTable, ca, maskTablePoly);
     mult(caTableRight, ca, maskTableRightPoly);
 
-    // ca.printAsVector();
-    // maskTablePoly.printAsVector();
     // caTable.printAsVector();
 
     ca.sub(ca1);
@@ -165,7 +228,7 @@ void PlainSort::compAndSwapTable(CyclicArray& ca, long logDataNum, long colNum, 
     // caTable.printAsVector();
     // caTableRight.printAsVector();
     
-    minMaxTable(ca1, ca1Right, caTable, caTableRight, logDataNum, colNum, maskRight, maskTableRight);
+    minMaxTable(ca1, ca1Right, caTable, caTableRight, logDataNum, colNum, maskRight[inc][loc], maskTableRight[inc][loc]);
 
     if(increase) ca1.leftRotate(dist);
     else ca1.rightRotate(dist);
@@ -305,6 +368,6 @@ void PlainSort::bitonicTableMergeRec(CyclicArray* ca, long log2n, long start, lo
 
 void PlainSort::selfBitonicTableMerge(CyclicArray& ca, long log2n, long logDataNum, long colNum, double*** mask, bool increase) {
     for(int i = 0; i <log2n - logDataNum; i++) {
-        compAndSwapTable(ca, logDataNum, colNum, mask[0][i], mask[1][i], mask[2][i], mask[3][i], 1 << (log2n - 1 - i), increase);
+        compAndSwapTable(ca, i, 1 << (log2n - 1 - i));
     }
 }

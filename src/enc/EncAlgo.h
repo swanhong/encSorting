@@ -20,6 +20,7 @@ public:
 
     void sqrtAlgorithm(Ciphertext& cipher);
     void minMaxAlgorithm(Ciphertext& minCipher, Ciphertext& maxCipher);
+    void comparisonAlgorithm(Ciphertext& a, Ciphertext& b);
 
     void evalFcn(Ciphertext& cipher);    
     void approxSqrt(Ciphertext& cipher);
@@ -36,6 +37,7 @@ public:
 
     void approxInverse(Ciphertext& cipher);
     void comparison(Ciphertext& cipher1, Ciphertext& cipher2);
+    void newComparison(Ciphertext& cipher1, Ciphertext& cipher2);
     void minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& minCipherTable, Ciphertext& maxCipherTable, ZZ* mask, ZZ* maskTable);
     void encSwapTable(Ciphertext& cipher, ZZ* maskLeft, ZZ* maskRight, ZZ* maskTableLeft, ZZ* maskTableRight, long dist, bool = true);
 };

@@ -2,16 +2,18 @@
 
 EncSorting::EncSorting(Parameter _param, long* iter, long numOfIter, bool _increase, bool _printCondition) : param(_param), increase(_increase) {
     encAlgo = new EncAlgo(_param, iter, numOfIter, _printCondition);
-    plainSort = new PlainSort(param.log2n, increase);
-    long maskNum = param.log2n * (param.log2n + 1) / 2;
-    for (int i = 0; i < maskNum; i++) {
-        std::cout << "mask[" << i << "] = ";
-        for (int j = 0; j < (1 << param.log2n); j++) {
-            std::cout << plainSort->mask[i][j] << ", ";
-        }
-        std::cout << std::endl;
+    if (increase) {
+        inc = 0;
+    } else {
+        inc = 1;
     }
-    cout << "end" << endl;
+    if(numOfIter > 2) {
+        logDataNum = iter[0];
+        colNum = iter[1];
+        plainSort = new PlainSort(param.log2n, logDataNum, colNum);
+    } else {
+        plainSort = new PlainSort(param.log2n);
+    }
 }
 
 void EncSorting::showDiffFromPlain() {
@@ -27,36 +29,68 @@ complex<double>* EncSorting::decrypt(Ciphertext& cipher) {
 }
 
 void EncSorting::genMaskPoly() {
-    MaskingGenerator mg(param.log2n, true);
-    double** mask = mg.getMasking();
-    maskPoly = new ZZ*[mg.maskNum];
-    for (int i = 0; i < mg.maskNum; i++) {
-        maskPoly[i] = encAlgo->encode(mask[i]);
+    maskPoly = new ZZ**[2];
+    for (int inc = 0; inc < 2; inc++) {
+        MaskingGenerator mg(param.log2n, inc == 0);
+        double** mask = mg.getMasking();
+        maskPoly[inc] = new ZZ*[mg.maskNum];
+        for (int i = 0; i < mg.maskNum; i++) {
+            maskPoly[inc][i] = encAlgo->encode(mask[i]);
+        }    
     }
 }
 
-void EncSorting::genMaskPolyDec() {
-    MaskingGenerator mg(param.log2n, false);
-    double** maskDec = mg.getMasking();
-    maskPolyDec = new ZZ*[mg.maskNum];
-    for (int i = 0; i < mg.maskNum; i++) {
-        maskPolyDec[i] = encAlgo->encode(maskDec[i]);
+void EncSorting::genTableMaskPoly() {
+    if(!maskPolyGen) {
+        maskPolyGen = true;
+
+        maskPoly = new ZZ**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            MaskingGenerator mg(param.log2n, logDataNum, inc == 0);
+            double** mask = mg.getMasking();
+            maskPoly[inc] = new ZZ*[mg.maskNum];
+            for (int i = 0; i < mg.maskNum; i++) {
+                maskPoly[inc][i] = encAlgo->encode(mask[i]);
+            }    
+        }
+        
+        maskRightPoly = new ZZ**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            MaskingGenerator mg(param.log2n, logDataNum, inc == 0);
+            double** mask = mg.getMaskingOther();
+            maskRightPoly[inc] = new ZZ*[mg.maskNum];
+            for (int i = 0; i < mg.maskNum; i++) {
+                maskRightPoly[inc][i] = encAlgo->encode(mask[i]);
+            }    
+        }
+
+        maskTablePoly = new ZZ**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            MaskingGenerator mg(param.log2n, logDataNum, colNum, inc == 0);
+            double** mask = mg.getMasking();
+            maskTablePoly[inc] = new ZZ*[mg.maskNum];
+            for (int i = 0; i < mg.maskNum; i++) {
+                maskTablePoly[inc][i] = encAlgo->encode(mask[i]);
+            }    
+        }
+
+        maskTableRightPoly = new ZZ**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            MaskingGenerator mg(param.log2n, logDataNum, colNum, inc == 0);
+            double** mask = mg.getMaskingOther();
+            maskTableRightPoly[inc] = new ZZ*[mg.maskNum];
+            for (int i = 0; i < mg.maskNum; i++) {
+                maskTableRightPoly[inc][i] = encAlgo->encode(mask[i]);
+            }    
+        }
     }
 }
 
 void EncSorting::runEncSorting(Ciphertext& cipher) {
-    cout << "maskPolyGen = " << maskPolyGen << ", increase = " << increase << endl;
-    if (increase) {
-        if (!maskPolyGen) {
-            genMaskPoly();
-            maskPolyGen = true;
-        }
-    } else {
-        if(!maskPolyDecGen) {
-            genMaskPolyDec();
-            maskPolyDecGen = true;
-        }
-    }          
+    if (!maskPolyGen) {
+        genMaskPoly();
+        maskPolyGen = true;
+    }
     sortingRecursion(cipher, param.log2n, 0, 0);
     encAlgo->showTotalCount();
 }
@@ -67,33 +101,24 @@ long EncSorting::sortingRecursion(Ciphertext& cipher, long logNum, long logDist,
     PrintUtils::nprint("run encBatcherSort with loc = " + to_string(loc), WANT_TO_PRINT);
     if (logNum == 1) {
         timeutils.start(to_string(loc)+"th CompAndSwap");
-    
-        encSwapCall(cipher, logDist, loc);
+        encSwapAndCompare(cipher, logDist, loc);
         timeutils.stop(to_string(loc)+"th CompAndSwap");
     } else {
         if (logDist == 0) {
             loc = sortingRecursion(cipher, logNum - 1, logDist, loc);
         }
         loc = sortingRecursion(cipher, logNum - 1, logDist + 1, loc);
-
         timeutils.start(to_string(loc)+"th CompAndSwap");
-        encSwapCall(cipher, logDist, loc);
+        encSwapAndCompare(cipher, logDist, loc);
         timeutils.stop(to_string(loc)+"th CompAndSwap");
     }
     return loc + 1;
 }
 
-void EncSorting::encSwapCall(Ciphertext& cipher, long logDist, long loc) {
-    ZZ* maskPolyTmp;
-    cout << "start encSwapCall" << endl;
-      
-    if (increase) {
-        maskPolyTmp = maskPoly[loc];
-    } else {
-        maskPolyTmp = maskPolyDec[loc];
-    }          
+void EncSorting::encSwapAndCompare(Ciphertext& cipher, long logDist, long loc) {
+    cout << "start encSwapAndCompare" << endl;
     cout << "start encSwap" << endl;
-    encAlgo->encSwap(cipher, maskPolyTmp, 1 << logDist, increase);
+    encAlgo->encSwap(cipher, maskPoly[inc][loc], 1 << logDist, increase);
     cout << "end encSwap" << endl;
 
     if (showDiff) {
@@ -111,91 +136,61 @@ void EncSorting::encSwapCall(Ciphertext& cipher, long logDist, long loc) {
     encAlgo->showCurrentCountAndReset();
 }
 
-// void EncSorting::runEncTableSorting(Ciphertext& cipher, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, bool increase) {
-//     MaskingGenerator mg(param.log2n, logDataNum, increase);
-//     double** mask = mg.getMasking();
-//     MaskingGenerator mg2(param.log2n, logDataNum, increase);
-//     double** maskOther = mg2.getMaskingOther();
-//     MaskingGenerator mgTable(param.log2n, logDataNum, colNum, increase);
-//     double** maskTable = mgTable.getMasking();
-//     MaskingGenerator mgTable2(param.log2n, logDataNum, colNum, increase);
-//     double** maskTableOther = mgTable2.getMaskingOther();
+void EncSorting::runEncTableSorting(Ciphertext& cipher) {
+    if(!maskTableGen) {
+        genTableMaskPoly();
+        maskTableGen = true;
+    }
+    sortingTableRecursion(cipher, param.log2n - logDataNum, 0, 0);
+    encAlgo->showTotalCount();
+}
 
-    
-//     // long logn = param.log2n - logDataNum;
-//     // long n = 1 << param.log2n;
-//     // long maskNum = logn * (logn + 1) / 2;
-//     // PrintUtils::printSingleMatrix("mask", mask, maskNum, n);
-//     // PrintUtils::printSingleMatrix("maskOther", maskOther, maskNum, n);
-//     // PrintUtils::printSingleMatrix("maskTable", maskTable, maskNum, n);
-//     // PrintUtils::printSingleMatrix("maskTableOther", maskTableOther, maskNum, n);
+long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logNum, long logDist, long loc) {
+    TimeUtils timeutils;
+    if (logNum == 1) {
+        timeutils.start(to_string(loc)+"th CompAndSwap");
+        encSwapTableAndCompare(cipher, 1 << (logDist + logDataNum), loc); 
+        timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logDist));
+    } else {
+        if (logDist == 0) {
+            loc = sortingTableRecursion(cipher, logNum - 1, logDist, loc);
+        }
+        loc = sortingTableRecursion(cipher, logNum - 1, logDist + 1, loc);
+        timeutils.start(to_string(loc)+"th CompAndSwap");
+        encSwapTableAndCompare(cipher, 1 << (logDist + logDataNum), loc); 
+        timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logDist));
+    }
+    return loc + 1;
+}
 
-//     bootAlgo = BootAlgo(param, invIter, compIter, increase);
-//     PlainSort plainSort;
-//     sortingTableRecursion(cipher, logDataNum, colNum, param.log2n - logDataNum, 0, 0, mask, maskOther, maskTable, maskTableOther, scheme, ring, bootHelper, secretKey, plainSort);
-//     scheme.showTotalCount();
-// }
+void EncSorting::encSwapTableAndCompare(Ciphertext& cipher, long dist, long loc) {
+    encAlgo->encSwapTable(cipher, maskPoly[inc][loc], maskRightPoly[inc][loc], maskTablePoly[inc][loc], maskTableRightPoly[inc][loc], dist, increase);
 
-// long EncSorting::sortingTableRecursion(Ciphertext& cipher, long logDataNum, long colNum, long logNum, long logDist, long loc,
-//                                     double** mask, double** maskRight, double** maskTable, double** maskTableRight,
-//                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps) {
-//     TimeUtils timeutils;
-//     if (logNum == 1) {
-//         timeutils.start(to_string(loc)+"th CompAndSwap");
+    if (showDiff) {
+        cout << "start compAndSwap" << endl;
+        plainSort->compAndSwapTable(*ca, loc, dist, increase);
+        cout << "end compAndSwap" << endl;
+        double* plain = ca->getArray();
+        complex<double>* enc = encAlgo->decrypt(cipher);
+        cout << loc << "th compAndSwap Result" << endl;
+        PrintUtils::printFewArrays(plain, enc, cipher.n);
+        cout << endl << "******************" << endl;
+        PrintUtils::averageDifference(plain, enc, cipher.n);
+        cout << "******************" << endl << endl;
+    }
+    encAlgo->showCurrentCountAndReset();
+}
 
-//         CompAndSwapTableBothWithDec(cipher, logDataNum, colNum, 1 << (logDist + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
+void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
+    MaskingGenerator mg(param.log2n);
+    double** maskIncrease = mg.getBitonicMergeMasking();
+    MaskingGenerator mg2(param.log2n, false);
+    double** maskDecrease = mg2.getBitonicMergeMasking();
 
-//         scheme.showCurrentCount();
-//         scheme.resetCount();
-//         timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logDist));
-//     } else {
-//         if (logDist == 0) {
-//             loc = sortingTableRecursion(cipher, logDataNum, colNum, logNum - 1, logDist, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
-//         }
-//         loc = sortingTableRecursion(cipher, logDataNum, colNum, logNum - 1, logDist + 1, loc, mask, maskRight, maskTable, maskTableRight, scheme, ring, bootHelper, secretKey, ps);
-//         timeutils.start(to_string(loc)+"th CompAndSwap");
+    bitonicMergeRec(cipher, 0, logNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
 
-//         CompAndSwapTableBothWithDec(cipher, logDataNum, colNum, 1 << (logDist + logDataNum), mask[loc], maskRight[loc], maskTable[loc], maskTableRight[loc], scheme, ring, bootHelper, secretKey, ps);
-//         scheme.showCurrentCount();
-//         scheme.resetCount();
-//         timeutils.stop(to_string(loc)+"th CompAndSwap with " + to_string(logNum) + ", " + to_string(logDist));
-//     }
-//     return loc + 1;
-// }
-
-// void EncSorting::CompAndSwapTableBothWithDec(Ciphertext& cipher, long logDataNum, long colNum, long dist,
-//                                     double* mask, double* maskRight, double* maskTable, double* maskTableRight,
-//                                     BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& secretKey, PlainSort ps) {
-//         complex<double>* mvecCplx = scheme.decrypt(secretKey, cipher);
-//         double* mvec = new double[cipher.n];
-//         for (int i = 0; i < cipher.n; i++) mvec[i] = mvecCplx[i].real();
-//         CyclicArray ca(mvec, cipher.n);
-        
-//         long logq = cipher.logq;
-//         long logp = cipher.logp;
-//         bootAlgo.compAndSwapTable(cipher, logDataNum, colNum, mask, maskRight, maskTable, maskTableRight, dist, scheme, ring, bootHelper, secretKey);
-//         ps.compAndSwapTable(ca, logDataNum, colNum, mask, maskRight, maskTable, maskTableRight, dist, bootAlgo.increase);
-
-//         mvec = ca.getArray();
-//         complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-//         // cout << " compAndSwap Result" << endl;
-//         // cout << "cipher.logq, logp = " << logq << ", " << logp << " -> " << cipher.logq << ", " << cipher.logp << endl;
-//         // PrintUtils::printArraysWithDataNum(mvec, dvec, cipher.n, logDataNum, colNum);
-//         cout << endl << "******************" << endl;
-//         PrintUtils::averageDifference(mvec, dvec, cipher.n);
-//         cout << "******************" << endl << endl;
-//     }
-
-// void EncSorting::bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper) {
-//     MaskingGenerator mg(param.log2n);
-//     double** maskIncrease = mg.getBitonicMergeMasking();
-//     MaskingGenerator mg2(param.log2n, false);
-//     double** maskDecrease = mg2.getBitonicMergeMasking();
-
-//     bitonicMergeRec(cipher, 0, logNum, maskIncrease, maskDecrease, scheme, ring, bootHelper, true);
-
-//     scheme.showTotalCount();
-// }
+    scheme.showTotalCount();
+}
 
 // void EncSorting::bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase) {
 //     if (logNum == 0) return;        
@@ -250,17 +245,13 @@ void EncSorting::encSwapCall(Ciphertext& cipher, long logDist, long loc) {
 //     double** mask = mg1.getBitonicMergeMasking();
 //     MaskingGenerator mg12(param.log2n, logDataNum, true);
 //     double** maskOther = mg12.getBitonicMergeMaskingOther();
-//     MaskingGenerator mgTable(param.log2n, logDataNum, colNum, true);
-//     double** maskTable = mgTable.getBitonicMergeMasking();
-//     MaskingGenerator mgTable2(param.log2n, logDataNum, colNum, true);
+//     MaskingGenerator mgTable(param.log2n, logDataNum, colNum, true) {
 //     double** maskTableOther = mgTable2.getBitonicMergeMaskingOther();
 
 //     long maskNum = param.log2n - logDataNum;
 //     double*** maskInc = new double**[4];
 //     maskInc[0] = mask;
-//     maskInc[1] = maskOther;
-//     maskInc[2] = maskTable;
-//     maskInc[3] = maskTableOther;
+//     maskInc[1] = maskOther {
 //     // for(int i = 0; i < 4; i++) {
 //     //     mg.printMask(maskInc[i], maskNum);
 //     // }

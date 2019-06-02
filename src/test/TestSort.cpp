@@ -3,7 +3,7 @@
 void TestSort::sort(Parameter param, long _iter, bool increase) {
     long n = 1 << param.log2n;
     long iter[1] = {_iter};
-    EncSorting encSorting(param, iter, 1, increase, true);
+    EncSorting encSorting(param, iter, 1, increase, false);
     encSorting.showDiffFromPlain();
 
     // double* mvec = EvaluatorUtils::randomRealArray(n);
@@ -24,8 +24,8 @@ void TestSort::sort(Parameter param, long _iter, bool increase) {
 
     // run PlainSort
     CyclicArray ca(mvec, 1 << param.log2n);
-    PlainSort plainSort(param.log2n, increase);
-    plainSort.runPlainSorting(ca, param.log2n, increase);
+    PlainSort plainSort(param.log2n);
+    plainSort.runPlainSorting(ca, increase);
     mvec = ca.getArray();
 
     // Print Result and Difference //	
@@ -34,48 +34,30 @@ void TestSort::sort(Parameter param, long _iter, bool increase) {
     PrintUtils::averageDifference(mvec, dvec, n);
 }
 
-// void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long invIter, long compIter, bool increase) {
-//     srand(time(NULL));
-// 	SetNumThreads(16);
-//     TimeUtils timeutils;
+void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long invIter, long compIter, bool increase) {
+    long n = 1 << param.log2n;
+    long iter[4] = {logDataNum, colNum, invIter, compIter};
+    EncSorting encSorting(param, iter, 4, increase);
+    encSorting.showDiffFromPlain();
     
-// 	PrintUtils::parameter(param, "TestTableSort");
-//     long n = 1 << param.log2n;
-//     long logp = param.logp;
+    double* mvec = EvaluatorUtils::randomRealArray(n);    
+	Ciphertext cipher = encSorting.encrypt(mvec);
 
-//     timeutils.start("TestTableSort KeyGen");
-//     Ring ring(param.logN, param.logQ);
-//     SecretKey secretKey(ring);
-//     BootScheme scheme(secretKey, ring);
-//     scheme.addConjKey(secretKey);
-//     scheme.addLeftRotKeys(secretKey);
-//     scheme.addRightRotKeys(secretKey);
-//     timeutils.stop("TestTableSort KeyGen");
+    TimeUtils timeutils;
+    timeutils.start("EncTableSort");
+    encSorting.runEncTableSorting(cipher);
+    timeutils.stop("EncTableSort"); 
 
-// 	timeutils.start("Bootstrapping Helper construct");
-// 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
-// 	timeutils.stop("Bootstrapping Helper construct");
-
-//     double* mvec = EvaluatorUtils::randomRealArray(n);
-    
-// 	Ciphertext cipher = scheme.encrypt(mvec, n, param.logp, param.logQ);
-
-//     timeutils.start("EncTableSort");
-//     EncSorting encSorting(param, invIter, compIter);
-//     encSorting.runEncTableSorting(cipher, logDataNum, colNum, scheme, ring, bootHelper, secretKey, increase);
-//     timeutils.stop("EncTableSort"); 
-
-//     // run PlainSort
-//     CyclicArray ca(mvec, 1 << param.log2n);
-//     PlainSort plainSort;
-//     plainSort.runPlainTableSorting(ca, param.log2n, logDataNum, colNum, increase);
-//     mvec = ca.getArray();
+    CyclicArray ca(mvec, 1 << param.log2n);
+    PlainSort plainSort(param.log2n, logDataNum, colNum);
+    plainSort.runPlainTableSorting(ca, increase);
+    mvec = ca.getArray();
     
 //     // Print Result and Difference //	
-// 	complex<double>* dvec = scheme.decrypt(secretKey, cipher);
-//     PrintUtils::printArraysWithDataNum(mvec, dvec, n, logDataNum, colNum);
-//     PrintUtils::averageDifference(mvec, dvec, n);    
-// }
+	complex<double>* dvec = encSorting.decrypt(cipher);
+    PrintUtils::printArraysWithDataNum(mvec, dvec, n, logDataNum, colNum);
+    PrintUtils::averageDifference(mvec, dvec, n);    
+}
 
 // void TestSort:: merge(Parameter param, long iter, long logNum) {
 //     srand(time(NULL));

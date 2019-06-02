@@ -9,18 +9,18 @@ void TestPlain::plainSort(long logn, bool increase) {
     ca.printAsVector();
     
     cout << "After sorting" << endl;
-    PlainSort plainSort;
-    plainSort.runPlainSorting(ca, logn, increase);
+    PlainSort plainSort(logn);
+    plainSort.runPlainSorting(ca, increase);
     ca.printAsVector();
 }
 
 void TestPlain::bitonicMerge(long log2n, long logNum) {
-    PlainSort plainSort;
+    PlainSort plainSort(log2n);
     CyclicArray* ca = new CyclicArray[1 << logNum];
     for(int i = 0; i < (1 << logNum); i++) {
         double* mvec = EvaluatorUtils::randomRealArray(1 << log2n);
         ca[i] = CyclicArray(mvec, 1 << log2n);
-        plainSort.runPlainSorting(ca[i], log2n, (i % 2 == 0));
+        plainSort.runPlainSorting(ca[i], (i % 2 == 0));
         ca[i].printAsVector();
         cout << "==" << endl;
     }
@@ -39,21 +39,21 @@ void TestPlain::plainTableSort(long logn, long logDataNum, long colNum, bool inc
     ca.randomGen(1 << logn);
     double* mvec = ca.getArray();
     CyclicArray plain(ca);
-    PlainSort plainSort;
-    plainSort.runPlainTableSorting(ca, logn, logDataNum, colNum, increase);
+    PlainSort plainSort(logn, logDataNum, colNum);
+    plainSort.runPlainTableSorting(ca, increase);
     double* dvec = ca.getArray();
     
     PrintUtils::printArraysWithDataNum(mvec, dvec, 1 << logn, logDataNum, colNum);
 }
 
 void TestPlain::bitonicTableMerge(long log2n, long logNum, long logDataNum, long colNum) {
-    PlainSort plainSort;
+    PlainSort plainSort(log2n);
     
     CyclicArray* ca = new CyclicArray[1 << logNum];
     for(int i = 0; i < (1 << logNum); i++) {
         double* mvec = EvaluatorUtils::randomRealArray(1 << log2n);
         ca[i] = CyclicArray(mvec, 1 << log2n);
-        plainSort.runPlainSorting(ca[i], log2n, (i % 2 == 0));
+        plainSort.runPlainSorting(ca[i], (i % 2 == 0));
         ca[i].printAsVector();
         cout << "==" << endl;
     }
