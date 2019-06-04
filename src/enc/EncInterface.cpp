@@ -31,6 +31,15 @@ ZZ* EncInterface::encode(double* mask) {
     return maskPoly;
 }
 
+ZZ* EncInterface::flipPoly(ZZ* poly) {
+    ZZ* res = new ZZ[1 << param.logN];
+    for (int i = 0; i < (1 << param.logN); i++) {
+        res[i] = -poly[i];
+    }
+    res[0] += 1;
+    return res;    
+}
+
 void EncInterface::bootstrapping(Ciphertext& cipher) {
     bootHelper->bootstrapping_cos(cipher, param.logq, param.logQ, 5);
 }

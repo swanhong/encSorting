@@ -46,7 +46,8 @@ void EncAlgo::evalFcn(Ciphertext& cipher) {
     
     // x <- x (3 - x^2) / 2, consumes 2 * logq
     for(int i = 0; i < iter[minMaxLoc]; i++) {
-        scheme->checkModulusAndBoot(cipher, 2 * param.logp, *bootHelper, param);
+        scheme->checkModulusAndBoot(cipher, 2 * param.logp + 1, *bootHelper, param);
+        scheme->resetImagErrorAndEqual(cipher);
         nprint("start cipher" + to_string(i), cipher);
         Ciphertext square = scheme->square(cipher);
         scheme->reScaleByAndEqual(square, param.logp);

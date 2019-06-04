@@ -3,7 +3,7 @@
 void TestSort::sort(Parameter param, long _iter, bool increase) {
     long n = 1 << param.log2n;
     long iter[1] = {_iter};
-    EncSorting encSorting(param, iter, 1, increase, false);
+    EncSorting encSorting(param, iter, 1, increase, true);
     encSorting.showDiffFromPlain();
 
     // double* mvec = EvaluatorUtils::randomRealArray(n);

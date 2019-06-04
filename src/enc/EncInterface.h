@@ -20,6 +20,7 @@ public:
     Ciphertext encrypt(double* mvec);
     complex<double>* decrypt(Ciphertext& cipher);
     ZZ* encode(double* mask);
+    ZZ* flipPoly(ZZ* poly);
     void bootstrapping(Ciphertext& cipher);
     void nprint(string str);
     void nprint(string str, Ciphertext& cipher);
