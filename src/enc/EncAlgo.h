@@ -31,6 +31,7 @@ public:
     void encSwap(Ciphertext& cipher, ZZ* mask, long dist, bool = true);
 
     void selfBitonicMerge(Ciphertext& cipher, ZZ** mask, bool = true);
+    void selfTableMerge(Ciphertext& cipher, ZZ** mask, bool = true);
     void reverse(Ciphertext& cipher, ZZ** mask);
     void reverse(Ciphertext& cipher, ZZ** maskLeft, ZZ** maskRight, long level, bool = true);
     void halfCleaner(Ciphertext& cipher, ZZ* mask, long dist, bool = true);

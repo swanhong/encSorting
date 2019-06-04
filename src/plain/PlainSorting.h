@@ -15,10 +15,12 @@ public:
 
     bool maskGen = false;
     bool maskTableGen = false;
+    bool maskMergeGen = false;
     double*** mask;
     double*** maskRight;
     double*** maskTable;
     double*** maskTableRight;
+    double*** maskMerge;
 
     long logDataNum = 0;
     long colNum = 0;
@@ -33,6 +35,7 @@ public:
 
     void genMask();
     void genTableMask();
+    void genMergeMask();
     void setInc(bool increase);
 
     void runPlainSorting(CyclicArray& ca, bool = true);
@@ -46,7 +49,7 @@ public:
 
     void bitonicMerge(CyclicArray* ca, long log2n, long logNum);
 
-    void bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, double** mask, double** mask2, bool increase);
+    void bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, bool increase);
 
     void compAndSwapTable(CyclicArray& ca, long loc, long dist, bool increase);
     void compAndSwapTable(CyclicArray& ca, long loc, long dist);

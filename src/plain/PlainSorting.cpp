@@ -25,7 +25,6 @@ void PlainSort::genMask() {
         for (int inc = 0; inc < 2; inc++) {
             mg = new MaskingGenerator(log2n, (inc == 0));
             mask[inc] = mg->getMasking();
-            // mg->printMask(mask[inc], mg->maskNum);
         }
     }
 }
@@ -62,9 +61,21 @@ void PlainSort::genTableMask() {
     }
 }
 
+void PlainSort::genMergeMask() {
+    if(!maskMergeGen) {
+        maskMergeGen = true;
+        maskMerge = new double**[2];
+        for (int inc = 0; inc < 2; inc++) {
+            mg = new MaskingGenerator(log2n, (inc == 0));
+            mask[inc] = mg->getBitonicMergeMasking();
+        }
+    }
+}
+
 void PlainSort::runPlainSorting(CyclicArray& ca, bool _increase) {
     increase = _increase;
     setInc(_increase);
+    genMask();
     sortingRec(ca, log2n, 0, 0);
 }
 
@@ -113,22 +124,20 @@ void PlainSort::selfBitonicMerge(CyclicArray& ca, long log2n, double** mask, boo
 }
 
 void PlainSort::bitonicMerge(CyclicArray* ca, long log2n, long logNum) {
-    MaskingGenerator mg(log2n);
-    double** maskIncrease = mg.getBitonicMergeMasking();
-    MaskingGenerator mg2(log2n, false);
-    double** maskDecrease = mg2.getBitonicMergeMasking();
-
-    bitonicMergeRec(ca, log2n, 0, logNum, maskIncrease, maskDecrease, true);
+    genMergeMask();
+    bitonicMergeRec(ca, log2n, 0, logNum, true);
 }
 
-void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, double** maskIncrease, double** maskDecrease, bool increase) {
+void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long logNum, bool increase) {
     if (logNum == 0) return;        
     
     // cout << "logNum = " << logNum << endl;
 
-    bitonicMergeRec(ca, log2n, start, logNum - 1, maskIncrease, maskDecrease, true);
-    bitonicMergeRec(ca, log2n, start + (1 << (logNum - 1)), logNum - 1, maskIncrease, maskDecrease, false);
+    bitonicMergeRec(ca, log2n, start, logNum - 1, true);
+    bitonicMergeRec(ca, log2n, start + (1 << (logNum - 1)), logNum - 1, false);
     
+    setInc(increase);
+
     for(int i = 0; i < logNum; i++) {
         for(int j = 0; j < (1 << i); j++) {
             for(int k = 0; k < (1 << (logNum - 1 - i)); k++) {
@@ -144,14 +153,9 @@ void PlainSort::bitonicMergeRec(CyclicArray* ca, long log2n, long start, long lo
             }
         }
     }
-    
     for(int i = 0; i < (1 << logNum); i++) {
         // cout << "self " << start + i << ", " << increase << endl;
-        double ** mask;
-        if (increase) mask = maskIncrease;
-        else          mask = maskDecrease;
-        
-        selfBitonicMerge(ca[start + i], log2n, mask, increase);
+        selfBitonicMerge(ca[start + i], log2n, maskMerge[inc], increase);
     } 
     // cout << " -- end " << logNum << " -- " << endl;
 }

@@ -19,12 +19,25 @@ public:
     
     // Enc
     EncAlgo* encAlgo;
+    
+    // masking polynomials
     ZZ*** maskPoly;
     bool maskPolyGen = false;
+    
     ZZ*** maskRightPoly;
     ZZ*** maskTablePoly;
     ZZ*** maskTableRightPoly;
     bool maskTableGen = false;
+
+    ZZ*** maskMergePoly;
+    ZZ*** maskMergeColPoly;
+    ZZ*** maskMergeRightPoly;
+    ZZ*** maskMergeRightColPoly;
+    bool maskMergeGen = false;
+
+    ZZ** maskMinMaxTablePoly;
+    ZZ*** maskMinMaxTableRightPoly;
+    bool maskMinMaxTableGen = false;
 
     // Plain
     bool showDiff = false;
@@ -43,8 +56,14 @@ public:
 
     void genMaskPoly();
     void genTableMaskPoly();
+    void genMergeMaskingPoly();
+    void genMinMaxTablePoly();
+    void genTableMergeMaskingPoly();
+
+    void setInc(bool _increase);
 
     void runEncSorting(Ciphertext& cipher);
+    void runEncSorting(Ciphertext& cipher, bool _increase);
     long sortingRecursion(Ciphertext& cipher, long logNum, long logDist, long loc);
 
     void runEncTableSorting(Ciphertext& cipher);
@@ -54,13 +73,13 @@ public:
     void encSwapAndCompare(Ciphertext& cipher, long logDist, long loc);
     void encSwapTableAndCompare(Ciphertext& cipher, long dist, long loc);
 
-    void bitonicMerge(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
-    void bitonicMergeRec(Ciphertext* cipher, long start, long logNum, double** maskIncrease, double** maskDecrease, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase);
+    void bitonicMerge(Ciphertext* cipher, long logNum);
+    void bitonicMergeRec(Ciphertext* cipher, long start, long logNum, bool increase);
 
-    void bitonicTableMerge(Ciphertext* cipher, long logNum, long logDataNum, long colNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk);
-    void bitonicTableMergeRec(Ciphertext* cipher, long start, long logNum, long logDataNum, long colNum, ZZ** maskminMaxTablePoly, double*** maskInc, double*** maskDec, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, SecretKey& sk, bool increase);
+    void bitonicTableMerge(Ciphertext* cipher, long logNum);
+    void bitonicTableMergeRec(Ciphertext* cipher, long start, long logNum, bool increase);
     
-    void reverseHalf(Ciphertext* cipher, long logNum, BootScheme& scheme, Ring& ring, BootHelper& bootHelper);
+    void reverseHalf(Ciphertext* cipher, long logNum);
 
     void runBitonicSort(Ciphertext& cipher, BootScheme& scheme, Ring& ring, BootHelper& bootHelper, bool increase);
 

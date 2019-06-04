@@ -305,6 +305,7 @@ void EncAlgo::encSwap(Ciphertext& cipher, ZZ* mask, long dist, bool increase) {
     scheme->modDownToAndEqualModified(cipher, dummy, *bootHelper, param);
     scheme->subAndEqual(cipher, dummy);
 
+    scheme->addByPolyAndEqual(cipher, mask, param.logp);
     scheme->rightRotateAndEqualConditional(dummy, dist, increase);
 
     nprint("before minmax, cipher", cipher);
@@ -315,6 +316,7 @@ void EncAlgo::encSwap(Ciphertext& cipher, ZZ* mask, long dist, bool increase) {
     nprint("after minmax, cipher", cipher);
     nprint("after minmax, dummy", dummy);
 
+    scheme->subByPolyAndEqual(cipher, mask, param.logp);
     scheme->leftRotateAndEqualConditional(dummy, dist, increase); 
     
     scheme->addAndEqual(cipher, dummy);   
@@ -325,6 +327,14 @@ void EncAlgo::selfBitonicMerge(Ciphertext& cipher, ZZ** mask, bool increase) {
         long logDist = param.log2n - 1 - i;
         nprint("                   - selfBitonicMerge, " + to_string(logDist));
         encSwap(cipher, mask[i], 1 << logDist, increase);
+    }
+}
+
+void EncAlgo::selfTableMerge(Ciphertext& cipher, ZZ** mask, bool increase) {
+    for(int i = 0; i < param.log2n - logDataNum; i++) {
+        nprint("                   - selfBitonicMerge, " + to_string(param.log2n - 1 - i));
+        // encSwapTable(cipher, mask[i], mask[i], maskMergeTablePoly[inc][i], maskMergeTableColPoly[inc][i], dist, increase);
+        // compAndSwapTable(cipher, logDataNum, colNum, mask[0][i], mask[1][i], mask[2][i], mask[3][i], 1 << (param.log2n - 1 - i), scheme, ring, bootHelper, sk);
     }
 }
 
@@ -374,35 +384,11 @@ void EncAlgo::halfCleaner(Ciphertext& cipher, ZZ* mask, long dist, bool increase
     
 
     scheme->rightRotateAndEqualConditional(dummy, dist, increase);
-
-    printCondition = true;
-
-    nprint("cipher", cipher);
-    nprint("dummy", dummy);
-
-    printCondition = false;
-    
-    // long n = cipher.n;
-    // double* maskDummy = new double[n];
-    
-    // for (int i = 0; i < n; i++) {
-    //     maskDummy[i] = mask[i] / ((double) (1 << (cipher.n-2)));
-    // }
-    // ZZ* maskDummyPoly = new ZZ[1 << param.logN];
-    // ring.encode(maskDummyPoly, maskDummy, n, param.logp);
-    
     scheme->addByPolyAndEqual(cipher, mask, param.logp);
 
     minMaxAlgorithm(dummy, cipher);
 
-    printCondition = true;
-
-    nprint("cipher", cipher);
-    nprint("dummy", dummy);
-
     scheme->leftRotateAndEqualConditional(dummy, dist, increase);
-
-
     scheme->subByPolyAndEqual(cipher, mask, param.logp);
     
     scheme->addAndEqual(cipher, dummy);
@@ -542,18 +528,6 @@ void EncAlgo::newComparison(Ciphertext& a, Ciphertext& b) {
 
     a = max;
     b = min;
-    
-    // scheme->modDownToAndEqualModified(a, max, *bootHelper, param);
-    // scheme->modDownToAndEqualModified(b, max, *bootHelper, param);
-    // Ciphertext minMin = scheme->mult(a, min);
-    // Ciphertext minMax = scheme->mult(a, max);
-    // Ciphertext maxMin = scheme->mult(b, min);
-    // Ciphertext maxMax = scheme->mult(b, max);
-
-    // minCipher = scheme->add(minMax, maxMin);
-    // maxCipher = scheme->add(minMin, maxMax);
-    // scheme->reScaleByAndEqual(a, param.logp);
-    // scheme->reScaleByAndEqual(b, param.logp);
 }
 
 void EncAlgo::minMaxTable(Ciphertext& minCipher, Ciphertext& maxCipher, Ciphertext& minCipherTable, Ciphertext& maxCipherTable, ZZ* mask, ZZ* maskTable) {

@@ -38,7 +38,7 @@ void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long inv
     long n = 1 << param.log2n;
     long iter[4] = {logDataNum, colNum, invIter, compIter};
     EncSorting encSorting(param, iter, 4, increase);
-    encSorting.showDiffFromPlain();
+    // encSorting.showDiffFromPlain();
     
     double* mvec = EvaluatorUtils::randomRealArray(n);    
 	Ciphertext cipher = encSorting.encrypt(mvec);
@@ -59,210 +59,154 @@ void TestSort::tableSort(Parameter param, long logDataNum, long colNum, long inv
     PrintUtils::averageDifference(mvec, dvec, n);    
 }
 
-// void TestSort:: merge(Parameter param, long iter, long logNum) {
-//     srand(time(NULL));
-// 	SetNumThreads(16);
-//     TimeUtils timeutils;
-//     long num = 1 << logNum;
+void TestSort:: merge(Parameter param, long _iter, long logNum) {
+    long n = 1 << param.log2n;
+    long iter[1] = {_iter};
+    EncSorting encSorting(param, iter, 1);
+    // encSorting.showDiffFromPlain();
     
-// 	PrintUtils::parameter(param, "Merge");
-//     long n = 1 << param.log2n;
-//     long logp = param.logp;
+    long num = 1 << logNum;
+    double ** mvec = new double*[num];
+    Ciphertext* cipher = new Ciphertext[num];
+ 
+    // sort (as bitonic sequence)
+    PlainSort plainSort(param.log2n);
+    CyclicArray* ca = new CyclicArray[num];
+    for(int i = 0; i < num; i++) {
+        mvec[i] = EvaluatorUtils::randomRealArray(n);
+        ca[i] = CyclicArray(mvec[i], n);
+        plainSort.runPlainSorting(ca[i], i % 2 == 0);
+        cipher[i] = encSorting.encrypt(ca[i].getArray());
+    }
 
-//     timeutils.start("KeyGen");
-//     Ring ring(param.logN, param.logQ);
-//     SecretKey secretKey(ring);
-//     BootScheme scheme(secretKey, ring);
-//     scheme.addConjKey(secretKey);
-//     scheme.addLeftRotKeys(secretKey);
-//     scheme.addRightRotKeys(secretKey);
-//     timeutils.stop("KeyGen");
+    TimeUtils timeutils;
+    timeutils.start("Bitonic Merge");
+    encSorting.bitonicMerge(cipher, logNum);
+    timeutils.stop("Bitonic Merge"); 
 
-// 	timeutils.start("Bootstrapping Helper construct");
-// 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
-// 	timeutils.stop("Bootstrapping Helper construct");
+    //* decrypt
+    complex<double>** dvec = new complex<double>*[num];
+    for(int i = 0; i < num; i++) {
+         dvec[i] = encSorting.decrypt(cipher[i]);
+    } 
 
-//     double ** mvec = new double*[num];
-//     Ciphertext* cipher = new Ciphertext[num];
-//     PlainSort plainSort;
-//     CyclicArray* ca = new CyclicArray[num];
-//     for(int i = 0; i < num; i++) {
-//         mvec[i] = EvaluatorUtils::randomRealArray(n);
-//         ca[i] = CyclicArray(mvec[i], n);
-//         plainSort.runPlainSorting(ca[i], param.log2n, i % 2 == 0);
-//         cipher[i] = scheme.encrypt(ca[i].getArray(), n, param.logp, param.logQ);
-//     }
+    //* run plain bitonicMerge
+    plainSort.bitonicMerge(ca, param.log2n, logNum);
 
-//     EncSorting encSorting(param, iter);
-//     timeutils.start("Bitonic Merge");
-//     encSorting.bitonicMerge(cipher, logNum, scheme, ring, bootHelper);
-//     timeutils.stop("Bitonic Merge"); 
+    //* Print merged arrays
+    for (int i = 0; i < num; i++) {
+        PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
+    }
 
-//     //* decrypt
-//     complex<double>** dvec = new complex<double>*[num];
-//     for(int i = 0; i < num; i++) {
-//          dvec[i] = scheme.decrypt(secretKey, cipher[i]);
-//     } 
+    //* Print log2(avg of errors)
+    for (int i = 0; i < num; i++) {
+        PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
+    }    
+}
 
-//     //* run plain bitonicMerge
-//     plainSort.bitonicMerge(ca, param.log2n, logNum);
+void TestSort:: tableMerge(Parameter param, long logNum, long logDataNum, long colNum, long invIter, long compIter, bool increase) {
+    long n = 1 << param.log2n;
+    long num = 1 << logNum;
+    long iter[4] = {logDataNum, colNum, invIter, compIter};
+    EncSorting encSorting(param, iter, 4, increase);
+    // encSorting.showDiffFromPlain();
 
-//     //* Print merged arrays
-//     // for (int i = 0; i < num; i++) {
-//     //     PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
-//     // }
+    double ** mvec = new double*[num];
+    Ciphertext* cipher = new Ciphertext[num];
+    PlainSort plainSort(param.log2n, logDataNum, colNum);
+    CyclicArray* ca = new CyclicArray[num];
+    for(int i = 0; i < num; i++) {
+        mvec[i] = EvaluatorUtils::randomRealArray(n); 
+        ca[i] = CyclicArray(mvec[i], n);
+        plainSort.runPlainTableSorting(ca[i], i % 2 == 0);
+        cipher[i] = encSorting.encrypt(ca[i].getArray());
+    }    
+    TimeUtils timeutils;
+    timeutils.start("Bitonic Table Merge");
+    encSorting.bitonicTableMerge(cipher, logNum);
+    timeutils.stop("Bitonic Table Merge"); 
 
-//     //* Print log2(avg of errors)
-//     for (int i = 0; i < num; i++) {
-//         PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
-//     }    
-// }
+    //* decrypt
+    complex<double>** dvec = new complex<double>*[num];
+    for(int i = 0; i < num; i++) {
+         dvec[i] = encSorting.decrypt(cipher[i]);
+    } 
 
-// void TestSort:: tableMerge(Parameter param, long logNum, long logDataNum, long colNum, long invIter, long compIter) {
-//     srand(time(NULL));
-// 	SetNumThreads(16);
-//     TimeUtils timeutils;
-//     long num = 1 << logNum;
+    //* run plain bitonicMerge
+    plainSort.bitonicTableMerge(ca, param.log2n, logNum, logDataNum, colNum);
+
+    //* Print merged arrays
+    for (int i = 0; i < num; i++) {
+        PrintUtils::printArraysWithDataNum(ca[i].getArray(), dvec[i], n, logDataNum, colNum);
+    }
+
+    //* Print log2(avg of errors)
+    for (int i = 0; i < num; i++) {
+        PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
+    }    
+}
+
+void TestSort::sortAndMerge(Parameter param, long _iter, long logNum) {
+    long n = 1 << param.log2n;
+    long iter[1] = {_iter};
+    EncSorting encSorting(param, iter, 1);
+    // encSorting.showDiffFromPlain();
     
-// 	PrintUtils::parameter(param, "tableMerge");
-//     long n = 1 << param.log2n;
-//     long logp = param.logp;
+    long num = 1 << logNum;
 
-//     timeutils.start("KeyGen");
-//     Ring ring(param.logN, param.logQ);
-//     SecretKey secretKey(ring);
-//     BootScheme scheme(secretKey, ring);
-//     scheme.addConjKey(secretKey);
-//     scheme.addLeftRotKeys(secretKey);
-//     scheme.addRightRotKeys(secretKey);
-//     timeutils.stop("KeyGen");
+    double** mvec = new double*[num];
+    Ciphertext* cipher = new Ciphertext[num];
+    for(int i = 0; i < num; i++) {
+        mvec[i] = EvaluatorUtils::randomRealArray(n);
+        cipher[i] = encSorting.encrypt(mvec[i]);
+    }
 
-// 	timeutils.start("Bootstrapping Helper construct");
-// 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
-// 	timeutils.stop("Bootstrapping Helper construct");
-
-//     double ** mvec = new double*[num];
-//     Ciphertext* cipher = new Ciphertext[num];
-//     PlainSort plainSort;
-//     CyclicArray* ca = new CyclicArray[num];
-//     for(int i = 0; i < num; i++) {
-//         mvec[i] = EvaluatorUtils::randomRealArray(n); 
-//         ca[i] = CyclicArray(mvec[i], n);
-//         plainSort.runPlainTableSorting(ca[i], param.log2n, logDataNum, colNum, i % 2 == 0);
-//         cipher[i] = scheme.encrypt(ca[i].getArray(), n, param.logp, param.logQ);
-//     }
-
-//     for(int i = 0; i < num; i++) {
-//         cout << "ca[" << i << "] = ";
-//         ca[i].printAsVector();
-//     }
+    TimeUtils timeutils, timeTotal;
     
+    timeTotal.start("Sort And Merge");
 
-//     EncSorting encSorting(param, invIter, compIter);
-//     timeutils.start("Bitonic Table Merge");
-//     encSorting.bitonicTableMerge(cipher, logNum, logDataNum, colNum, scheme, ring, bootHelper, secretKey);
-//     timeutils.stop("Bitonic Table Merge"); 
+    for (int i = 0; i < num; i++) {
+        timeutils.start("EncSort " + to_string(i));
+        encSorting.runEncSorting(cipher[i], i % 2 == 0);
+        timeutils.stop("EncSort " + to_string(i));
+    }
 
-//     //* decrypt
-//     complex<double>** dvec = new complex<double>*[num];
-//     for(int i = 0; i < num; i++) {
-//          dvec[i] = scheme.decrypt(secretKey, cipher[i]);
-//     } 
+    // timeutils.start("Reverse");
+    // encSorting.reverseHalf(cipher, logNum, scheme, ring, bootHelper);
+    // timeutils.stop("Reverse");
 
-//     //* run plain bitonicMerge
-//     plainSort.bitonicTableMerge(ca, param.log2n, logNum, logDataNum, colNum);
+    timeutils.start("Bitonic Merge");
+    encSorting.bitonicMerge(cipher, logNum);
+    timeutils.stop("Bitonic Merge"); 
 
-//     //* Print merged arrays
-//     for (int i = 0; i < num; i++) {
-//         PrintUtils::printArraysWithDataNum(ca[i].getArray(), dvec[i], n, logDataNum, colNum);
-//     }
+    timeTotal.stop("Total Sort And Merge");
 
-//     //* Print log2(avg of errors)
-//     for (int i = 0; i < num; i++) {
-//         PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
-//     }    
-// }
+    //* run plain bitonicMerge
+    PlainSort plainSort(param.log2n);
+    CyclicArray* ca = new CyclicArray[num];
+    for (int i = 0; i < num; i++) {
+        ca[i] = CyclicArray(mvec[i], n);
+        plainSort.runPlainSorting(ca[i], i % 2 == 0);
+    }
+    plainSort.bitonicMerge(ca, param.log2n, logNum);
 
-// void TestSort::sortAndMerge(Parameter param, long iter, long logNum) {
-//     srand(time(NULL));
-// 	SetNumThreads(16);
-//     TimeUtils timeutils;
-    
-// 	PrintUtils::parameter(param, "sortAndMerge");
-//     long n = 1 << param.log2n;
-//     long logp = param.logp;
-//     long num = 1 << logNum;
+    //* decrypt
+    complex<double>** dvec = new complex<double>*[num];
+    for(int i = 0; i < num; i++) {
+         dvec[i] = encSorting.decrypt(cipher[i]);
+    } 
 
-//     timeutils.start("KeyGen");
-//     Ring ring(param.logN, param.logQ);
-//     SecretKey secretKey(ring);
-//     BootScheme scheme(secretKey, ring);
-//     scheme.addConjKey(secretKey);
-//     scheme.addLeftRotKeys(secretKey);
-//     scheme.addRightRotKeys(secretKey);
-//     timeutils.stop("KeyGen");
+    //* Print full arrays
+    for (int i = 0; i < num; i++) {
+        PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
+        cout << "===" << endl;
+    }
 
-// 	timeutils.start("Bootstrapping Helper construct");
-// 	BootHelper bootHelper(param.log2n, param.radix, param.logc, scheme, ring, secretKey);
-// 	timeutils.stop("Bootstrapping Helper construct");
-
-//     double** mvec = new double*[num];
-//     Ciphertext* cipher = new Ciphertext[num];
-//     for(int i = 0; i < num; i++) {
-//         mvec[i] = EvaluatorUtils::randomRealArray(n);
-//         cipher[i] = scheme.encrypt(mvec[i], n, param.logp, param.logQ);
-//     }
-
-//     EncSorting encSorting(param, iter);
-    
-//     TimeUtils timeTotal;
-    
-//     timeTotal.start("Sort And Merge");
-
-//     timeutils.start("EncSort");
-//     for (int i = 0; i < num; i++) {
-//         encSorting.runEncSorting(cipher[i], scheme, ring, bootHelper);
-//     }
-//     timeutils.stop("EncSort");
-
-//     timeutils.start("Reverse");
-//     encSorting.reverseHalf(cipher, logNum, scheme, ring, bootHelper);
-//     timeutils.stop("Reverse");
-
-//     timeutils.start("Bitonic Merge");
-//     encSorting.bitonicMerge(cipher, logNum, scheme, ring, bootHelper);
-//     timeutils.stop("Bitonic Merge"); 
-
-//     timeTotal.stop("Total Sort And Merge");
-
-
-
-//     //* run plain bitonicMerge
-//     PlainSort plainSort;
-//     CyclicArray* ca = new CyclicArray[num];
-//     for (int i = 0; i < num; i++) {
-//         ca[i] = CyclicArray(mvec[i], n);
-//         plainSort.runPlainSorting(ca[i], param.log2n, i % 2 == 0);
-//     }
-//     plainSort.bitonicMerge(ca, param.log2n, logNum);
-
-//     //* decrypt
-//     complex<double>** dvec = new complex<double>*[num];
-//     for(int i = 0; i < num; i++) {
-//          dvec[i] = scheme.decrypt(secretKey, cipher[i]);
-//     } 
-
-//     //* Print full arrays
-//     for (int i = 0; i < num; i++) {
-//         PrintUtils::printArrays(ca[i].getArray(), dvec[i], n);
-//         cout << "===" << endl;
-//     }
-
-//     //* Print log2(avg of errors)
-//     for (int i = 0; i < num; i++) {
-//         PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
-//     }    
-// }
+    //* Print log2(avg of errors)
+    for (int i = 0; i < num; i++) {
+        PrintUtils::averageDifference(ca[i].getArray(), dvec[i], n);
+    }    
+}
 
 // void TestSort::bitonicSort(Parameter param, long iter, bool increase) {
 //     srand(time(NULL));

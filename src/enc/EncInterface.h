@@ -7,7 +7,7 @@
 #include "../PrintUtils.h"
 
 class EncInterface {
-protected:
+public:
     Parameter param;
     Ring* ring;
     SecretKey* secretKey;
@@ -15,7 +15,6 @@ protected:
     BootHelper* bootHelper;
     bool printCondition;
 
-public:
     EncInterface(Parameter _param, bool = false);
 
     Ciphertext encrypt(double* mvec);
