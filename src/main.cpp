@@ -67,7 +67,7 @@ int main() {
     // ******************************
     // *** Check Parameters
     // ******************************
-    TestAlgo::bootstrapping(sortingTestParamBig2);
+    // TestAlgo::bootstrapping(sortingTestParamBig2);
     // TestEnc::compAndSwap(sortingTestParam1, 10);
 
     // ******************************
