@@ -46,11 +46,26 @@ void EncAlgo::evalFcn(Ciphertext& cipher) {
     
     // x <- x (3 - x^2) / 2, consumes 2 * logq
     for(int i = 0; i < iter[minMaxLoc]; i++) {
-        scheme->checkModulusAndBoot(cipher, 2 * param.logp + 1, *bootHelper, param);
-        scheme->resetImagErrorAndEqual(cipher);
+        // scheme->checkModulusAndBoot(cipher, 2 * param.logp + 1, *bootHelper, param);
+        // scheme->resetImagErrorAndEqual(cipher);        
+        // nprint("start cipher" + to_string(i), cipher);
+        // Ciphertext square = scheme->square(cipher);
+        // scheme->reScaleByAndEqual(square, param.logp);
+        // nprint("square" + to_string(i), square);
+        // scheme->negateAndEqual(square);
+        // scheme->addConstAndEqual(square, 3.0, param.logp);
+        // nprint("3 - x^2" + to_string(i), square);
+        // scheme->divByPo2AndEqual(cipher, 1);
+        // nprint("x / 2" + to_string(i), cipher);
+        // scheme->modDownToAndEqual(cipher, square.logq);
+        // scheme->multAndEqual(cipher, square);
+        // scheme->reScaleByAndEqual(cipher, param.logp);
+        // nprint("final x (3 - x^2) / 2" + to_string(i), cipher);
+
+        scheme->checkModulusAndBoot(cipher, 2 * param.logp + 3, *bootHelper, param);
         nprint("start cipher" + to_string(i), cipher);
-        Ciphertext square = scheme->square(cipher);
-        scheme->reScaleByAndEqual(square, param.logp);
+        Ciphertext square;
+        mult(square, cipher, cipher);
         nprint("square" + to_string(i), square);
         scheme->negateAndEqual(square);
         scheme->addConstAndEqual(square, 3.0, param.logp);
@@ -58,8 +73,9 @@ void EncAlgo::evalFcn(Ciphertext& cipher) {
         scheme->divByPo2AndEqual(cipher, 1);
         nprint("x / 2" + to_string(i), cipher);
         scheme->modDownToAndEqual(cipher, square.logq);
-        scheme->multAndEqual(cipher, square);
-        scheme->reScaleByAndEqual(cipher, param.logp);
+        Ciphertext dummy;
+        mult(dummy, cipher, square);
+        cipher = dummy;
         nprint("final x (3 - x^2) / 2" + to_string(i), cipher);
     }
     // scheme->addConstAndEqual(cipher, 1.0, param.logp);
@@ -280,6 +296,8 @@ void EncAlgo::newMinMax(Ciphertext& minCipher, Ciphertext& maxCipher) {
 
     scheme->divByPo2AndEqual(add, 1);
     scheme->divByPo2AndEqual(sub, 1);
+    
+    scheme->checkLevelAndBoot(minMax, 1, *bootHelper, param);
     scheme->modDownToAndEqualModified(minMax, sub, *bootHelper, param);
     scheme->multAndEqual(sub, minMax);
     scheme->reScaleByAndEqual(sub, param.logp);

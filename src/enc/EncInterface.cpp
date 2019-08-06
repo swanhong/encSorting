@@ -4,21 +4,21 @@ EncInterface::EncInterface(Parameter _param, bool _printCondition) :
     param(_param), printCondition(_printCondition) {
     srand(time(NULL));
     SetNumThreads(16);
-    long n = 1 << param.log2n;
+    long n = 1 << log2n;
     
     PrintUtils::parameter(param, "HEAAN");
 
-    ring = new Ring(param.logN, param.logQ);
+    ring = new Ring(logN, logQ);
     secretKey = new SecretKey(*ring);
     scheme = new BootScheme(*secretKey, *ring);
     scheme->addConjKey(*secretKey);
     scheme->addLeftRotKeys(*secretKey);
     scheme->addRightRotKeys(*secretKey);
-    bootHelper = new BootHelper(param.log2n, param.radix, param.logc, *scheme, *ring, *secretKey);
+    bootHelper = new BootHelper(log2n, radix, logc, *scheme, *ring, *secretKey);
 }
 
 Ciphertext EncInterface::encrypt(double* mvec) {
-    return scheme->encrypt(mvec, 1 << param.log2n, param.logp, param.logQ);
+    return scheme->encrypt(mvec, 1 << log2n, logp, logQ);
 }
 
 complex<double>* EncInterface::decrypt(Ciphertext& cipher) {
@@ -26,14 +26,14 @@ complex<double>* EncInterface::decrypt(Ciphertext& cipher) {
 }
 
 ZZ* EncInterface::encode(double* mask) {
-    ZZ* maskPoly = new ZZ[1 << param.logN];
-    ring->encode(maskPoly, mask, 1 << param.log2n, param.logp);
+    ZZ* maskPoly = new ZZ[1 << logN];
+    ring->encode(maskPoly, mask, 1 << log2n, logp);
     return maskPoly;
 }
 
 ZZ* EncInterface::flipPoly(ZZ* poly) {
-    ZZ* res = new ZZ[1 << param.logN];
-    for (int i = 0; i < (1 << param.logN); i++) {
+    ZZ* res = new ZZ[1 << logN];
+    for (int i = 0; i < (1 << logN); i++) {
         res[i] = -poly[i];
     }
     res[0] += 1;
@@ -41,7 +41,21 @@ ZZ* EncInterface::flipPoly(ZZ* poly) {
 }
 
 void EncInterface::bootstrapping(Ciphertext& cipher) {
-    bootHelper->bootstrapping_cos(cipher, param.logq, param.logQ, 5);
+    bootHelper->bootstrapping_cos(cipher, logq, logQ, 5);
+}
+
+void EncInterface::add(Ciphertext& output, Ciphertext& a, Ciphertext& b) {
+    output = scheme->add(a, b);
+}
+
+void EncInterface::sub(Ciphertext& output, Ciphertext& a, Ciphertext& b) {
+    output = scheme->sub(a, b);
+}
+
+void EncInterface::mult(Ciphertext& output, Ciphertext& a, Ciphertext& b) {
+    output = scheme->mult(a, b);
+    scheme->reScaleByAndEqual(output, logp);
+    scheme->resetImagErrorAndEqual(output);
 }
 
 void EncInterface::nprint(string str) {

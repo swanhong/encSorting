@@ -22,6 +22,11 @@ public:
     ZZ* encode(double* mask);
     ZZ* flipPoly(ZZ* poly);
     void bootstrapping(Ciphertext& cipher);
+
+    void add(Ciphertext& output, Ciphertext& a, Ciphertext& b);
+    void sub(Ciphertext& output, Ciphertext& a, Ciphertext& b);
+    void mult(Ciphertext& output, Ciphertext& a, Ciphertext& b);
+
     void nprint(string str);
     void nprint(string str, Ciphertext& cipher);
 
